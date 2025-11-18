@@ -14,6 +14,12 @@ document.body.style.overflow = "hidden";
 document.documentElement.style.margin = "0";
 document.documentElement.style.overflow = "hidden";
 
+//zoom valeus
+let gridScale = 1;
+const zoomSpeed = 0.1;
+const minScale = 0.3;
+const maxScale = 1;
+
 //grid setup
 const cellSize = 50;
 const grid = new PIXI.Graphics();
@@ -57,11 +63,13 @@ function drawAreas(offsetX,offsetY){
         areaGridGraphics.endFill();
         areaContainer.addChild(areaGridGraphics);
 
+        if (gridScale > 0.7) return; //TODO: kdyz bude hodne zazoomovano, tak tam bude fancy text!!!
         const areaText = new PIXI.Text(area.name + (area.type === AREATYPES.CITY ? '\n' + "population : " + area.peeps :""), {fontFamily: "Arial", fontSize: 14, fill: 0x000000});
         areaText.x = offsetX + area.x + area.size / 2;
         areaText.y = offsetY + area.y + area.size / 2;
         areaText.anchor.set(0.5);
         areaText.style.align = 'center';
+        areaText.scale.set((1 / gridScale));
         areaContainer.addChild(areaText);
     });
 }
@@ -99,11 +107,6 @@ app.view.addEventListener('mousemove', (event) => {
 });
 
 //zooming
-let gridScale = 1;
-const zoomSpeed = 0.1;
-const minScale = 0.5;
-const maxScale = 1;
-
 app.view.addEventListener('wheel', (event) => {
     event.preventDefault();
 
