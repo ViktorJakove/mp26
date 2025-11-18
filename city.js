@@ -1,7 +1,7 @@
 export class City {
     /** 
-    @param {number} x - x coordinate(left lower corner)
-    @param {number} y - y coordinate(left lower corner)  
+    @param {number} x - x coordinate(left upper corner)
+    @param {number} y - y coordinate(left upper corner)  
     @param {number} size - size of the city
     @param {number} peeps - population
     @param {string} name - self explanatory, bro
