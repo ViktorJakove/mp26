@@ -1,4 +1,5 @@
-import { City } from "./city.js";
+import { Area } from "./area.js";
+import { AREATYPES } from "./areaTypes.js";
 
 //pixi setup
 const app = new PIXI.Application({
@@ -33,37 +34,37 @@ function drawGrid(offsetX, offsetY) {
     }
 }
 
-//cities defs and render
-const cities = {
-    0: new City(5*cellSize, 3*cellSize, 5*cellSize, 200, "Red Rock")
+//enviroment defs and render func
+const areas = {
+    0: new Area(AREATYPES.CITY,5*cellSize, 3*cellSize, 5*cellSize, "Red Rock", 200)
 };
+//container - hold and rerender areas each screen move
+const areaContainer = new PIXI.Container();
+app.stage.addChild(areaContainer);
 
-const cityContainer = new PIXI.Container();
-app.stage.addChild(cityContainer);
+function drawAreas(offsetX,offsetY){
+    areaContainer.removeChildren();
 
-function drawCities(offsetX,offsetY){
-    cityContainer.removeChildren();
+    Object.values(areas).forEach(area => {
+        const areaGridGraphics = new PIXI.Graphics();
+        areaGridGraphics.beginFill(0xff0000, 0.5);
+        const relX = offsetX + area.x;
+        const relY = offsetY + area.y;
+        areaGridGraphics.drawRect(relX, relY, area.size, area.size);
+        areaGridGraphics.endFill();
+        areaContainer.addChild(areaGridGraphics);
 
-    Object.values(cities).forEach(city => {
-        const cityGridGraphics = new PIXI.Graphics();
-        cityGridGraphics.beginFill(0xff0000, 0.5);
-        const relX = offsetX + city.x;
-        const relY = offsetY + city.y;
-        cityGridGraphics.drawRect(relX, relY, city.size, city.size);
-        cityGridGraphics.endFill();
-        cityContainer.addChild(cityGridGraphics);
-
-        const cityText = new PIXI.Text(city.name + '\n' + "population : " + city.peeps, {fontFamily: "Arial", fontSize: 14, fill: 0x000000});
-        cityText.x = offsetX + city.x + city.size / 2;
-        cityText.y = offsetY + city.y + city.size / 2;
-        cityText.anchor.set(0.5);
-        cityText.style.align = 'center';
-        cityContainer.addChild(cityText);
+        const areaText = new PIXI.Text(area.name + '\n' + "population : " + area.peeps, {fontFamily: "Arial", fontSize: 14, fill: 0x000000});
+        areaText.x = offsetX + area.x + area.size / 2;
+        areaText.y = offsetY + area.y + area.size / 2;
+        areaText.anchor.set(0.5);
+        areaText.style.align = 'center';
+        areaContainer.addChild(areaText);
 });
 }
-drawCities(0,0);
+drawAreas(0,0);
 //
-console.log(cities[0]);
+console.log(areas[0]);
 //
 
 //mouse move
@@ -79,6 +80,9 @@ app.view.addEventListener('mousedown', (event) => {
 app.view.addEventListener('mouseup', () => {
     isDragging = false;
 });
+app.view.addEventListener('mouseout', () => {
+    isDragging = false;
+});
 
 app.view.addEventListener('mousemove', (event) => {
     if (isDragging) {
@@ -89,9 +93,7 @@ app.view.addEventListener('mousemove', (event) => {
         mouseInitialPos = { x: event.clientX, y: event.clientY };
 
         drawGrid(offset.x, offset.y);
-        /*cityGridGraphics.x = offset.x;
-        cityGridGraphics.y = offset.y;*/
 
-        drawCities(offset.x, offset.y);
+        drawAreas(offset.x, offset.y);
     }
 });
