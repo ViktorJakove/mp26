@@ -36,7 +36,10 @@ function drawGrid(offsetX, offsetY) {
 
 //enviroment defs and render func
 const areas = {
-    0: new Area(AREATYPES.CITY,5*cellSize, 3*cellSize, 5*cellSize, "Red Rock", 200)
+    0: new Area(AREATYPES.CITY,5*cellSize, 3*cellSize, 2*cellSize, "Red Rock", 200),
+    1: new Area(AREATYPES.LAKE,12*cellSize, 8*cellSize, 4*cellSize, "mega Lake", 0),
+    2: new Area(AREATYPES.FOREST,20*cellSize, 5*cellSize, 6*cellSize, "Dark Woods", 0),
+    3: new Area(AREATYPES.CITY,20*cellSize, 15*cellSize, 3*cellSize, "Bluemoon", 300),
 };
 //container - hold and rerender areas each screen move
 const areaContainer = new PIXI.Container();
@@ -63,9 +66,6 @@ function drawAreas(offsetX,offsetY){
     });
 }
 drawAreas(0,0);
-//
-console.log(areas[0]);
-//
 
 //mouse move
 let isDragging = false;
@@ -86,8 +86,8 @@ app.view.addEventListener('mouseout', () => {
 
 app.view.addEventListener('mousemove', (event) => {
     if (isDragging) {
-        const dx = event.clientX - mouseInitialPos.x;
-        const dy = event.clientY - mouseInitialPos.y;
+        const dx = (event.clientX - mouseInitialPos.x)/gridScale;
+        const dy = (event.clientY - mouseInitialPos.y)/gridScale;
         offset.x += dx;
         offset.y += dy;
         mouseInitialPos = { x: event.clientX, y: event.clientY };
@@ -96,4 +96,34 @@ app.view.addEventListener('mousemove', (event) => {
 
         drawAreas(offset.x, offset.y);
     }
+});
+
+//zooming
+let gridScale = 1;
+const zoomSpeed = 0.1;
+const minScale = 0.5;
+const maxScale = 1;
+
+app.view.addEventListener('wheel', (event) => {
+    event.preventDefault();
+
+    const zoomFactor = event.deltaY > 0 ? 1 - zoomSpeed : 1 + zoomSpeed;
+
+    const mousePos = app.renderer.events.pointer.global;
+    const worldPos = {
+        x: (mousePos.x - app.stage.x) / gridScale,
+        y: (mousePos.y - app.stage.y) / gridScale,
+    };
+    
+    //clamping
+    gridScale = Math.min(maxScale, Math.max(minScale, gridScale * zoomFactor));
+
+    app.stage.scale.set(gridScale, gridScale);
+
+    app.stage.x = mousePos.x - worldPos.x * gridScale;
+    app.stage.y = mousePos.y - worldPos.y * gridScale;
+
+    // Redraw grid and areas
+    drawGrid(offset.x, offset.y);
+    drawAreas(offset.x, offset.y);
 });
