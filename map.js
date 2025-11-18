@@ -47,20 +47,20 @@ function drawAreas(offsetX,offsetY){
 
     Object.values(areas).forEach(area => {
         const areaGridGraphics = new PIXI.Graphics();
-        areaGridGraphics.beginFill(0xff0000, 0.5);
+        areaGridGraphics.beginFill(area.type.color, 0.5);
         const relX = offsetX + area.x;
         const relY = offsetY + area.y;
         areaGridGraphics.drawRect(relX, relY, area.size, area.size);
         areaGridGraphics.endFill();
         areaContainer.addChild(areaGridGraphics);
 
-        const areaText = new PIXI.Text(area.name + '\n' + "population : " + area.peeps, {fontFamily: "Arial", fontSize: 14, fill: 0x000000});
+        const areaText = new PIXI.Text(area.name + (area.type === AREATYPES.CITY ? '\n' + "population : " + area.peeps :""), {fontFamily: "Arial", fontSize: 14, fill: 0x000000});
         areaText.x = offsetX + area.x + area.size / 2;
         areaText.y = offsetY + area.y + area.size / 2;
         areaText.anchor.set(0.5);
         areaText.style.align = 'center';
         areaContainer.addChild(areaText);
-});
+    });
 }
 drawAreas(0,0);
 //
