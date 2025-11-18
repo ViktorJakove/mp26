@@ -28,7 +28,7 @@ app.stage.addChild(grid);
 
 //cities defs and render
 const cities = {
-    0: new City(5*cellSize, 3*cellSize, 5*cellSize, 5000, "Red Rock")
+    0: new City(5*cellSize, 3*cellSize, 5*cellSize, 200, "Red Rock")
 };
 Object.values(cities).forEach(city => {
     const cityGridGraphics = new PIXI.Graphics();
@@ -36,10 +36,11 @@ Object.values(cities).forEach(city => {
     cityGridGraphics.drawRect(city.x, city.y, city.size, city.size);
     cityGridGraphics.endFill();
     app.stage.addChild(cityGridGraphics);
-    const cityText = new PIXI.Text(city.name + " population : " + city.peeps, {fontFamily: "Arial", fontSize: 14, fill: 0x000000});
+    const cityText = new PIXI.Text(city.name + '\n' + "population : " + city.peeps, {fontFamily: "Arial", fontSize: 14, fill: 0x000000});
     cityText.x = city.x + city.size / 2;
     cityText.y = city.y + city.size / 2;
     cityText.anchor.set(0.5);
+    cityText.style.align = 'center';
     app.stage.addChild(cityText);
 });
 console.log(cities[0]);
