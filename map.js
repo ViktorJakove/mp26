@@ -18,6 +18,7 @@ const cellSize = 50;
 const grid = new PIXI.Graphics();
 grid.lineStyle(1, 0xcccccc);
 app.stage.addChild(grid);
+drawGrid(0, 0);
 
 //grid updated draw
 function drawGrid(offsetX, offsetY) {
@@ -36,19 +37,31 @@ function drawGrid(offsetX, offsetY) {
 const cities = {
     0: new City(5*cellSize, 3*cellSize, 5*cellSize, 200, "Red Rock")
 };
-Object.values(cities).forEach(city => {
-    const cityGridGraphics = new PIXI.Graphics();
-    cityGridGraphics.beginFill(0xff0000, 0.5);
-    cityGridGraphics.drawRect(city.x, city.y, city.size, city.size);
-    cityGridGraphics.endFill();
-    app.stage.addChild(cityGridGraphics);
-    const cityText = new PIXI.Text(city.name + '\n' + "population : " + city.peeps, {fontFamily: "Arial", fontSize: 14, fill: 0x000000});
-    cityText.x = city.x + city.size / 2;
-    cityText.y = city.y + city.size / 2;
-    cityText.anchor.set(0.5);
-    cityText.style.align = 'center';
-    app.stage.addChild(cityText);
+
+const cityContainer = new PIXI.Container();
+app.stage.addChild(cityContainer);
+
+function drawCities(offsetX,offsetY){
+    cityContainer.removeChildren();
+
+    Object.values(cities).forEach(city => {
+        const cityGridGraphics = new PIXI.Graphics();
+        cityGridGraphics.beginFill(0xff0000, 0.5);
+        const relX = offsetX + city.x;
+        const relY = offsetY + city.y;
+        cityGridGraphics.drawRect(relX, relY, city.size, city.size);
+        cityGridGraphics.endFill();
+        cityContainer.addChild(cityGridGraphics);
+
+        const cityText = new PIXI.Text(city.name + '\n' + "population : " + city.peeps, {fontFamily: "Arial", fontSize: 14, fill: 0x000000});
+        cityText.x = offsetX + city.x + city.size / 2;
+        cityText.y = offsetY + city.y + city.size / 2;
+        cityText.anchor.set(0.5);
+        cityText.style.align = 'center';
+        cityContainer.addChild(cityText);
 });
+}
+drawCities(0,0);
 //
 console.log(cities[0]);
 //
@@ -76,7 +89,9 @@ app.view.addEventListener('mousemove', (event) => {
         mouseInitialPos = { x: event.clientX, y: event.clientY };
 
         drawGrid(offset.x, offset.y);
-        cityGridGraphics.x = offset.x;
-        cityGridGraphics.y = offset.y;
+        /*cityGridGraphics.x = offset.x;
+        cityGridGraphics.y = offset.y;*/
+
+        drawCities(offset.x, offset.y);
     }
 });
