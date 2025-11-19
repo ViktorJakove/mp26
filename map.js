@@ -51,8 +51,8 @@ function drawGrid() {
 //environment
 const areas = {
     0: new Area(AREA_TYPES.CITY, 5 * cellSize, 3 * cellSize, 2 * cellSize, "Red Rock", 200),
-    1: new Area(AREA_TYPES.LAKE, 12 * cellSize, 8 * cellSize, 4 * cellSize, "mega Lake", 0),
-    2: new Area(AREA_TYPES.FOREST, 20 * cellSize, 5 * cellSize, 6 * cellSize, "Dark Woods", 0),
+    1: new Area(AREA_TYPES.LAKE, 12 * cellSize, 8 * cellSize, 4 * cellSize, "Booger Lake", 0),
+    2: new Area(AREA_TYPES.BISONS, 20 * cellSize, 5 * cellSize, 6 * cellSize, "Wild Bunch", 42),
     3: new Area(AREA_TYPES.CITY, 20 * cellSize, 15 * cellSize, 3 * cellSize, "Bluemoon", 300),
 };
 
@@ -77,10 +77,7 @@ function drawAreas() {
 
         if (gridScale > 0.7) return;
 
-        const areaText = new PIXI.Text(
-            area.name + (area.type === AREA_TYPES.CITY ? '\n' + "population : " + area.peeps : ""),
-            { fontFamily: "Arial", fontSize: 14, fill: 0x000000 }
-        );
+        const areaText = new PIXI.Text(area.name + ((area.type === AREA_TYPES.CITY || area.type === AREA_TYPES.BISONS) ? '\n' + "population : " + area.peeps : ""),{ fontFamily: "Arial", fontSize: 14, fill: 0x000000 });
         areaText.x = screenX + area.size / 2;
         areaText.y = screenY + area.size / 2;
         areaText.anchor.set(0.5);
@@ -102,10 +99,8 @@ app.view.addEventListener("mousedown", (event) => {
     isDragging = true;
     mouseInitialPos = { x: event.clientX, y: event.clientY };
 });
-
 app.view.addEventListener("mouseup", () => { isDragging = false; });
 app.view.addEventListener("mouseout", () => { isDragging = false; });
-
 app.view.addEventListener("mousemove", (event) => {
     if (isDragging) {
         const dx = (event.clientX - mouseInitialPos.x) / gridScale;
@@ -120,17 +115,14 @@ app.view.addEventListener("mousemove", (event) => {
         drawAreas();
     }
 });
-
 //zoom
 app.view.addEventListener("wheel", (event) => {
     event.preventDefault();
-
     const zoomFactor = event.deltaY > 0 ? 1 - zoomSpeed : 1 + zoomSpeed;
     const newScale = Math.min(maxScale, Math.max(minScale, gridScale * zoomFactor));
-
+    
     const mouseX = event.clientX - app.screen.width / 2;
     const mouseY = event.clientY - app.screen.height / 2;
-
     const worldMouseX = camera.x + mouseX / gridScale;
     const worldMouseY = camera.y + mouseY / gridScale;
 
