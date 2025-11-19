@@ -1,4 +1,4 @@
-export const AREATYPES = {
+export const AREA_TYPES = {
     CITY: {type: "city", color: 0xff0000},
     LAKE: {type: "lake", color: 0x00ffff},
     INDIANS: {type: "indians",color: 0xCD5C5C},

@@ -1,5 +1,6 @@
 import { Area } from "./area.js";
-import { AREATYPES } from "./areaTypes.js";
+import { AREA_TYPES } from "./areaTypes.js";
+import { SCREEN_DIMENSIONS } from "./screenDimensions.js";
 
 //pixi setup
 const app = new PIXI.Application({
@@ -32,36 +33,27 @@ function drawGrid() {
     grid.clear();
     grid.lineStyle(1, 0xcccccc);
 
-    const screenWidth = app.screen.width / gridScale;
-    const screenHeight = app.screen.height / gridScale;
+    const dimensions = SCREEN_DIMENSIONS(app, camera, gridScale, cellSize);
 
-    const worldLeft = camera.x - screenWidth / 2;
-    const worldRight = camera.x + screenWidth / 2;
-    const worldTop = camera.y - screenHeight / 2;
-    const worldBottom = camera.y + screenHeight / 2;
-
-    const startX = Math.floor(worldLeft / cellSize) * cellSize;
-    const startY = Math.floor(worldTop / cellSize) * cellSize;
-
-    for (let worldX = startX; worldX <= worldRight + cellSize; worldX += cellSize) {
-        const screenX = worldX - worldLeft;
+    for (let worldX = dimensions.startX; worldX <= dimensions.worldRight + cellSize; worldX += cellSize) {
+        const screenX = worldX - dimensions.worldLeft;
         grid.moveTo(screenX, 0);
-        grid.lineTo(screenX, screenHeight);
+        grid.lineTo(screenX, dimensions.screenHeight);
     }
 
-    for (let worldY = startY; worldY <= worldBottom + cellSize; worldY += cellSize) {
-        const screenY = worldY - worldTop;
+    for (let worldY = dimensions.startY; worldY <= dimensions.worldBottom + cellSize; worldY += cellSize) {
+        const screenY = worldY - dimensions.worldTop;
         grid.moveTo(0, screenY);
-        grid.lineTo(screenWidth, screenY);
+        grid.lineTo(dimensions.screenWidth, screenY);
     }
 }
 
 //environment
 const areas = {
-    0: new Area(AREATYPES.CITY, 5 * cellSize, 3 * cellSize, 2 * cellSize, "Red Rock", 200),
-    1: new Area(AREATYPES.LAKE, 12 * cellSize, 8 * cellSize, 4 * cellSize, "mega Lake", 0),
-    2: new Area(AREATYPES.FOREST, 20 * cellSize, 5 * cellSize, 6 * cellSize, "Dark Woods", 0),
-    3: new Area(AREATYPES.CITY, 20 * cellSize, 15 * cellSize, 3 * cellSize, "Bluemoon", 300),
+    0: new Area(AREA_TYPES.CITY, 5 * cellSize, 3 * cellSize, 2 * cellSize, "Red Rock", 200),
+    1: new Area(AREA_TYPES.LAKE, 12 * cellSize, 8 * cellSize, 4 * cellSize, "mega Lake", 0),
+    2: new Area(AREA_TYPES.FOREST, 20 * cellSize, 5 * cellSize, 6 * cellSize, "Dark Woods", 0),
+    3: new Area(AREA_TYPES.CITY, 20 * cellSize, 15 * cellSize, 3 * cellSize, "Bluemoon", 300),
 };
 
 const areaContainer = new PIXI.Container();
@@ -70,18 +62,14 @@ app.stage.addChild(areaContainer);
 function drawAreas() {
     areaContainer.removeChildren();
 
-    const screenWidth = app.screen.width / gridScale;
-    const screenHeight = app.screen.height / gridScale;
-
-    const worldLeft = camera.x - screenWidth / 2;
-    const worldTop = camera.y - screenHeight / 2;
+    const dimensions = SCREEN_DIMENSIONS(app, camera, gridScale, cellSize);
 
     Object.values(areas).forEach(area => {
         const areaGraphics = new PIXI.Graphics();
         areaGraphics.beginFill(area.type.color, 0.5);
 
-        const screenX = area.x - worldLeft;
-        const screenY = area.y - worldTop;
+        const screenX = area.x - dimensions.worldLeft;
+        const screenY = area.y - dimensions.worldTop;
 
         areaGraphics.drawRect(screenX, screenY, area.size, area.size);
         areaGraphics.endFill();
@@ -90,14 +78,14 @@ function drawAreas() {
         if (gridScale > 0.7) return;
 
         const areaText = new PIXI.Text(
-            area.name + (area.type === AREATYPES.CITY ? '\n' + "population : " + area.peeps : ""),
+            area.name + (area.type === AREA_TYPES.CITY ? '\n' + "population : " + area.peeps : ""),
             { fontFamily: "Arial", fontSize: 14, fill: 0x000000 }
         );
         areaText.x = screenX + area.size / 2;
         areaText.y = screenY + area.size / 2;
         areaText.anchor.set(0.5);
         areaText.style.align = "center";
-        areaText.scale.set(1 / gridScale);
+        areaText.scale.set(1 / gridScale,1/gridScale);
         areaContainer.addChild(areaText);
     });
 }
@@ -147,7 +135,7 @@ app.view.addEventListener("wheel", (event) => {
     const worldMouseY = camera.y + mouseY / gridScale;
 
     gridScale = newScale;
-    app.stage.scale.set(gridScale, gridScale);
+    app.stage.scale.set(gridScale, gridScale,cellSize);
 
     camera.x = worldMouseX - mouseX / gridScale;
     camera.y = worldMouseY - mouseY / gridScale;
