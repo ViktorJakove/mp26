@@ -21,8 +21,8 @@ const camera = { x: 0, y: 0 };
 //zoom valeus
 let gridScale = 1;
 const zoomSpeed = 0.1;
-const minScale = 0.3;
-const maxScale = 1;
+const minScale = 0.2;
+const maxScale = 2.5;
 
 //grid setup
 const cellSize = 50;
@@ -91,7 +91,7 @@ function drawAreas() {
 drawGrid();
 drawAreas();
 
-//mouse movement
+//mouse controls
 let isDragging = false;
 let mouseInitialPos = { x: 0, y: 0 };
 
@@ -119,19 +119,76 @@ app.view.addEventListener("mousemove", (event) => {
 app.view.addEventListener("wheel", (event) => {
     event.preventDefault();
     const zoomFactor = event.deltaY > 0 ? 1 - zoomSpeed : 1 + zoomSpeed;
+    mapZoom(zoomFactor, event);
+});
+
+//keyboard controls
+const keyboardMapMoveSpeed = 22;
+const keyboardZoomSpeed = zoomSpeed/2;
+let keysDown = new Set();
+
+document.addEventListener("keydown", (event) => {
+    keysDown.add(event.code);
+    event.preventDefault();
+});
+document.addEventListener("keyup", (event) => {
+    keysDown.delete(event.code);
+});
+
+function keyboardMapMovement(){
+    let moved = false;
+    if(keysDown.has("ArrowUp")){
+        camera.y -= keyboardMapMoveSpeed / gridScale;
+        moved = true;
+    }
+    if(keysDown.has("ArrowDown")){
+        camera.y += keyboardMapMoveSpeed / gridScale;
+        moved = true;
+    }
+    if(keysDown.has("ArrowLeft")){
+        camera.x -= keyboardMapMoveSpeed / gridScale;
+        moved = true;
+    }
+    if(keysDown.has("ArrowRight")){
+        camera.x += keyboardMapMoveSpeed / gridScale;
+        moved = true;
+    }
+    if(keysDown.has("KeyA")){
+        mapZoom(1 - keyboardZoomSpeed,undefined);
+        moved = true;
+    }else if(keysDown.has("KeyS")){
+        mapZoom(1 + keyboardZoomSpeed,undefined);
+        moved = true;
+    }
+
+    if(moved){
+        drawGrid();
+        drawAreas();
+    }
+}
+
+function mapZoom(zoomFactor, event){
+    console.log("zooming");
     const newScale = Math.min(maxScale, Math.max(minScale, gridScale * zoomFactor));
     
+    if(event){
     const mouseX = event.clientX - app.screen.width / 2;
     const mouseY = event.clientY - app.screen.height / 2;
     const worldMouseX = camera.x + mouseX / gridScale;
     const worldMouseY = camera.y + mouseY / gridScale;
+    
+    camera.x = worldMouseX - mouseX / newScale;
+    camera.y = worldMouseY - mouseY / newScale;
+    }
 
     gridScale = newScale;
     app.stage.scale.set(gridScale, gridScale,cellSize);
 
-    camera.x = worldMouseX - mouseX / gridScale;
-    camera.y = worldMouseY - mouseY / gridScale;
+    
 
     drawGrid();
     drawAreas();
+}
+app.ticker.add(() => {
+    keyboardMapMovement();
 });
