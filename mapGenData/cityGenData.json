@@ -1,0 +1,26 @@
+[
+    {
+        "cityName": "Steamport",
+        "peepsMin": 75,
+        "peepsMax": 200,
+        "sizeX": 3,
+        "sizeY": 2,
+        "roughPosition": "random",
+        "building": "hq",
+        "defenseLevel": 1,
+        "cathouseLevel": 0,
+        "description": "Hometown of a great mind. (you!)"
+    },
+    {
+        "cityName": "Royal Bank",
+        "peepsMin": 150,
+        "peepsMax": 400,
+        "sizeX": 4,
+        "sizeY": 5,
+        "roughPosition": "random",
+        "building": "bank",
+        "defenseLevel": 5,
+        "cathouseLevel": 0,
+        "description": "Led by a successful and wealthy hustler mayor. They say his left ear tickles when he is near money."
+    }
+]
