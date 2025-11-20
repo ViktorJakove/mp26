@@ -50,10 +50,10 @@ function drawGrid() {
 
 //environment
 const areas = {
-    0: new Area(AREA_TYPES.CITY, 5 * cellSize, 3 * cellSize, 2 * cellSize, "Red Rock", 200),
-    1: new Area(AREA_TYPES.LAKE, 12 * cellSize, 8 * cellSize, 4 * cellSize, "Booger Lake", 0),
-    2: new Area(AREA_TYPES.BISONS, 20 * cellSize, 5 * cellSize, 6 * cellSize, "Wild Bunch", 42),
-    3: new Area(AREA_TYPES.CITY, 20 * cellSize, 15 * cellSize, 3 * cellSize, "Bluemoon", 300),
+    0: new Area(AREA_TYPES.CITY, -13, -8, 2, "Red Rock", 200),
+    1: new Area(AREA_TYPES.LAKE, -9, -5, 4, "Booger Lake", 0),
+    2: new Area(AREA_TYPES.BISONS, 2, 2, 6, "Wild Bunch", 42),
+    3: new Area(AREA_TYPES.CITY, 7, -6, 3, "Bluemoon", 300),
 };
 
 const areaContainer = new PIXI.Container();
@@ -68,18 +68,18 @@ function drawAreas() {
         const areaGraphics = new PIXI.Graphics();
         areaGraphics.beginFill(area.type.color, 0.5);
 
-        const screenX = area.x - dimensions.worldLeft;
-        const screenY = area.y - dimensions.worldTop;
+        const screenX = (area.x * cellSize) - dimensions.worldLeft;
+        const screenY = (area.y * cellSize) - dimensions.worldTop;
 
-        areaGraphics.drawRect(screenX, screenY, area.size, area.size);
+        areaGraphics.drawRect(screenX, screenY, area.size * cellSize, area.size * cellSize);
         areaGraphics.endFill();
         areaContainer.addChild(areaGraphics);
 
         if (gridScale > 0.7) return;
 
         const areaText = new PIXI.Text(area.name + ((area.type === AREA_TYPES.CITY || area.type === AREA_TYPES.BISONS) ? '\n' + "population : " + area.peeps : ""),{ fontFamily: "Arial", fontSize: 14, fill: 0x000000 });
-        areaText.x = screenX + area.size / 2;
-        areaText.y = screenY + area.size / 2;
+        areaText.x = screenX + area.size * cellSize / 2;
+        areaText.y = screenY + area.size * cellSize / 2;
         areaText.anchor.set(0.5);
         areaText.style.align = "center";
         areaText.scale.set(1 / gridScale,1/gridScale);
