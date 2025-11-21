@@ -16,6 +16,8 @@ document.body.style.overflow = "hidden";
 document.documentElement.style.margin = "0";
 document.documentElement.style.overflow = "hidden";
 
+app.stage.sortableChildren = true;
+
 //camera
 const camera = { x: 0, y: 0 };
 
@@ -50,6 +52,7 @@ function drawGrid() {
 }
 
 const fgContainer = new PIXI.Container();
+fgContainer.zIndex = 10;
 
 function drawForeground() {
     const dimensions = SCREEN_DIMENSIONS(app, camera, gridScale, cellSize);
@@ -104,10 +107,15 @@ const areas = {
 };
 
 const areaContainer = new PIXI.Container();
+areaContainer.zIndex = 1;
+const areaTextContainer = new PIXI.Container();
+areaTextContainer.zIndex = 11;
 app.stage.addChild(areaContainer);
+app.stage.addChild(areaTextContainer);
 
 function drawAreas() {
     areaContainer.removeChildren();
+    areaTextContainer.removeChildren();
 
     const dimensions = SCREEN_DIMENSIONS(app, camera, gridScale, cellSize);
 
@@ -130,7 +138,8 @@ function drawAreas() {
         areaText.anchor.set(0.5);
         areaText.style.align = "center";
         areaText.scale.set(1 / gridScale,1/gridScale);
-        areaContainer.addChild(areaText);
+
+        areaTextContainer.addChild(areaText);
     });
 }
 
