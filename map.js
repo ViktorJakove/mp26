@@ -1,6 +1,7 @@
 import { Area } from "./area.js";
 import { AREA_TYPES } from "./areaTypes.js";
 import { SCREEN_DIMENSIONS } from "./screenDimensions.js";
+import { AREA_GEN_DATA } from "./mapGenData/areaGenData.js";
 
 //pixi setup
 const app = new PIXI.Application({
@@ -21,8 +22,8 @@ const camera = { x: 0, y: 0 };
 //zoom valeus
 let gridScale = 1;
 const zoomSpeed = 0.1;
-const minScale = 0.3;
-const maxScale = 1;
+const minScale = 0.2;
+const maxScale = 2.5;
 
 //grid setup
 const cellSize = 50;
@@ -31,10 +32,10 @@ app.stage.addChild(grid);
 
 function drawGrid() {
     grid.clear();
-    grid.lineStyle(1, 0xcccccc);
-
     const dimensions = SCREEN_DIMENSIONS(app, camera, gridScale, cellSize);
 
+    // Draw grid lines
+    grid.lineStyle(1, 0x999999); // Slightly darker grey for grid lines
     for (let worldX = dimensions.startX; worldX <= dimensions.worldRight + cellSize; worldX += cellSize) {
         const screenX = worldX - dimensions.worldLeft;
         grid.moveTo(screenX, 0);
@@ -48,12 +49,58 @@ function drawGrid() {
     }
 }
 
-//environment
+const fgContainer = new PIXI.Container();
+
+function drawForeground() {
+    const dimensions = SCREEN_DIMENSIONS(app, camera, gridScale, cellSize);
+    fgContainer.removeChildren();
+
+    const fgMapEdge = new PIXI.Graphics();
+    fgMapEdge.beginFill(0xd3d3d3);
+    fgMapEdge.drawRect(0, 0, dimensions.screenWidth, dimensions.screenHeight);
+    fgContainer.addChild(fgMapEdge);
+
+    const holeWidth = AREA_GEN_DATA.areaSize[0][0] * cellSize;
+    const holeHeight = AREA_GEN_DATA.areaSize[0][1] * cellSize;
+
+    const holeStartX = -holeWidth / 2;
+    const holeStartY = -holeHeight / 2;
+
+    const holeEndX = holeWidth / 2;
+    const holeEndY = holeHeight / 2;
+
+    const screenHoleStartX = holeStartX - dimensions.worldLeft;
+    const screenHoleStartY = holeStartY - dimensions.worldTop;
+    const screenHoleEndX = holeEndX - dimensions.worldLeft;
+    const screenHoleEndY = holeEndY - dimensions.worldTop;
+
+    const isOverlapping = screenHoleEndX > 0 && screenHoleStartX < dimensions.screenWidth && screenHoleEndY > 0 && screenHoleStartY < dimensions.screenHeight;
+
+    if (isOverlapping) {
+        const bgMask = new PIXI.Graphics();
+        bgMask.beginFill(0x000000);
+        bgMask.drawRect(0, 0, dimensions.screenWidth, dimensions.screenHeight);
+        bgMask.beginHole();
+        bgMask.drawRect(Math.max(0, screenHoleStartX),Math.max(0, screenHoleStartY),Math.min(dimensions.screenWidth, screenHoleEndX) - Math.max(0, screenHoleStartX),Math.min(dimensions.screenHeight, screenHoleEndY) - Math.max(0, screenHoleStartY)
+        );
+        bgMask.endHole();
+        bgMask.endFill();
+
+        fgContainer.mask = bgMask;
+        fgContainer.addChild(bgMask);
+    } else {
+        fgContainer.mask = null;
+    }
+
+    app.stage.addChild(fgContainer);
+}
+
+//environment, temporary
 const areas = {
-    0: new Area(AREA_TYPES.CITY, 5 * cellSize, 3 * cellSize, 2 * cellSize, "Red Rock", 200),
-    1: new Area(AREA_TYPES.LAKE, 12 * cellSize, 8 * cellSize, 4 * cellSize, "mega Lake", 0),
-    2: new Area(AREA_TYPES.FOREST, 20 * cellSize, 5 * cellSize, 6 * cellSize, "Dark Woods", 0),
-    3: new Area(AREA_TYPES.CITY, 20 * cellSize, 15 * cellSize, 3 * cellSize, "Bluemoon", 300),
+    0: new Area(AREA_TYPES.CITY, -13, -8, 2, "Red Rock", 200),
+    1: new Area(AREA_TYPES.LAKE, -9, -5, 4, "Booger Lake", 0),
+    2: new Area(AREA_TYPES.BISONS, 2, 2, 6, "Wild Bunch", 42),
+    3: new Area(AREA_TYPES.CITY, 7, -6, 3, "Bluemoon", 300),
 };
 
 const areaContainer = new PIXI.Container();
@@ -68,21 +115,18 @@ function drawAreas() {
         const areaGraphics = new PIXI.Graphics();
         areaGraphics.beginFill(area.type.color, 0.5);
 
-        const screenX = area.x - dimensions.worldLeft;
-        const screenY = area.y - dimensions.worldTop;
+        const screenX = (area.x * cellSize) - dimensions.worldLeft;
+        const screenY = (area.y * cellSize) - dimensions.worldTop;
 
-        areaGraphics.drawRect(screenX, screenY, area.size, area.size);
+        areaGraphics.drawRect(screenX, screenY, area.size * cellSize, area.size * cellSize);
         areaGraphics.endFill();
         areaContainer.addChild(areaGraphics);
 
         if (gridScale > 0.7) return;
 
-        const areaText = new PIXI.Text(
-            area.name + (area.type === AREA_TYPES.CITY ? '\n' + "population : " + area.peeps : ""),
-            { fontFamily: "Arial", fontSize: 14, fill: 0x000000 }
-        );
-        areaText.x = screenX + area.size / 2;
-        areaText.y = screenY + area.size / 2;
+        const areaText = new PIXI.Text(area.name + ((area.type === AREA_TYPES.CITY || area.type === AREA_TYPES.BISONS) ? '\n' + "population : " + area.peeps : ""),{ fontFamily: "Arial", fontSize: 14, fill: 0x000000 });
+        areaText.x = screenX + area.size * cellSize / 2;
+        areaText.y = screenY + area.size * cellSize / 2;
         areaText.anchor.set(0.5);
         areaText.style.align = "center";
         areaText.scale.set(1 / gridScale,1/gridScale);
@@ -90,11 +134,16 @@ function drawAreas() {
     });
 }
 
-//init draw
-drawGrid();
-drawAreas();
+function drawGraphics(){
+    drawGrid();
+    drawAreas();
+    drawForeground();
+}
 
-//mouse movement
+//init draw
+drawGraphics();
+
+//mouse controls
 let isDragging = false;
 let mouseInitialPos = { x: 0, y: 0 };
 
@@ -102,10 +151,8 @@ app.view.addEventListener("mousedown", (event) => {
     isDragging = true;
     mouseInitialPos = { x: event.clientX, y: event.clientY };
 });
-
 app.view.addEventListener("mouseup", () => { isDragging = false; });
 app.view.addEventListener("mouseout", () => { isDragging = false; });
-
 app.view.addEventListener("mousemove", (event) => {
     if (isDragging) {
         const dx = (event.clientX - mouseInitialPos.x) / gridScale;
@@ -116,30 +163,79 @@ app.view.addEventListener("mousemove", (event) => {
 
         mouseInitialPos = { x: event.clientX, y: event.clientY };
 
-        drawGrid();
-        drawAreas();
+        drawGraphics();
     }
 });
-
 //zoom
 app.view.addEventListener("wheel", (event) => {
     event.preventDefault();
-
     const zoomFactor = event.deltaY > 0 ? 1 - zoomSpeed : 1 + zoomSpeed;
-    const newScale = Math.min(maxScale, Math.max(minScale, gridScale * zoomFactor));
+    mapZoom(zoomFactor, event);
+});
 
+//keyboard controls
+const keyboardMapMoveSpeed = 22;
+const keyboardZoomSpeed = zoomSpeed/2;
+let keysDown = new Set();
+
+document.addEventListener("keydown", (event) => {
+    keysDown.add(event.code);
+    event.preventDefault();
+});
+document.addEventListener("keyup", (event) => {
+    keysDown.delete(event.code);
+});
+
+function keyboardMapMovement(){
+    let moved = false;
+    if(keysDown.has("ArrowUp")){
+        camera.y -= keyboardMapMoveSpeed / gridScale;
+        moved = true;
+    }
+    if(keysDown.has("ArrowDown")){
+        camera.y += keyboardMapMoveSpeed / gridScale;
+        moved = true;
+    }
+    if(keysDown.has("ArrowLeft")){
+        camera.x -= keyboardMapMoveSpeed / gridScale;
+        moved = true;
+    }
+    if(keysDown.has("ArrowRight")){
+        camera.x += keyboardMapMoveSpeed / gridScale;
+        moved = true;
+    }
+    if(keysDown.has("KeyA")){
+        mapZoom(1 - keyboardZoomSpeed,undefined);
+        moved = true;
+    }else if(keysDown.has("KeyS")){
+        mapZoom(1 + keyboardZoomSpeed,undefined);
+        moved = true;
+    }
+
+    if(moved){
+        drawGraphics();
+    }
+}
+
+function mapZoom(zoomFactor, event){
+    console.log("zooming");
+    const newScale = Math.min(maxScale, Math.max(minScale, gridScale * zoomFactor));
+    
+    if(event){
     const mouseX = event.clientX - app.screen.width / 2;
     const mouseY = event.clientY - app.screen.height / 2;
-
     const worldMouseX = camera.x + mouseX / gridScale;
     const worldMouseY = camera.y + mouseY / gridScale;
+    
+    camera.x = worldMouseX - mouseX / newScale;
+    camera.y = worldMouseY - mouseY / newScale;
+    }
 
     gridScale = newScale;
     app.stage.scale.set(gridScale, gridScale,cellSize);
 
-    camera.x = worldMouseX - mouseX / gridScale;
-    camera.y = worldMouseY - mouseY / gridScale;
-
-    drawGrid();
-    drawAreas();
+    drawGraphics();
+}
+app.ticker.add(() => {
+    keyboardMapMovement();
 });
