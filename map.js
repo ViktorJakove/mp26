@@ -1,6 +1,7 @@
 import { Area } from "./area.js";
 import { AREA_TYPES } from "./areaTypes.js";
 import { SCREEN_DIMENSIONS } from "./screenDimensions.js";
+import { AREA_GEN_DATA } from "./mapGenData/areaGenData.js";
 
 //pixi setup
 const app = new PIXI.Application({
@@ -31,10 +32,10 @@ app.stage.addChild(grid);
 
 function drawGrid() {
     grid.clear();
-    grid.lineStyle(1, 0xcccccc);
-
     const dimensions = SCREEN_DIMENSIONS(app, camera, gridScale, cellSize);
 
+    // Draw grid lines
+    grid.lineStyle(1, 0x999999); // Slightly darker grey for grid lines
     for (let worldX = dimensions.startX; worldX <= dimensions.worldRight + cellSize; worldX += cellSize) {
         const screenX = worldX - dimensions.worldLeft;
         grid.moveTo(screenX, 0);
@@ -48,7 +49,53 @@ function drawGrid() {
     }
 }
 
-//environment
+const fgContainer = new PIXI.Container();
+
+function drawForeground() {
+    const dimensions = SCREEN_DIMENSIONS(app, camera, gridScale, cellSize);
+    fgContainer.removeChildren();
+
+    const fgMapEdge = new PIXI.Graphics();
+    fgMapEdge.beginFill(0xd3d3d3);
+    fgMapEdge.drawRect(0, 0, dimensions.screenWidth, dimensions.screenHeight);
+    fgContainer.addChild(fgMapEdge);
+
+    const holeWidth = AREA_GEN_DATA.areaSize[0][0] * cellSize;
+    const holeHeight = AREA_GEN_DATA.areaSize[0][1] * cellSize;
+
+    const holeStartX = -holeWidth / 2;
+    const holeStartY = -holeHeight / 2;
+
+    const holeEndX = holeWidth / 2;
+    const holeEndY = holeHeight / 2;
+
+    const screenHoleStartX = holeStartX - dimensions.worldLeft;
+    const screenHoleStartY = holeStartY - dimensions.worldTop;
+    const screenHoleEndX = holeEndX - dimensions.worldLeft;
+    const screenHoleEndY = holeEndY - dimensions.worldTop;
+
+    const isOverlapping = screenHoleEndX > 0 && screenHoleStartX < dimensions.screenWidth && screenHoleEndY > 0 && screenHoleStartY < dimensions.screenHeight;
+
+    if (isOverlapping) {
+        const bgMask = new PIXI.Graphics();
+        bgMask.beginFill(0x000000);
+        bgMask.drawRect(0, 0, dimensions.screenWidth, dimensions.screenHeight);
+        bgMask.beginHole();
+        bgMask.drawRect(Math.max(0, screenHoleStartX),Math.max(0, screenHoleStartY),Math.min(dimensions.screenWidth, screenHoleEndX) - Math.max(0, screenHoleStartX),Math.min(dimensions.screenHeight, screenHoleEndY) - Math.max(0, screenHoleStartY)
+        );
+        bgMask.endHole();
+        bgMask.endFill();
+
+        fgContainer.mask = bgMask;
+        fgContainer.addChild(bgMask);
+    } else {
+        fgContainer.mask = null;
+    }
+
+    app.stage.addChild(fgContainer);
+}
+
+//environment, temporary
 const areas = {
     0: new Area(AREA_TYPES.CITY, -13, -8, 2, "Red Rock", 200),
     1: new Area(AREA_TYPES.LAKE, -9, -5, 4, "Booger Lake", 0),
@@ -87,9 +134,14 @@ function drawAreas() {
     });
 }
 
+function drawGraphics(){
+    drawGrid();
+    drawAreas();
+    drawForeground();
+}
+
 //init draw
-drawGrid();
-drawAreas();
+drawGraphics();
 
 //mouse controls
 let isDragging = false;
@@ -111,8 +163,7 @@ app.view.addEventListener("mousemove", (event) => {
 
         mouseInitialPos = { x: event.clientX, y: event.clientY };
 
-        drawGrid();
-        drawAreas();
+        drawGraphics();
     }
 });
 //zoom
@@ -162,8 +213,7 @@ function keyboardMapMovement(){
     }
 
     if(moved){
-        drawGrid();
-        drawAreas();
+        drawGraphics();
     }
 }
 
@@ -184,10 +234,7 @@ function mapZoom(zoomFactor, event){
     gridScale = newScale;
     app.stage.scale.set(gridScale, gridScale,cellSize);
 
-    
-
-    drawGrid();
-    drawAreas();
+    drawGraphics();
 }
 app.ticker.add(() => {
     keyboardMapMovement();
