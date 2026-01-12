@@ -8,16 +8,16 @@ export const generateAreas = (level , areas) => {
     const citiesToGenerate = CITY_GEN_DATA.slice(0, AREA_GEN_DATA.cityCount[level]);
     const sortedCities = citiesToGenerate.sort((a, b) => (b.sizeX * b.sizeY) - (a.sizeX * a.sizeY));
     const placedCities = [];
-    sortedCities.forEach(city => {
+    sortedCities.forEach((city, index) => {
         let x, y;
         do {
             x = getRandom(-AREA_GEN_DATA.areaSize[level][0]/2+1, AREA_GEN_DATA.areaSize[level][0]/2-1 - city.sizeX);
             y = getRandom(-AREA_GEN_DATA.areaSize[level][1]/2+1, AREA_GEN_DATA.areaSize[level][1]/2-1 - city.sizeY);
-        } while (placedCities.some(placedCity => 
-            x < placedCity.x + placedCity.sizeX + 1 &&
+        } while (placedCities.some((placedCity, placedIndex) => 
+            (x < placedCity.x + placedCity.sizeX + 1 &&
             x + city.sizeX > placedCity.x + 1 &&
             y < placedCity.y + placedCity.sizeY + 1 &&
-            y + city.sizeY > placedCity.y + 1
+            y + city.sizeY > placedCity.y + 1) || (Math.abs(index - placedIndex) === 1 && Math.abs(x-placedCity.x)<10)
         ));
         placedCities.push(new Area(AREA_TYPES.CITY, x, y, city.sizeX, city.sizeY, city.cityName, getRandom(city.peepsMin, city.peepsMax)));
     });

@@ -12,7 +12,19 @@ export const CITY_GEN_DATA=[
         description: "Hometown of a great mind. (you!)"
     },
     {
-        cityName: "Royal Bank",
+        cityName: "The Gravetary",
+        peepsMin: 1,
+        peepsMax: 1,
+        sizeX: 1,
+        sizeY: 1,
+        roughPosition: "random",
+        building: "graveyard",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "."
+    },
+    {
+        cityName: "Pennyville",
         peepsMin: 150,
         peepsMax: 400,
         sizeX: 4,
@@ -24,51 +36,123 @@ export const CITY_GEN_DATA=[
         description: "Led by a successful and wealthy hustler mayor. They say his left ear tickles when he is near money."
     },
     {
-        cityName: "Royal Bank",
+        cityName: "3",
         peepsMin: 150,
         peepsMax: 400,
         sizeX: 4,
         sizeY: 5,
         roughPosition: "random",
-        building: "bank",
+        building: "bison",
         defenseLevel: 5,
         cathouseLevel: 0,
-        description: "Led by a successful and wealthy hustler mayor. They say his left ear tickles when he is near money."
+        description: "."
     },
     {
-        cityName: "Royal Bank",
+        cityName: "4",
         peepsMin: 150,
         peepsMax: 400,
         sizeX: 4,
         sizeY: 5,
         roughPosition: "random",
-        building: "bank",
+        building: "skinshop",
         defenseLevel: 5,
         cathouseLevel: 0,
-        description: "Led by a successful and wealthy hustler mayor. They say his left ear tickles when he is near money."
+        description: "."
     },
     {
-        cityName: "Royal Bank",
+        cityName: "Snapschad",
         peepsMin: 150,
         peepsMax: 400,
         sizeX: 4,
         sizeY: 5,
         roughPosition: "random",
-        building: "bank",
+        building: "gallery",
         defenseLevel: 5,
         cathouseLevel: 0,
-        description: "Led by a successful and wealthy hustler mayor. They say his left ear tickles when he is near money."
+        description: "."
     },
     {
-        cityName: "Royal Bank",
+        cityName: "6",
         peepsMin: 150,
         peepsMax: 400,
         sizeX: 4,
         sizeY: 5,
         roughPosition: "random",
-        building: "bank",
+        building: "saloon",
         defenseLevel: 5,
         cathouseLevel: 0,
-        description: "Led by a successful and wealthy hustler mayor. They say his left ear tickles when he is near money."
+        description: "."
+    },
+    {
+        cityName: "7",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 4,
+        sizeY: 5,
+        roughPosition: "random",
+        building: "---",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "."
+    },
+    {
+        cityName: "Bonegrass fields",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 4,
+        sizeY: 5,
+        roughPosition: "random",
+        building: "rails",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "."
+    },
+    {
+        cityName: "Positive hills",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 4,
+        sizeY: 5,
+        roughPosition: "random",
+        building: "trains",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "."
+    },
+    {
+        cityName: "Big Pews",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 4,
+        sizeY: 5,
+        roughPosition: "random",
+        building: "gunshop",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "."
+    },
+    {
+        cityName: "11",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 4,
+        sizeY: 5,
+        roughPosition: "random",
+        building: "stable",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "."
+    },
+    {
+        cityName: "12",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 4,
+        sizeY: 5,
+        roughPosition: "random",
+        building: "---",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "."
     }
 ]
