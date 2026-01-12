@@ -5,7 +5,7 @@ export class Area {
     @param {number} y - y coordinate(left upper corner)  
     @param {number} sizeX - x size of the city  
     @param {number} sizeY - x size of the city
-    @param {string} name - self explanatory, bro
+    @param {string} name - self explanatory
     @param {number} peeps - population
     */
     constructor(type,x,y,sizeX,sizeY,name, peeps) {

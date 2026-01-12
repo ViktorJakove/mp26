@@ -39,7 +39,7 @@ let areas = {
     2: new Area(AREA_TYPES.BISONS, 2, 2, 6,7, "Wild Bunch", 42),
     3: new Area(AREA_TYPES.CITY, 7, -6, 3,1, "Bluemoon", 300),*/
 };
-areas = generateAreas(1, areas);
+areas = generateAreas(0, areas);
 
 function drawGrid() {
     grid.clear();
