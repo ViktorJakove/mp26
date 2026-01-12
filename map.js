@@ -2,6 +2,7 @@ import { Area } from "./area.js";
 import { AREA_TYPES } from "./areaTypes.js";
 import { SCREEN_DIMENSIONS } from "./screenDimensions.js";
 import { AREA_GEN_DATA } from "./mapGenData/areaGenData.js";
+import { generateAreas } from "./generateAreas.js";
 
 //pixi setup
 const app = new PIXI.Application({
@@ -31,6 +32,14 @@ const maxScale = 2.5;
 const cellSize = 50;
 const grid = new PIXI.Graphics();
 app.stage.addChild(grid);
+
+let areas = {
+    /*0: new Area(AREA_TYPES.CITY, -13, -8, 2,3, "Red Rock", 200),
+    1: new Area(AREA_TYPES.LAKE, -9, -5, 4,3, "Booger Lake", 0),
+    2: new Area(AREA_TYPES.BISONS, 2, 2, 6,7, "Wild Bunch", 42),
+    3: new Area(AREA_TYPES.CITY, 7, -6, 3,1, "Bluemoon", 300),*/
+};
+areas = generateAreas(1, areas);
 
 function drawGrid() {
     grid.clear();
@@ -98,14 +107,6 @@ function drawForeground() {
     app.stage.addChild(fgContainer);
 }
 
-//environment, temporary
-const areas = {
-    0: new Area(AREA_TYPES.CITY, -13, -8, 2, "Red Rock", 200),
-    1: new Area(AREA_TYPES.LAKE, -9, -5, 4, "Booger Lake", 0),
-    2: new Area(AREA_TYPES.BISONS, 2, 2, 6, "Wild Bunch", 42),
-    3: new Area(AREA_TYPES.CITY, 7, -6, 3, "Bluemoon", 300),
-};
-
 const areaContainer = new PIXI.Container();
 areaContainer.zIndex = 1;
 const areaTextContainer = new PIXI.Container();
@@ -126,15 +127,15 @@ function drawAreas() {
         const screenX = (area.x * cellSize) - dimensions.worldLeft;
         const screenY = (area.y * cellSize) - dimensions.worldTop;
 
-        areaGraphics.drawRect(screenX, screenY, area.size * cellSize, area.size * cellSize);
+        areaGraphics.drawRect(screenX, screenY, area.sizeX * cellSize, area.sizeY * cellSize);
         areaGraphics.endFill();
         areaContainer.addChild(areaGraphics);
 
         if (gridScale > 0.7) return;
 
         const areaText = new PIXI.Text(area.name + ((area.type === AREA_TYPES.CITY || area.type === AREA_TYPES.BISONS) ? '\n' + "population : " + area.peeps : ""),{ fontFamily: "Arial", fontSize: 14, fill: 0x000000 });
-        areaText.x = screenX + area.size * cellSize / 2;
-        areaText.y = screenY + area.size * cellSize / 2;
+        areaText.x = screenX + area.sizeX * cellSize / 2;
+        areaText.y = screenY + area.sizeY * cellSize / 2;
         areaText.anchor.set(0.5);
         areaText.style.align = "center";
         areaText.scale.set(1 / gridScale,1/gridScale);

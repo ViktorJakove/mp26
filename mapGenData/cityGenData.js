@@ -22,5 +22,53 @@ export const CITY_GEN_DATA=[
         defenseLevel: 5,
         cathouseLevel: 0,
         description: "Led by a successful and wealthy hustler mayor. They say his left ear tickles when he is near money."
+    },
+    {
+        cityName: "Royal Bank",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 4,
+        sizeY: 5,
+        roughPosition: "random",
+        building: "bank",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "Led by a successful and wealthy hustler mayor. They say his left ear tickles when he is near money."
+    },
+    {
+        cityName: "Royal Bank",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 4,
+        sizeY: 5,
+        roughPosition: "random",
+        building: "bank",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "Led by a successful and wealthy hustler mayor. They say his left ear tickles when he is near money."
+    },
+    {
+        cityName: "Royal Bank",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 4,
+        sizeY: 5,
+        roughPosition: "random",
+        building: "bank",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "Led by a successful and wealthy hustler mayor. They say his left ear tickles when he is near money."
+    },
+    {
+        cityName: "Royal Bank",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 4,
+        sizeY: 5,
+        roughPosition: "random",
+        building: "bank",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "Led by a successful and wealthy hustler mayor. They say his left ear tickles when he is near money."
     }
 ]
