@@ -5,20 +5,22 @@ import { CITY_GEN_DATA } from "./mapGenData/cityGenData.js";
 import { LAKE_GEN_DATA, FOREST_GEN_DATA, MOUNTAIN_GEN_DATA, INDIAN_GEN_DATA, BISON_GEN_DATA } from "./mapGenData/natureGenData.js";
 
 export const generateAreas = (level, areas) => {
+    while (true) {
+        const result = tryGeneration(level);
+        if (result) return result;
+        console.log("regenerating areas");
+    }
+}
+
+function tryGeneration(level){
     const citiesToGenerate = CITY_GEN_DATA.slice(0, AREA_GEN_DATA.cityCount[level]);
     const lakesToGenerate = LAKE_GEN_DATA.slice(0, AREA_GEN_DATA.lakeCount[level]);
     const forestsToGenerate = FOREST_GEN_DATA.slice(0, AREA_GEN_DATA.forestCount[level]);
     const mountainsToGenerate = MOUNTAIN_GEN_DATA.slice(0, AREA_GEN_DATA.mountainCount[level]);
     const indiansToGenerate = INDIAN_GEN_DATA.slice(0, AREA_GEN_DATA.indianAreasCount[level]);
     const bisonsToGenerate = BISON_GEN_DATA.slice(0, AREA_GEN_DATA.bisonAreasCount[level]);
-    const merge = [];
 
-    console.log(citiesToGenerate);
-    citiesToGenerate.forEach(city => {
-        console.log(city.name);
-    });
-
-    const allAreas = merge.concat(
+    const allAreas = [].concat(
         citiesToGenerate.map(area => ({ ...area, type: AREA_TYPES.CITY })),
         lakesToGenerate.map(area => ({ ...area, type: AREA_TYPES.LAKE })),
         forestsToGenerate.map(area => ({ ...area, type: AREA_TYPES.FOREST })),
@@ -31,31 +33,39 @@ export const generateAreas = (level, areas) => {
     const sortedAreas = allAreas.sort((a, b) => (b.sizeX * b.sizeY) - (a.sizeX * a.sizeY));
     const placedAreas = [];
 
-    //pokud trva moc dlouho- reset
-    let cycles = 0;
-    sortedAreas.forEach((area, index) => {
-        let x, y;
-        do {
-            cycles++;
-            x = getRandom(-AREA_GEN_DATA.areaSize[level][0] / 2 + 1, AREA_GEN_DATA.areaSize[level][0] / 2 - 1 - area.sizeX);
-            y = getRandom(-AREA_GEN_DATA.areaSize[level][1] / 2 + 1, AREA_GEN_DATA.areaSize[level][1] / 2 - 1 - area.sizeY);
-        } while (placedAreas.some((placedArea, placedIndex) =>
-            (x < placedArea.x + placedArea.sizeX + 1 &&
-                x + area.sizeX > placedArea.x + 1 &&
-                y < placedArea.y + placedArea.sizeY + 1 &&
-                y + area.sizeY > placedArea.y + 1) || (Math.abs(index - placedIndex) === 1 && Math.abs(x - placedArea.x) < 10)
-        ));
-        placedAreas.push(new Area(
-            area.type,
-            x,
-            y,
-            area.sizeX,
-            area.sizeY,
-            area.name,
-            area.type === AREA_TYPES.CITY ? getRandom(area.peepsMin, area.peepsMax) : 0
+    for (const area of sortedAreas) {
+        let cycles = 0;
+        const maxCycles = 1000;
+        let placed = false;
 
-        ));
-    });
+        while(cycles < maxCycles){
+            cycles++;
+
+            const x = getRandom(-AREA_GEN_DATA.areaSize[level][0] / 2 + 1, AREA_GEN_DATA.areaSize[level][0] / 2 - 1 - area.sizeX);
+            const y = getRandom(-AREA_GEN_DATA.areaSize[level][1] / 2 + 1, AREA_GEN_DATA.areaSize[level][1] / 2 - 1 - area.sizeY);
+            const collision = placedAreas.some((placedArea, placedIndex) =>
+                !((x + area.sizeX+1 <= placedArea.x || x >= placedArea.x + placedArea.sizeX+1) &&
+                (y + area.sizeY-1 <= placedArea.y || y >= placedArea.y + placedArea.sizeY-1))
+            );
+
+            if(!collision){
+                placedAreas.push(new Area(
+                    area.type,
+                    x,
+                    y,
+                    area.sizeX,
+                    area.sizeY,
+                    area.name,
+                    area.type === AREA_TYPES.CITY ? getRandom(area.peepsMin, area.peepsMax) : 0
+
+                ));
+                placed = true;
+                break;
+            }
+        }
+
+        if (!placed)return null;
+    };
     return placedAreas;
 }
 
