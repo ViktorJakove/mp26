@@ -1,6 +1,6 @@
 export const CITY_GEN_DATA=[
     {
-        cityName: "Steamport",
+        name: "Steamport",
         peepsMin: 75,
         peepsMax: 200,
         sizeX: 3,
@@ -12,7 +12,7 @@ export const CITY_GEN_DATA=[
         description: "Hometown of a great mind. (you!)"
     },
     {
-        cityName: "The Gravetary",
+        name: "The Gravetary",
         peepsMin: 1,
         peepsMax: 1,
         sizeX: 1,
@@ -24,7 +24,7 @@ export const CITY_GEN_DATA=[
         description: "."
     },
     {
-        cityName: "Pennyville",
+        name: "Pennyville",
         peepsMin: 150,
         peepsMax: 400,
         sizeX: 4,
@@ -36,7 +36,7 @@ export const CITY_GEN_DATA=[
         description: "Led by a successful and wealthy hustler mayor. They say his left ear tickles when he is near money."
     },
     {
-        cityName: "3",
+        name: "3",
         peepsMin: 150,
         peepsMax: 400,
         sizeX: 4,
@@ -48,7 +48,7 @@ export const CITY_GEN_DATA=[
         description: "."
     },
     {
-        cityName: "4",
+        name: "4",
         peepsMin: 150,
         peepsMax: 400,
         sizeX: 4,
@@ -60,7 +60,7 @@ export const CITY_GEN_DATA=[
         description: "."
     },
     {
-        cityName: "Snapschad",
+        name: "Snapschad",
         peepsMin: 150,
         peepsMax: 400,
         sizeX: 4,
@@ -72,7 +72,7 @@ export const CITY_GEN_DATA=[
         description: "."
     },
     {
-        cityName: "6",
+        name: "6",
         peepsMin: 150,
         peepsMax: 400,
         sizeX: 4,
@@ -84,7 +84,7 @@ export const CITY_GEN_DATA=[
         description: "."
     },
     {
-        cityName: "7",
+        name: "7",
         peepsMin: 150,
         peepsMax: 400,
         sizeX: 4,
@@ -96,7 +96,7 @@ export const CITY_GEN_DATA=[
         description: "."
     },
     {
-        cityName: "Bonegrass fields",
+        name: "Bonegrass fields",
         peepsMin: 150,
         peepsMax: 400,
         sizeX: 4,
@@ -108,7 +108,7 @@ export const CITY_GEN_DATA=[
         description: "."
     },
     {
-        cityName: "Positive hills",
+        name: "Positive hills",
         peepsMin: 150,
         peepsMax: 400,
         sizeX: 4,
@@ -120,7 +120,7 @@ export const CITY_GEN_DATA=[
         description: "."
     },
     {
-        cityName: "Big Pews",
+        name: "Big Pews",
         peepsMin: 150,
         peepsMax: 400,
         sizeX: 4,
@@ -132,7 +132,7 @@ export const CITY_GEN_DATA=[
         description: "."
     },
     {
-        cityName: "11",
+        name: "11",
         peepsMin: 150,
         peepsMax: 400,
         sizeX: 4,
@@ -144,7 +144,7 @@ export const CITY_GEN_DATA=[
         description: "."
     },
     {
-        cityName: "12",
+        name: "12",
         peepsMin: 150,
         peepsMax: 400,
         sizeX: 4,
