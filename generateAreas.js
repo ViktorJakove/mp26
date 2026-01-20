@@ -50,12 +50,12 @@ function tryGeneration(level){
                 (y + area.sizeY-1 <= placedArea.y || y >= placedArea.y + placedArea.sizeY-1))) return true;
                 
                 //city docneighbor distance check
-                const MIN_CITY_XDISTANCE = AREA_GEN_DATA.areaSize[level][0]/3;
+                const MIN_CITY_XDISTANCE = AREA_GEN_DATA.areaSize[level][0]/4;
                 console.log(MIN_CITY_XDISTANCE);
 
                 if(area.type === AREA_TYPES.CITY && placedArea.type === AREA_TYPES.CITY){
                     const placedAreaOrderInDoc = CITY_GEN_DATA.findIndex(city => city.name === placedArea.name);
-                    return Math.abs(area.orderInDoc - placedAreaOrderInDoc) === 1 && Math.abs(x - placedArea.x) <= MIN_CITY_XDISTANCE;
+                    return Math.abs(area.orderInDoc - placedAreaOrderInDoc) === 1 && Math.min(Math.abs(x - placedArea.x),Math.abs(x + area.sizeX - placedArea.x),Math.abs(x - placedArea.x + placedArea.sizeX)) <= MIN_CITY_XDISTANCE;
                 }
             });
 
