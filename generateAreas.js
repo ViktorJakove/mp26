@@ -21,7 +21,7 @@ function tryGeneration(level){
     const bisonsToGenerate = BISON_GEN_DATA.slice(0, AREA_GEN_DATA.bisonAreasCount[level]);
 
     const allAreas = [].concat(
-        citiesToGenerate.map(area => ({ ...area, type: AREA_TYPES.CITY })),
+        citiesToGenerate.map(area => ({ ...area, type: AREA_TYPES.CITY, orderInDoc: citiesToGenerate.indexOf(area) })),
         lakesToGenerate.map(area => ({ ...area, type: AREA_TYPES.LAKE })),
         forestsToGenerate.map(area => ({ ...area, type: AREA_TYPES.FOREST })),
         mountainsToGenerate.map(area => ({ ...area, type: AREA_TYPES.ROCK })),
@@ -43,10 +43,21 @@ function tryGeneration(level){
 
             const x = getRandom(-AREA_GEN_DATA.areaSize[level][0] / 2 + 1, AREA_GEN_DATA.areaSize[level][0] / 2 - 1 - area.sizeX);
             const y = getRandom(-AREA_GEN_DATA.areaSize[level][1] / 2 + 1, AREA_GEN_DATA.areaSize[level][1] / 2 - 1 - area.sizeY);
-            const collision = placedAreas.some((placedArea, placedIndex) =>
-                !((x + area.sizeX+1 <= placedArea.x || x >= placedArea.x + placedArea.sizeX+1) &&
-                (y + area.sizeY-1 <= placedArea.y || y >= placedArea.y + placedArea.sizeY-1))
-            );
+            const collision = placedAreas.some((placedArea) =>{
+                
+                //overlap check
+                if(!((x + area.sizeX+1 <= placedArea.x || x >= placedArea.x + placedArea.sizeX+1) &&
+                (y + area.sizeY-1 <= placedArea.y || y >= placedArea.y + placedArea.sizeY-1))) return true;
+                
+                //city docneighbor distance check
+                const MIN_CITY_XDISTANCE = AREA_GEN_DATA.areaSize[level][0]/3;
+                console.log(MIN_CITY_XDISTANCE);
+
+                if(area.type === AREA_TYPES.CITY && placedArea.type === AREA_TYPES.CITY){
+                    const placedAreaOrderInDoc = CITY_GEN_DATA.findIndex(city => city.name === placedArea.name);
+                    return Math.abs(area.orderInDoc - placedAreaOrderInDoc) === 1 && Math.abs(x - placedArea.x) <= MIN_CITY_XDISTANCE;
+                }
+            });
 
             if(!collision){
                 placedAreas.push(new Area(
@@ -57,7 +68,6 @@ function tryGeneration(level){
                     area.sizeY,
                     area.name,
                     area.type === AREA_TYPES.CITY ? getRandom(area.peepsMin, area.peepsMax) : 0
-
                 ));
                 placed = true;
                 break;
