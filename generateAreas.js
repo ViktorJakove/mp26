@@ -48,7 +48,6 @@ function tryGeneration(level){
                 
                 //city doc-neighbor distance check
                 const MIN_CITY_XDISTANCE = AREA_GEN_DATA.areaSize[level][0]/4;
-                console.log(MIN_CITY_XDISTANCE);
 
                 if(area.type === AREA_TYPES.CITY && placedArea.type === AREA_TYPES.CITY){
                     const placedAreaOrderInDoc = CITY_GEN_DATA.findIndex(city => city.name === placedArea.name);

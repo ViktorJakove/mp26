@@ -2,6 +2,7 @@ import { AREA_TYPES } from "./enums/areaTypes.js";
 import { SCREEN_DIMENSIONS } from "./screenDimensions.js";
 import { AREA_GEN_DATA } from "./mapGenData/areaGenData.js";
 import { generateAreas } from "./generateAreas.js";
+import { Area } from "./area.js";
 
 //pixi setup
 const app = new PIXI.Application({
@@ -114,7 +115,7 @@ function drawAreas() {
 
     const dimensions = SCREEN_DIMENSIONS(app, camera, gridScale, cellSize);
 
-    Object.values(areas).forEach(area => {
+    Object.values(areas).forEach((area, index) => {
         const areaGraphics = new PIXI.Graphics();
         areaGraphics.beginFill(area.type.color, 0.5);
 
@@ -126,18 +127,61 @@ function drawAreas() {
         areaContainer.addChild(areaGraphics);
 
         if (gridScale > 0.7) return;
-        
-        //TODO: pokud je to snakearea, vykreslit uprostred mezi veci nejvic nalevo a nejvic napravo
+        if ((area.type === AREA_TYPES.FOREST || area.type === AREA_TYPES.ROCK)) {
+            if (Object.values(areas).findIndex(part => part.name === area.name) !== index) {
+                return;
+            }
+        }
 
+        const textPosition = getAreaTextPosition(area, dimensions, Object.values(areas), screenX, screenY);
+        
         const areaText = new PIXI.Text(area.name + ((area.type === AREA_TYPES.CITY || area.type === AREA_TYPES.BISONS) ? '\n' + "population : " + area.peeps : ""),{ fontFamily: "Arial", fontSize: 14, fill: 0x000000 });
-        areaText.x = screenX + area.sizeX * cellSize / 2;
-        areaText.y = screenY + area.sizeY * cellSize / 2;
+        areaText.x = textPosition.textX;
+        areaText.y = textPosition.textY;
         areaText.anchor.set(0.5);
         areaText.style.align = "center";
         areaText.scale.set(1 / gridScale,1/gridScale);
-
+        
         areaTextContainer.addChild(areaText);
     });
+}
+
+function getAreaTextPosition(area, dimensions, areas, screenX, screenY) {
+    let textX = screenX + area.sizeX * cellSize / 2;
+    let textY = screenY + area.sizeY * cellSize / 2;
+
+    if (area.type === AREA_TYPES.FOREST || area.type === AREA_TYPES.ROCK) {
+        const snakeParts = areas.filter(part => part.name === area.name); //all parst
+        const minX = Math.min(...snakeParts.map(part => part.x));
+        const maxX = Math.max(...snakeParts.map(part => part.x + part.sizeX));
+        const minY = Math.min(...snakeParts.map(part => part.y));
+        const maxY = Math.max(...snakeParts.map(part => part.y + part.sizeY));
+
+        const centerX = (minX + maxX) / 2;
+        const centerY = (minY + maxY) / 2;
+
+        //nejblizsi cast hada k centru
+        let closestTile = snakeParts[0];
+        let closestDistance = Infinity;
+
+        snakeParts.forEach(part => {
+            const tileCenterX = (part.x + part.sizeX / 2);
+            const tileCenterY = (part.y + part.sizeY / 2);
+            const distance = Math.sqrt(
+                Math.pow(centerX - tileCenterX, 2) + Math.pow(centerY - tileCenterY, 2)
+            );
+
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestTile = part;
+            }
+        });
+
+        textX = (closestTile.x + closestTile.sizeX / 2) * cellSize - dimensions.worldLeft;
+        textY = (closestTile.y + closestTile.sizeY / 2) * cellSize - dimensions.worldTop;
+    }
+
+    return { textX, textY };
 }
 
 function drawGraphics(){
