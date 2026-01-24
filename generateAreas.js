@@ -93,15 +93,16 @@ function tryGeneration(level){
         for (let i = 0; i < area.length; i++) {
             let placed = false;
             let cycles = 0;
+            const maxCycles = area.length * area.thickness * 3;
     
-            while (!placed && cycles < 50) {
+            while (!placed && cycles < maxCycles) {
                 cycles++;
 
                 //smer (pro sutry neopakujici se - jsou min rovny)
                 let OKdirections = DIRECTIONS;
 
                 if(area.type === AREA_TYPES.ROCK && lastDir){
-                    OKdirections = DIRECTIONS.filter(d => !isOpposite(d, lastDir));
+                    OKdirections = DIRECTIONS.filter(d => !isOppositeDir(d, lastDir));
                 }
                 const dir = OKdirections[getRandom(0, OKdirections.length - 1)];
                 const newX = x + dir.xChange * area.thickness;
@@ -126,7 +127,7 @@ function tryGeneration(level){
                     for (let dx = 0; dx < area.thickness; dx++) {
                         for (let dy = 0; dy < area.thickness; dy++) {
 
-                            if (!shouldPlaceForestTile(area)) continue;
+                            if (!shouldPlaceTile(area)) continue;
                             placedSnakeAreaParts.push(
                                 new Area(
                                     area.type,
@@ -146,7 +147,7 @@ function tryGeneration(level){
                 }
             }
     
-            if (!placed) break;
+            if (!placed) return null;
         }
     }
     
@@ -161,7 +162,7 @@ function squareCollides(x, y, size, placedAreas, placedSnakeParts) {
         y < pa.y + pa.sizeY + 1 &&
         y + size > pa.y - 1
     )) return true;
-
+    
     //snakes
     for (let dx = 0; dx < size; dx++) {
         for (let dy = 0; dy < size; dy++) {
@@ -174,13 +175,12 @@ function squareCollides(x, y, size, placedAreas, placedSnakeParts) {
     return false;
 }
 
-function shouldPlaceForestTile(area) {
-    return !(area.type === AREA_TYPES.FOREST &&
-             area.thickness > 1 &&
-             Math.random() < 0.2);
+function shouldPlaceTile(area) {
+    const chance = area.type === AREA_TYPES.FOREST ? 0.2 : 0.05;
+    return !(area.thickness > 1 && Math.random() < chance);
 }
 
-function isOpposite(dirA, dirB) {
+function isOppositeDir(dirA, dirB) {
     return dirA.xChange === -dirB.xChange &&
            dirA.yChange === -dirB.yChange;
 }

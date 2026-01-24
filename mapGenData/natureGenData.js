@@ -37,8 +37,8 @@ export const FOREST_GEN_DATA=[
 export const MOUNTAIN_GEN_DATA=[
     {
         name: "Uprock",
-        length: 4,
-        thickness: 2,
+        length: 5,
+        thickness: 3,
         description: "Local water source."
     },{
         name: "ShizzPeez",
