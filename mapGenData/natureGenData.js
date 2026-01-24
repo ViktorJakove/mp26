@@ -19,36 +19,36 @@ export const LAKE_GEN_DATA=[
 export const FOREST_GEN_DATA=[
     {
         name: "Greentimber",
-        sizeX: 4,
-        sizeY: 1,
-        description: "Local water source."
+        length: 20,
+        thickness: 2,
+        description: "pp poopoo."
     },{
         name: "ShizzPeez",
-        sizeX: 3,
-        sizeY: 2,
+        length: 8,
+        thickness: 1,
         description: "Local diarrhea source."
     },{
         name: "Clam Cove",
-        sizeX: 3,
-        sizeY: 2,
+        length: 8,
+        thickness: 1,
         description: "Exceptionally pure."
     }
 ];
 export const MOUNTAIN_GEN_DATA=[
     {
         name: "Uprock",
-        sizeX: 3,
-        sizeY: 2,
+        length: 4,
+        thickness: 2,
         description: "Local water source."
     },{
         name: "ShizzPeez",
-        sizeX: 3,
-        sizeY: 2,
+        length: 3,
+        thickness: 2,
         description: "Local diarrhea source."
     },{
         name: "Clam Cove",
-        sizeX: 3,
-        sizeY: 2,
+        length: 3,
+        thickness: 2,
         description: "Exceptionally pure."
     }
 ];export const INDIAN_GEN_DATA=[

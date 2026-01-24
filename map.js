@@ -1,5 +1,4 @@
-import { Area } from "./area.js";
-import { AREA_TYPES } from "./areaTypes.js";
+import { AREA_TYPES } from "./enums/areaTypes.js";
 import { SCREEN_DIMENSIONS } from "./screenDimensions.js";
 import { AREA_GEN_DATA } from "./mapGenData/areaGenData.js";
 import { generateAreas } from "./generateAreas.js";
@@ -33,12 +32,7 @@ const cellSize = 50;
 const grid = new PIXI.Graphics();
 app.stage.addChild(grid);
 
-let areas = {
-    /*0: new Area(AREA_TYPES.CITY, -13, -8, 2,3, "Red Rock", 200),
-    1: new Area(AREA_TYPES.LAKE, -9, -5, 4,3, "Booger Lake", 0),
-    2: new Area(AREA_TYPES.BISONS, 2, 2, 6,7, "Wild Bunch", 42),
-    3: new Area(AREA_TYPES.CITY, 7, -6, 3,1, "Bluemoon", 300),*/
-};
+let areas = {};
 areas = generateAreas(0, areas);
 
 function drawGrid() {
@@ -132,6 +126,8 @@ function drawAreas() {
         areaContainer.addChild(areaGraphics);
 
         if (gridScale > 0.7) return;
+        
+        //TODO: pokud je to snakearea, vykreslit uprostred mezi veci nejvic nalevo a nejvic napravo
 
         const areaText = new PIXI.Text(area.name + ((area.type === AREA_TYPES.CITY || area.type === AREA_TYPES.BISONS) ? '\n' + "population : " + area.peeps : ""),{ fontFamily: "Arial", fontSize: 14, fill: 0x000000 });
         areaText.x = screenX + area.sizeX * cellSize / 2;

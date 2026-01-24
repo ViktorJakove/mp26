@@ -1,5 +1,6 @@
 import { Area } from "./area.js";
-import { AREA_TYPES } from "./areaTypes.js";
+import { AREA_TYPES } from "./enums/areaTypes.js";
+import { DIRECTIONS } from "./enums/directionEnum.js";
 import { AREA_GEN_DATA } from "./mapGenData/areaGenData.js";
 import { CITY_GEN_DATA } from "./mapGenData/cityGenData.js";
 import { LAKE_GEN_DATA, FOREST_GEN_DATA, MOUNTAIN_GEN_DATA, INDIAN_GEN_DATA, BISON_GEN_DATA } from "./mapGenData/natureGenData.js";
@@ -15,16 +16,12 @@ export const generateAreas = (level, areas) => {
 function tryGeneration(level){
     const citiesToGenerate = CITY_GEN_DATA.slice(0, AREA_GEN_DATA.cityCount[level]);
     const lakesToGenerate = LAKE_GEN_DATA.slice(0, AREA_GEN_DATA.lakeCount[level]);
-    const forestsToGenerate = FOREST_GEN_DATA.slice(0, AREA_GEN_DATA.forestCount[level]);
-    const mountainsToGenerate = MOUNTAIN_GEN_DATA.slice(0, AREA_GEN_DATA.mountainCount[level]);
     const indiansToGenerate = INDIAN_GEN_DATA.slice(0, AREA_GEN_DATA.indianAreasCount[level]);
     const bisonsToGenerate = BISON_GEN_DATA.slice(0, AREA_GEN_DATA.bisonAreasCount[level]);
 
     const allAreas = [].concat(
         citiesToGenerate.map(area => ({ ...area, type: AREA_TYPES.CITY, orderInDoc: citiesToGenerate.indexOf(area) })),
         lakesToGenerate.map(area => ({ ...area, type: AREA_TYPES.LAKE })),
-        forestsToGenerate.map(area => ({ ...area, type: AREA_TYPES.FOREST })),
-        mountainsToGenerate.map(area => ({ ...area, type: AREA_TYPES.ROCK })),
         indiansToGenerate.map(area => ({ ...area, type: AREA_TYPES.INDIANS })),
         bisonsToGenerate.map(area => ({ ...area, type: AREA_TYPES.BISONS }))
     );
@@ -49,7 +46,7 @@ function tryGeneration(level){
                 if(!((x + area.sizeX+1 <= placedArea.x || x >= placedArea.x + placedArea.sizeX+1) &&
                 (y + area.sizeY-1 <= placedArea.y || y >= placedArea.y + placedArea.sizeY-1))) return true;
                 
-                //city docneighbor distance check
+                //city doc-neighbor distance check
                 const MIN_CITY_XDISTANCE = AREA_GEN_DATA.areaSize[level][0]/4;
                 console.log(MIN_CITY_XDISTANCE);
 
@@ -76,7 +73,116 @@ function tryGeneration(level){
 
         if (!placed)return null;
     };
-    return placedAreas;
+    
+    const forestsToGenerate = FOREST_GEN_DATA.slice(0, AREA_GEN_DATA.forestCount[level]);
+    const mountainsToGenerate = MOUNTAIN_GEN_DATA.slice(0, AREA_GEN_DATA.mountainCount[level]);
+    const allSnakeAreas = [].concat(
+        forestsToGenerate.map(area => ({ ...area, type: AREA_TYPES.FOREST })),
+        mountainsToGenerate.map(area => ({ ...area, type: AREA_TYPES.ROCK }))
+    );
+
+    const sortedSnakeAreas = allSnakeAreas.sort((a, b) => (b.thickness * b.length) - (a.length * a.thickness));
+    const placedSnakeAreaParts = [];
+
+    for (const area of sortedSnakeAreas) {
+        let x = getRandom(-AREA_GEN_DATA.areaSize[level][0] / 2 + 1,AREA_GEN_DATA.areaSize[level][0] / 2 - 1);
+        let y = getRandom(-AREA_GEN_DATA.areaSize[level][1] / 2 + 1,AREA_GEN_DATA.areaSize[level][1] / 2 - 1);
+
+        let lastDir = null;
+    
+        for (let i = 0; i < area.length; i++) {
+            let placed = false;
+            let cycles = 0;
+    
+            while (!placed && cycles < 50) {
+                cycles++;
+
+                //smer (pro sutry neopakujici se - jsou min rovny)
+                let OKdirections = DIRECTIONS;
+
+                if(area.type === AREA_TYPES.ROCK && lastDir){
+                    OKdirections = DIRECTIONS.filter(d => !isOpposite(d, lastDir));
+                }
+                const dir = OKdirections[getRandom(0, OKdirections.length - 1)];
+                const newX = x + dir.xChange * area.thickness;
+                const newY = y + dir.yChange * area.thickness;
+
+                const withinBounds = (
+                    newX >= -AREA_GEN_DATA.areaSize[level][0] / 2 &&
+                    newX + area.thickness <= AREA_GEN_DATA.areaSize[level][0] / 2 &&
+                    newY >= -AREA_GEN_DATA.areaSize[level][1] / 2 &&
+                    newY + area.thickness <= AREA_GEN_DATA.areaSize[level][1] / 2
+                );
+    
+                const collision = squareCollides(
+                    newX,
+                    newY,
+                    area.thickness,
+                    placedAreas,
+                    placedSnakeAreaParts
+                );
+    
+                if (withinBounds && !collision) {
+                    for (let dx = 0; dx < area.thickness; dx++) {
+                        for (let dy = 0; dy < area.thickness; dy++) {
+
+                            if (!shouldPlaceForestTile(area)) continue;
+                            placedSnakeAreaParts.push(
+                                new Area(
+                                    area.type,
+                                    newX + dx,
+                                    newY + dy,
+                                    1,
+                                    1,
+                                    area.name,
+                                    0
+                                )
+                            );
+                        }
+                    }
+                    x = newX;
+                    y = newY;
+                    placed = true;
+                }
+            }
+    
+            if (!placed) break;
+        }
+    }
+    
+    return placedAreas.concat(placedSnakeAreaParts);
+}
+
+function squareCollides(x, y, size, placedAreas, placedSnakeParts) {
+    //areas
+    if (placedAreas.some(pa =>
+        x < pa.x + pa.sizeX + 1 &&
+        x + size > pa.x - 1 &&
+        y < pa.y + pa.sizeY + 1 &&
+        y + size > pa.y - 1
+    )) return true;
+
+    //snakes
+    for (let dx = 0; dx < size; dx++) {
+        for (let dy = 0; dy < size; dy++) {
+            if (placedSnakeParts.some(p => p.x === x + dx && p.y === y + dy)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+function shouldPlaceForestTile(area) {
+    return !(area.type === AREA_TYPES.FOREST &&
+             area.thickness > 1 &&
+             Math.random() < 0.2);
+}
+
+function isOpposite(dirA, dirB) {
+    return dirA.xChange === -dirB.xChange &&
+           dirA.yChange === -dirB.yChange;
 }
 
 function getRandom(min, max) {
