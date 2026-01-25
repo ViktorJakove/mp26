@@ -1,6 +1,6 @@
 export const CITY_GEN_DATA=[
     {
-        cityName: "Steamport",
+        name: "Steamport",
         peepsMin: 75,
         peepsMax: 200,
         sizeX: 3,
@@ -12,7 +12,19 @@ export const CITY_GEN_DATA=[
         description: "Hometown of a great mind. (you!)"
     },
     {
-        cityName: "Royal Bank",
+        name: "The Gravetary",
+        peepsMin: 1,
+        peepsMax: 1,
+        sizeX: 1,
+        sizeY: 1,
+        roughPosition: "random",
+        building: "graveyard",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "."
+    },
+    {
+        name: "Pennyville",
         peepsMin: 150,
         peepsMax: 400,
         sizeX: 4,
@@ -22,5 +34,125 @@ export const CITY_GEN_DATA=[
         defenseLevel: 5,
         cathouseLevel: 0,
         description: "Led by a successful and wealthy hustler mayor. They say his left ear tickles when he is near money."
+    },
+    {
+        name: "3",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 4,
+        sizeY: 5,
+        roughPosition: "random",
+        building: "bison",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "."
+    },
+    {
+        name: "4",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 4,
+        sizeY: 5,
+        roughPosition: "random",
+        building: "skinshop",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "."
+    },
+    {
+        name: "Snapschad",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 4,
+        sizeY: 5,
+        roughPosition: "random",
+        building: "gallery",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "."
+    },
+    {
+        name: "6",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 4,
+        sizeY: 5,
+        roughPosition: "random",
+        building: "saloon",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "."
+    },
+    {
+        name: "7",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 4,
+        sizeY: 5,
+        roughPosition: "random",
+        building: "---",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "."
+    },
+    {
+        name: "Bonegrass fields",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 4,
+        sizeY: 5,
+        roughPosition: "random",
+        building: "rails",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "."
+    },
+    {
+        name: "Positive hills",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 4,
+        sizeY: 5,
+        roughPosition: "random",
+        building: "trains",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "."
+    },
+    {
+        name: "Big Pews",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 4,
+        sizeY: 5,
+        roughPosition: "random",
+        building: "gunshop",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "."
+    },
+    {
+        name: "11",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 4,
+        sizeY: 5,
+        roughPosition: "random",
+        building: "stable",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "."
+    },
+    {
+        name: "12",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 4,
+        sizeY: 5,
+        roughPosition: "random",
+        building: "---",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "."
     }
 ]
