@@ -116,6 +116,8 @@ function drawAreas() {
     const dimensions = SCREEN_DIMENSIONS(app, camera, gridScale, cellSize);
 
     Object.values(areas).forEach((area, index) => {
+        if(area.type === AREA_TYPES.LOCK) return;
+        
         const areaGraphics = new PIXI.Graphics();
         areaGraphics.beginFill(area.type.color, 0.5);
 

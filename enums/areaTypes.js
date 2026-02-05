@@ -5,4 +5,5 @@ export const AREA_TYPES = {
     BISONS: {type: "bisons",color: 0xB8860B},
     ROCK: {type: "rock",color: 0x696969},
     FOREST: {type: "forest",color: 0x006400},
+    LOCK: {type: "lock",color: 0x000000}
 }

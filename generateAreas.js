@@ -5,6 +5,8 @@ import { AREA_GEN_DATA } from "./mapGenData/areaGenData.js";
 import { CITY_GEN_DATA } from "./mapGenData/cityGenData.js";
 import { LAKE_GEN_DATA, FOREST_GEN_DATA, MOUNTAIN_GEN_DATA, INDIAN_GEN_DATA, BISON_GEN_DATA } from "./mapGenData/natureGenData.js";
 
+const { CITY, LAKE, INDIANS, BISONS, FOREST, ROCK, LOCK } = AREA_TYPES;
+
 export const generateAreas = (level, areas) => {
     while (true) {
         const result = tryGeneration(level);
@@ -14,16 +16,17 @@ export const generateAreas = (level, areas) => {
 }
 
 function tryGeneration(level){
+
     const citiesToGenerate = CITY_GEN_DATA.slice(0, AREA_GEN_DATA.cityCount[level]);
     const lakesToGenerate = LAKE_GEN_DATA.slice(0, AREA_GEN_DATA.lakeCount[level]);
     const indiansToGenerate = INDIAN_GEN_DATA.slice(0, AREA_GEN_DATA.indianAreasCount[level]);
     const bisonsToGenerate = BISON_GEN_DATA.slice(0, AREA_GEN_DATA.bisonAreasCount[level]);
 
     const allAreas = [].concat(
-        citiesToGenerate.map(area => ({ ...area, type: AREA_TYPES.CITY, orderInDoc: citiesToGenerate.indexOf(area) })),
-        lakesToGenerate.map(area => ({ ...area, type: AREA_TYPES.LAKE })),
-        indiansToGenerate.map(area => ({ ...area, type: AREA_TYPES.INDIANS })),
-        bisonsToGenerate.map(area => ({ ...area, type: AREA_TYPES.BISONS }))
+        citiesToGenerate.map(area => ({ ...area, type: CITY, orderInDoc: citiesToGenerate.indexOf(area) })),
+        lakesToGenerate.map(area => ({ ...area, type: LAKE })),
+        indiansToGenerate.map(area => ({ ...area, type: INDIANS })),
+        bisonsToGenerate.map(area => ({ ...area, type: BISONS }))
     );
 
     //od nejvetsiho po nejmensi bez lesu a hor
@@ -49,7 +52,7 @@ function tryGeneration(level){
                 //city doc-neighbor distance check
                 const MIN_CITY_XDISTANCE = AREA_GEN_DATA.areaSize[level][0]/4;
 
-                if(area.type === AREA_TYPES.CITY && placedArea.type === AREA_TYPES.CITY){
+                if(area.type === CITY && placedArea.type === CITY){
                     const placedAreaOrderInDoc = CITY_GEN_DATA.findIndex(city => city.name === placedArea.name);
                     return Math.abs(area.orderInDoc - placedAreaOrderInDoc) === 1 && Math.min(Math.abs(x - placedArea.x),Math.abs(x + area.sizeX - placedArea.x),Math.abs(x - placedArea.x + placedArea.sizeX)) <= MIN_CITY_XDISTANCE;
                 }
@@ -63,7 +66,7 @@ function tryGeneration(level){
                     area.sizeX,
                     area.sizeY,
                     area.name,
-                    area.type === AREA_TYPES.CITY ? getRandom(area.peepsMin, area.peepsMax) : 0
+                    area.type === CITY ? getRandom(area.peepsMin, area.peepsMax) : 0
                 ));
                 placed = true;
                 break;
@@ -76,8 +79,8 @@ function tryGeneration(level){
     const forestsToGenerate = FOREST_GEN_DATA.slice(0, AREA_GEN_DATA.forestCount[level]);
     const mountainsToGenerate = MOUNTAIN_GEN_DATA.slice(0, AREA_GEN_DATA.mountainCount[level]);
     const allSnakeAreas = [].concat(
-        forestsToGenerate.map(area => ({ ...area, type: AREA_TYPES.FOREST })),
-        mountainsToGenerate.map(area => ({ ...area, type: AREA_TYPES.ROCK }))
+        forestsToGenerate.map(area => ({ ...area, type: FOREST })),
+        mountainsToGenerate.map(area => ({ ...area, type: ROCK }))
     );
 
     const sortedSnakeAreas = allSnakeAreas.sort((a, b) => (b.thickness * b.length) - (a.length * a.thickness));
@@ -100,7 +103,7 @@ function tryGeneration(level){
                 //smer (pro sutry neopakujici se - jsou min rovny)
                 let OKdirections = DIRECTIONS;
 
-                if(area.type === AREA_TYPES.ROCK && lastDir){
+                if(area.type === ROCK && lastDir){
                     OKdirections = DIRECTIONS.filter(d => !isOppositeDir(d, lastDir));
                 }
                 const dir = OKdirections[getRandom(0, OKdirections.length - 1)];
@@ -150,6 +153,8 @@ function tryGeneration(level){
         }
     }
     
+    placedSnakeAreaParts.push(new Area(LOCK,-AREA_GEN_DATA.areaSize[level][0]/2,-AREA_GEN_DATA.areaSize[level][1]/2,AREA_GEN_DATA.areaSize[level][0],AREA_GEN_DATA.areaSize[level][1],"",0));
+
     return placedAreas.concat(placedSnakeAreaParts);
 }
 
@@ -175,7 +180,7 @@ function squareCollides(x, y, size, placedAreas, placedSnakeParts) {
 }
 
 function shouldPlaceTile(area) {
-    const chance = area.type === AREA_TYPES.FOREST ? 0.2 : 0.05;
+    const chance = area.type === FOREST ? 0.2 : 0.05;
     return !(area.thickness > 1 && Math.random() < chance);
 }
 
