@@ -41,13 +41,13 @@ export const MOUNTAIN_GEN_DATA=[
         thickness: 3,
         description: "Local water source."
     },{
-        name: "ShizzPeez",
+        name: "rockhard",
         length: 3,
         thickness: 2,
         description: "Local diarrhea source."
     },{
-        name: "Clam Cove",
-        length: 3,
+        name: "hugerock",
+        length: 67,
         thickness: 2,
         description: "Exceptionally pure."
     }

@@ -17,7 +17,9 @@ export const generateAreas = (level, lastLockArea) => {
 
 function tryGeneration(level, lockArea){
 
-    const citiesToGenerate = CITY_GEN_DATA.slice(0, AREA_GEN_DATA.cityCount[level]);
+    const citiesToGenerate = level === 0 
+    ? CITY_GEN_DATA.slice(0, AREA_GEN_DATA.cityCount[level]) 
+    : CITY_GEN_DATA.slice(AREA_GEN_DATA.cityCount[level - 1], AREA_GEN_DATA.cityCount[level - 1] + AREA_GEN_DATA.cityCount[level]);
     const lakesToGenerate = LAKE_GEN_DATA.slice(0, AREA_GEN_DATA.lakeCount[level]);
     const indiansToGenerate = INDIAN_GEN_DATA.slice(0, AREA_GEN_DATA.indianAreasCount[level]);
     const bisonsToGenerate = BISON_GEN_DATA.slice(0, AREA_GEN_DATA.bisonAreasCount[level]);
