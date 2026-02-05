@@ -29,8 +29,8 @@ export const FOREST_GEN_DATA=[
         description: "Local diarrhea source."
     },{
         name: "Clam Cove",
-        length: 8,
-        thickness: 1,
+        length: 80,
+        thickness: 5,
         description: "Exceptionally pure."
     }
 ];

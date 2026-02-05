@@ -7,15 +7,15 @@ import { LAKE_GEN_DATA, FOREST_GEN_DATA, MOUNTAIN_GEN_DATA, INDIAN_GEN_DATA, BIS
 
 const { CITY, LAKE, INDIANS, BISONS, FOREST, ROCK, LOCK } = AREA_TYPES;
 
-export const generateAreas = (level, areas) => {
+export const generateAreas = (level, lastLockArea) => {
     while (true) {
-        const result = tryGeneration(level);
+        const result = tryGeneration(level, lastLockArea);
         if (result) return result;
         console.log("regenerating areas");
     }
 }
 
-function tryGeneration(level){
+function tryGeneration(level, lockArea){
 
     const citiesToGenerate = CITY_GEN_DATA.slice(0, AREA_GEN_DATA.cityCount[level]);
     const lakesToGenerate = LAKE_GEN_DATA.slice(0, AREA_GEN_DATA.lakeCount[level]);
@@ -32,6 +32,7 @@ function tryGeneration(level){
     //od nejvetsiho po nejmensi bez lesu a hor
     const sortedAreas = allAreas.sort((a, b) => (b.sizeX * b.sizeY) - (a.sizeX * a.sizeY));
     const placedAreas = [];
+    if(lockArea) placedAreas.push(lockArea);
 
     for (const area of sortedAreas) {
         let cycles = 0;

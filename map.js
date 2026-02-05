@@ -2,7 +2,8 @@ import { AREA_TYPES } from "./enums/areaTypes.js";
 import { SCREEN_DIMENSIONS } from "./screenDimensions.js";
 import { AREA_GEN_DATA } from "./mapGenData/areaGenData.js";
 import { generateAreas } from "./generateAreas.js";
-import { Area } from "./area.js";
+
+const { CITY, LAKE, INDIANS, BISONS, FOREST, ROCK, LOCK } = AREA_TYPES;
 
 //pixi setup
 const app = new PIXI.Application({
@@ -33,8 +34,10 @@ const cellSize = 50;
 const grid = new PIXI.Graphics();
 app.stage.addChild(grid);
 
-let areas = {};
-areas = generateAreas(0, areas);
+let level = 0;
+
+let areas = [];
+areas = generateAreas(level, null);
 
 function drawGrid() {
     grid.clear();
@@ -67,8 +70,8 @@ function drawForeground() {
     fgMapEdge.drawRect(0, 0, dimensions.screenWidth, dimensions.screenHeight);
     fgContainer.addChild(fgMapEdge);
 
-    const holeWidth = AREA_GEN_DATA.areaSize[0][0] * cellSize;
-    const holeHeight = AREA_GEN_DATA.areaSize[0][1] * cellSize;
+    const holeWidth = AREA_GEN_DATA.areaSize[level][0] * cellSize;
+    const holeHeight = AREA_GEN_DATA.areaSize[level][1] * cellSize;
 
     const holeStartX = -holeWidth / 2;
     const holeStartY = -holeHeight / 2;
@@ -116,8 +119,8 @@ function drawAreas() {
     const dimensions = SCREEN_DIMENSIONS(app, camera, gridScale, cellSize);
 
     Object.values(areas).forEach((area, index) => {
-        if(area.type === AREA_TYPES.LOCK) return;
-        
+        if(area.type === LOCK) return;
+
         const areaGraphics = new PIXI.Graphics();
         areaGraphics.beginFill(area.type.color, 0.5);
 
@@ -129,7 +132,7 @@ function drawAreas() {
         areaContainer.addChild(areaGraphics);
 
         if (gridScale > 0.7) return;
-        if ((area.type === AREA_TYPES.FOREST || area.type === AREA_TYPES.ROCK)) {
+        if ((area.type === FOREST || area.type === ROCK)) {
             if (Object.values(areas).findIndex(part => part.name === area.name) !== index) {
                 return;
             }
@@ -137,7 +140,7 @@ function drawAreas() {
 
         const textPosition = getAreaTextPosition(area, dimensions, Object.values(areas), screenX, screenY);
         
-        const areaText = new PIXI.Text(area.name + ((area.type === AREA_TYPES.CITY || area.type === AREA_TYPES.BISONS) ? '\n' + "population : " + area.peeps : ""),{ fontFamily: "Arial", fontSize: 14, fill: 0x000000 });
+        const areaText = new PIXI.Text(((area.type === BISONS) ? "bisons" : area.name)  + ((area.type === CITY || area.type === BISONS) ? '\n' + "population : " + area.peeps : ""),{ fontFamily: "Arial", fontSize: 14, fill: 0x000000 });
         areaText.x = textPosition.textX;
         areaText.y = textPosition.textY;
         areaText.anchor.set(0.5);
@@ -152,7 +155,7 @@ function getAreaTextPosition(area, dimensions, areas, screenX, screenY) {
     let textX = screenX + area.sizeX * cellSize / 2;
     let textY = screenY + area.sizeY * cellSize / 2;
 
-    if (area.type === AREA_TYPES.FOREST || area.type === AREA_TYPES.ROCK) {
+    if (area.type === FOREST || area.type === ROCK) {
         const snakeParts = areas.filter(part => part.name === area.name); //all parst
         const minX = Math.min(...snakeParts.map(part => part.x));
         const maxX = Math.max(...snakeParts.map(part => part.x + part.sizeX));
@@ -195,6 +198,12 @@ function drawGraphics(){
 //init draw
 drawGraphics();
 
+function addLevel(){
+    console.log("adding level");
+    level++;
+    areas.push(...generateAreas(level, areas[areas.length - 1]));
+}
+
 //mouse controls
 let isDragging = false;
 let mouseInitialPos = { x: 0, y: 0 };
@@ -231,6 +240,10 @@ const keyboardZoomSpeed = zoomSpeed/2;
 let keysDown = new Set();
 
 document.addEventListener("keydown", (event) => {
+    /*temp*/
+    if (event.code === "Space" && !keysDown.has("Space")) {
+        addLevel();
+    }
     keysDown.add(event.code);
     event.preventDefault();
 });
@@ -239,32 +252,25 @@ document.addEventListener("keyup", (event) => {
 });
 
 function keyboardMapMovement(){
-    let moved = false;
-    if(keysDown.has("ArrowUp")){
-        camera.y -= keyboardMapMoveSpeed / gridScale;
-        moved = true;
-    }
-    if(keysDown.has("ArrowDown")){
-        camera.y += keyboardMapMoveSpeed / gridScale;
-        moved = true;
-    }
-    if(keysDown.has("ArrowLeft")){
-        camera.x -= keyboardMapMoveSpeed / gridScale;
-        moved = true;
-    }
-    if(keysDown.has("ArrowRight")){
-        camera.x += keyboardMapMoveSpeed / gridScale;
-        moved = true;
-    }
-    if(keysDown.has("KeyA")){
-        mapZoom(1 - keyboardZoomSpeed,undefined);
-        moved = true;
-    }else if(keysDown.has("KeyS")){
-        mapZoom(1 + keyboardZoomSpeed,undefined);
-        moved = true;
-    }
+    const movementActions = {
+        "ArrowUp": () => camera.y -= keyboardMapMoveSpeed / gridScale,
+        "ArrowDown": () => camera.y += keyboardMapMoveSpeed / gridScale,
+        "ArrowLeft": () => camera.x -= keyboardMapMoveSpeed / gridScale,
+        "ArrowRight": () => camera.x += keyboardMapMoveSpeed / gridScale,
+        "KeyA": () => mapZoom(1 - keyboardZoomSpeed, undefined),
+        "KeyS": () => mapZoom(1 + keyboardZoomSpeed, undefined)
+    };
 
-    if(moved){
+    let moved = false;
+
+    keysDown.forEach((key) => {
+        if (movementActions[key]) {
+            movementActions[key]();
+            moved = true;
+        }
+    });
+
+    if (moved) {
         drawGraphics();
     }
 }
