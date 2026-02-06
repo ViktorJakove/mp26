@@ -83,8 +83,8 @@ function tryGeneration(level, lockArea){
         if (!placed)return null;
     };
     
-    const forestsToGenerate = FOREST_GEN_DATA.slice(0, AREA_GEN_DATA.forestCount[level]);
-    const mountainsToGenerate = MOUNTAIN_GEN_DATA.slice(0, AREA_GEN_DATA.mountainCount[level]);
+    const forestsToGenerate = getAreasToGenerate(level, FOREST_GEN_DATA, AREA_GEN_DATA.forestCount);
+    const mountainsToGenerate = getAreasToGenerate(level, MOUNTAIN_GEN_DATA, AREA_GEN_DATA.mountainCount);
     const allSnakeAreas = [].concat(
         forestsToGenerate.map(area => ({ ...area, type: FOREST })),
         mountainsToGenerate.map(area => ({ ...area, type: ROCK }))
