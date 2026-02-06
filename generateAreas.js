@@ -15,14 +15,18 @@ export const generateAreas = (level, lastLockArea) => {
     }
 }
 
+function getAreasToGenerate(level, genData, typeCount){
+    return level === 0 
+    ? genData.slice(0, typeCount[level]) 
+    : genData.slice(typeCount[level - 1], typeCount[level - 1] + typeCount[level]);
+}
+
 function tryGeneration(level, lockArea){
 
-    const citiesToGenerate = level === 0 
-    ? CITY_GEN_DATA.slice(0, AREA_GEN_DATA.cityCount[level]) 
-    : CITY_GEN_DATA.slice(AREA_GEN_DATA.cityCount[level - 1], AREA_GEN_DATA.cityCount[level - 1] + AREA_GEN_DATA.cityCount[level]);
-    const lakesToGenerate = LAKE_GEN_DATA.slice(0, AREA_GEN_DATA.lakeCount[level]);
-    const indiansToGenerate = INDIAN_GEN_DATA.slice(0, AREA_GEN_DATA.indianAreasCount[level]);
-    const bisonsToGenerate = BISON_GEN_DATA.slice(0, AREA_GEN_DATA.bisonAreasCount[level]);
+    const citiesToGenerate = getAreasToGenerate(level, CITY_GEN_DATA, AREA_GEN_DATA.cityCount);
+    const lakesToGenerate = getAreasToGenerate(level, LAKE_GEN_DATA, AREA_GEN_DATA.lakeCount);
+    const indiansToGenerate = getAreasToGenerate(level, INDIAN_GEN_DATA, AREA_GEN_DATA.indianAreasCount);
+    const bisonsToGenerate = getAreasToGenerate(level, BISON_GEN_DATA, AREA_GEN_DATA.bisonAreasCount);
 
     const allAreas = [].concat(
         citiesToGenerate.map(area => ({ ...area, type: CITY, orderInDoc: citiesToGenerate.indexOf(area) })),

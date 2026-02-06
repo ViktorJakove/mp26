@@ -5,14 +5,14 @@ export const LAKE_GEN_DATA=[
         sizeY: 3,
         description: "Local water source."
     },{
-        name: "ShizzPeez",
-        sizeX: 3,
-        sizeY: 2,
+        name: "MudButt",
+        sizeX: 8,
+        sizeY: 12,
         description: "Local diarrhea source."
     },{
         name: "Clam Cove",
-        sizeX: 3,
-        sizeY: 2,
+        sizeX: 7,
+        sizeY: 4,
         description: "Exceptionally pure."
     }
 ];
@@ -23,12 +23,12 @@ export const FOREST_GEN_DATA=[
         thickness: 2,
         description: "pp poopoo."
     },{
-        name: "ShizzPeez",
+        name: "Shady Oaks",
         length: 8,
         thickness: 1,
         description: "Local diarrhea source."
     },{
-        name: "Clam Cove",
+        name: "The Woods",
         length: 80,
         thickness: 5,
         description: "Exceptionally pure."

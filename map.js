@@ -2,6 +2,7 @@ import { AREA_TYPES } from "./enums/areaTypes.js";
 import { SCREEN_DIMENSIONS } from "./screenDimensions.js";
 import { AREA_GEN_DATA } from "./mapGenData/areaGenData.js";
 import { generateAreas } from "./generateAreas.js";
+import { keyboardControls } from "./mapMovement.js";
 
 const { CITY, LAKE, INDIANS, BISONS, FOREST, ROCK, LOCK } = AREA_TYPES;
 
@@ -234,47 +235,6 @@ app.view.addEventListener("wheel", (event) => {
     mapZoom(zoomFactor, event);
 });
 
-//keyboard controls
-const keyboardMapMoveSpeed = 22;
-const keyboardZoomSpeed = zoomSpeed/2;
-let keysDown = new Set();
-
-document.addEventListener("keydown", (event) => {
-    /*temp*/
-    if (event.code === "Space" && !keysDown.has("Space")) {
-        addLevel();
-    }
-    keysDown.add(event.code);
-    event.preventDefault();
-});
-document.addEventListener("keyup", (event) => {
-    keysDown.delete(event.code);
-});
-
-function keyboardMapMovement(){
-    const movementActions = {
-        "ArrowUp": () => camera.y -= keyboardMapMoveSpeed / gridScale,
-        "ArrowDown": () => camera.y += keyboardMapMoveSpeed / gridScale,
-        "ArrowLeft": () => camera.x -= keyboardMapMoveSpeed / gridScale,
-        "ArrowRight": () => camera.x += keyboardMapMoveSpeed / gridScale,
-        "KeyA": () => mapZoom(1 - keyboardZoomSpeed, undefined),
-        "KeyS": () => mapZoom(1 + keyboardZoomSpeed, undefined)
-    };
-
-    let moved = false;
-
-    keysDown.forEach((key) => {
-        if (movementActions[key]) {
-            movementActions[key]();
-            moved = true;
-        }
-    });
-
-    if (moved) {
-        drawGraphics();
-    }
-}
-
 function mapZoom(zoomFactor, event){
     console.log("zooming");
     const newScale = Math.min(maxScale, Math.max(minScale, gridScale * zoomFactor));
@@ -294,6 +254,10 @@ function mapZoom(zoomFactor, event){
 
     drawGraphics();
 }
+
+// init funkci!!!
+const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics);
+
 app.ticker.add(() => {
     keyboardMapMovement();
 });
