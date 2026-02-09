@@ -256,7 +256,7 @@ function mapZoom(zoomFactor, event){
 }
 
 // init funkci!!!
-const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics);
+const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel);
 
 app.ticker.add(() => {
     keyboardMapMovement();
