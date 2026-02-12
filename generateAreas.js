@@ -22,18 +22,24 @@ function getAreasToGenerate(level, genData, typeCount){
 }
 
 function tryGeneration(level, lockArea){
+    //cache areaSize (efektivnost)
+    const areaWidth = AREA_GEN_DATA.areaSize[level][0];
+    const areaHeight = AREA_GEN_DATA.areaSize[level][1];
 
     const citiesToGenerate = getAreasToGenerate(level, CITY_GEN_DATA, AREA_GEN_DATA.cityCount);
     const lakesToGenerate = getAreasToGenerate(level, LAKE_GEN_DATA, AREA_GEN_DATA.lakeCount);
     const indiansToGenerate = getAreasToGenerate(level, INDIAN_GEN_DATA, AREA_GEN_DATA.indianAreasCount);
     const bisonsToGenerate = getAreasToGenerate(level, BISON_GEN_DATA, AREA_GEN_DATA.bisonAreasCount);
 
+    //mapa oblastí (efektivnost)
     const allAreas = [].concat(
-        citiesToGenerate.map(area => ({ ...area, type: CITY, orderInDoc: citiesToGenerate.indexOf(area) })),
+        citiesToGenerate.map((area, idx) => ({ ...area, type: CITY, orderInDoc: idx })),
         lakesToGenerate.map(area => ({ ...area, type: LAKE })),
         indiansToGenerate.map(area => ({ ...area, type: INDIANS })),
         bisonsToGenerate.map(area => ({ ...area, type: BISONS }))
     );
+
+    const cityOrderMap = new Map(citiesToGenerate.map((c, i) => [c.name, i]));
 
     //od nejvetsiho po nejmensi bez lesu a hor
     const sortedAreas = allAreas.sort((a, b) => (b.sizeX * b.sizeY) - (a.sizeX * a.sizeY));
@@ -47,9 +53,8 @@ function tryGeneration(level, lockArea){
 
         while(cycles < maxCycles){
             cycles++;
-
-            const x = getRandom(-AREA_GEN_DATA.areaSize[level][0] / 2 + 1, AREA_GEN_DATA.areaSize[level][0] / 2 - 1 - area.sizeX);
-            const y = getRandom(-AREA_GEN_DATA.areaSize[level][1] / 2 + 1, AREA_GEN_DATA.areaSize[level][1] / 2 - 1 - area.sizeY);
+            const x = getRandom(-areaWidth / 2 + 1, areaWidth / 2 - 1 - area.sizeX);
+            const y = getRandom(-areaHeight / 2 + 1, areaHeight / 2 - 1 - area.sizeY);
             const collision = placedAreas.some((placedArea) =>{
                 
                 //overlap check
@@ -57,10 +62,10 @@ function tryGeneration(level, lockArea){
                 (y + area.sizeY-1 <= placedArea.y || y >= placedArea.y + placedArea.sizeY-1))) return true;
                 
                 //city doc-neighbor distance check
-                const MIN_CITY_XDISTANCE = AREA_GEN_DATA.areaSize[level][0]/4;
+                const MIN_CITY_XDISTANCE = areaWidth/4;
 
                 if(area.type === CITY && placedArea.type === CITY){
-                    const placedAreaOrderInDoc = CITY_GEN_DATA.findIndex(city => city.name === placedArea.name);
+                    const placedAreaOrderInDoc = cityOrderMap.get(placedArea.name) ?? -1;
                     return Math.abs(area.orderInDoc - placedAreaOrderInDoc) === 1 && Math.min(Math.abs(x - placedArea.x),Math.abs(x + area.sizeX - placedArea.x),Math.abs(x - placedArea.x + placedArea.sizeX)) <= MIN_CITY_XDISTANCE;
                 }
             });
@@ -92,14 +97,16 @@ function tryGeneration(level, lockArea){
 
     const sortedSnakeAreas = allSnakeAreas.sort((a, b) => (b.thickness * b.length) - (a.length * a.thickness));
     const placedSnakeAreaParts = [];
+    //set (efektivnost kontroly x,y)
+    const occupiedSnakeSet = new Set();
 
     for (const area of sortedSnakeAreas) {
-        let x = getRandom(-AREA_GEN_DATA.areaSize[level][0] / 2 + 1,AREA_GEN_DATA.areaSize[level][0] / 2 - 1);
-        let y = getRandom(-AREA_GEN_DATA.areaSize[level][1] / 2 + 1,AREA_GEN_DATA.areaSize[level][1] / 2 - 1);
+        let x = getRandom(-areaWidth / 2 + 1, areaWidth / 2 - 1);
+        let y = getRandom(-areaHeight / 2 + 1, areaHeight / 2 - 1);
 
         let lastDir = null;
     
-        for (let i = 0; i < area.length; i++) {
+    for (let i = 0; i < area.length; i++) {
             let placed = false;
             let cycles = 0;
             const maxCycles = area.length * area.thickness * 3;
@@ -114,22 +121,24 @@ function tryGeneration(level, lockArea){
                     OKdirections = DIRECTIONS.filter(d => !isOppositeDir(d, lastDir));
                 }
                 const dir = OKdirections[getRandom(0, OKdirections.length - 1)];
+                lastDir = dir;
+
                 const newX = x + dir.xChange * area.thickness;
                 const newY = y + dir.yChange * area.thickness;
 
                 const withinBounds = (
-                    newX >= -AREA_GEN_DATA.areaSize[level][0] / 2 &&
-                    newX + area.thickness <= AREA_GEN_DATA.areaSize[level][0] / 2 &&
-                    newY >= -AREA_GEN_DATA.areaSize[level][1] / 2 &&
-                    newY + area.thickness <= AREA_GEN_DATA.areaSize[level][1] / 2
+                    newX >= -areaWidth / 2 &&
+                    newX + area.thickness <= areaWidth / 2 &&
+                    newY >= -areaHeight / 2 &&
+                    newY + area.thickness <= areaHeight / 2
                 );
-    
+
                 const collision = squareCollides(
                     newX,
                     newY,
                     area.thickness,
                     placedAreas,
-                    placedSnakeAreaParts
+                    occupiedSnakeSet
                 );
     
                 if (withinBounds && !collision) {
@@ -137,17 +146,20 @@ function tryGeneration(level, lockArea){
                         for (let dy = 0; dy < area.thickness; dy++) {
 
                             if (!shouldPlaceTile(area)) continue;
+                            const tileX = newX + dx;
+                            const tileY = newY + dy;
                             placedSnakeAreaParts.push(
                                 new Area(
                                     area.type,
-                                    newX + dx,
-                                    newY + dy,
+                                    tileX,
+                                    tileY,
                                     1,
                                     1,
                                     area.name,
                                     0
                                 )
                             );
+                            occupiedSnakeSet.add(`${tileX},${tileY}`);
                         }
                     }
                     x = newX;
@@ -175,10 +187,18 @@ function squareCollides(x, y, size, placedAreas, placedSnakeParts) {
     )) return true;
     
     //snakes
-    for (let dx = 0; dx < size; dx++) {
-        for (let dy = 0; dy < size; dy++) {
-            if (placedSnakeParts.some(p => p.x === x + dx && p.y === y + dy)) {
-                return true;
+    if (Array.isArray(placedSnakeParts)) {
+        for (let dx = 0; dx < size; dx++) {
+            for (let dy = 0; dy < size; dy++) {
+                if (placedSnakeParts.some(p => p.x === x + dx && p.y === y + dy)) {
+                    return true;
+                }
+            }
+        }
+    } else if (placedSnakeParts instanceof Set) {
+        for (let dx = 0; dx < size; dx++) {
+            for (let dy = 0; dy < size; dy++) {
+                if (placedSnakeParts.has(`${x + dx},${y + dy}`)) return true;
             }
         }
     }
@@ -187,7 +207,7 @@ function squareCollides(x, y, size, placedAreas, placedSnakeParts) {
 }
 
 function shouldPlaceTile(area) {
-    const chance = area.type === FOREST ? 0.2 : 0.05;
+    const chance = area.type === FOREST ? 0.15 : 0.05;
     return !(area.thickness > 1 && Math.random() < chance);
 }
 
