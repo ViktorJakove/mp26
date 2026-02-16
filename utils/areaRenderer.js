@@ -83,7 +83,7 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
         const gridScale = getGridScale();
         const dimensions = SCREEN_DIMENSIONS(app, camera, gridScale, cellSize);
         
-        //musim?
+        //musim renderovat tyto?
         const cameraChanged = camera.x !== lastCameraPos.x || camera.y !== lastCameraPos.y;
         const scaleChanged = gridScale !== lastGridScale;
         

@@ -1,4 +1,4 @@
-import { AREA_TYPES } from "./enums/areaTypes.js";
+import { AREA_TYPES } from "../enums/areaTypes.js";
 export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGraphics, areas) {
     let highlightedTile = null;
 

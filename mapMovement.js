@@ -2,6 +2,7 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
     const keyboardMapMoveSpeed = 28;
     const keyboardZoomSpeed = zoomSpeed / 2;
     const keysDown = new Set();
+    let spacePressed = false;
 
     const movementActions = {
         "ArrowUp": () => camera.y -= keyboardMapMoveSpeed / gridScale,
@@ -29,20 +30,31 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
 
     document.addEventListener("keydown", (event) => {
         try {
-            if (event.code === "Space") { //Space toggljuje pokladaci mod
-                placementModeObj.placementMode = !placementModeObj.placementMode;
-                console.log("Placement mode:", placementModeObj.placementMode ? "ON" : "OFF");
-                event.preventDefault();
-                return;
+            switch (event.code) {
+                case "Space":
+                    if (!spacePressed) {
+                        spacePressed = true;
+                        placementModeObj.placementMode = !placementModeObj.placementMode;
+                        console.log("Placement mode:", placementModeObj.placementMode ? "ON" : "OFF");
+                    }
+                    event.preventDefault();
+                    return;
+                case "ShiftLeft":
+                case "ShiftRight":
+                case "Shift":
+                    if (!keysDown.has(event.code)) {
+                        console.log("Shift pressed");
+                        keysDown.add(event.code);
+                    }
+                    event.preventDefault();
+                    return;
+                case "KeyP":
+                    // temp
+                    if (!keysDown.has("KeyP")) addLevel();
+                    event.preventDefault();
+                    return;
             }
-            // temp
-            if (event.code === "KeyP") {
-                if (!keysDown.has("KeyP")) addLevel();
-                keysDown.add("KeyP");
-                event.preventDefault();
-                return;
-            }
-
+            
             keysDown.add(event.code);
             event.preventDefault();
         } catch (error) {
@@ -51,11 +63,18 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
     });
 
     document.addEventListener("keyup", (event) => {
-        try {
-            keysDown.delete(event.code);
-        } catch (error) {
-            console.error("Error in keyup listener:", error);
+        switch (event.code) {
+            case "Space":
+                spacePressed = false;
+                break;
+            case "ShiftLeft":
+            case "ShiftRight":
+            case "Shift":
+                console.log("Shift released");
+                break;
         }
+        keysDown.delete(event.code);
+        event.preventDefault();
     });
 
     return keyboardMapMovement;

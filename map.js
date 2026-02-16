@@ -4,7 +4,7 @@ import { AREA_GEN_DATA } from "./mapGenData/areaGenData.js";
 import { generateAreas } from "./generateAreas.js";
 import { keyboardControls } from "./mapMovement.js";
 import { PLAYER_BLOCKS } from "./enums/playerBlocks.js";
-import { setupTileHighlight } from "./highlightTile.js";
+import { setupTileHighlight } from "./utils/highlightTile.js";
 import { createAreaRenderer } from "./utils/areaRenderer.js";
 
 //pixi setup
@@ -185,8 +185,10 @@ app.stage.on('pointermove', (event) => {
     }
 });
 
+//blokace okynka
 app.view.addEventListener("contextmenu", (event) => {
-    event.preventDefault();
+    //TEMP FIX DEBUG SMAZONA
+    //event.preventDefault();
 });
 
 //zoom
