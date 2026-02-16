@@ -63,9 +63,6 @@ function drawGrid() {
         grid.moveTo(0, screenY);
         grid.lineTo(dimensions.screenWidth, screenY);
     }
-    grid.beginFill(0x000000, 1);
-    grid.drawRect(0 * cellSize - dimensions.worldLeft, 0* cellSize - dimensions.worldTop, cellSize *2, cellSize);
-    grid.endFill();
     //highlight
     if (!placementMode) return;
     const highlightedTile = getHighlightedTile();

@@ -14,7 +14,7 @@ export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGrap
         const tileX = Math.floor(worldMouseX / cellSize);
         const tileY = Math.floor(worldMouseY / cellSize);
 
-        // Adjust the isOccupied logic
+        //zdali je obsazena dlazd
         const isOccupied = areas.some(placedArea =>
             tileX >= placedArea.x &&
             tileX < placedArea.x + placedArea.sizeX &&
