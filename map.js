@@ -2,7 +2,7 @@ import { AREA_TYPES } from "./enums/areaTypes.js";
 import { SCREEN_DIMENSIONS } from "./screenDimensions.js";
 import { AREA_GEN_DATA } from "./mapGenData/areaGenData.js";
 import { generateAreas } from "./generateAreas.js";
-import { keyboardControls } from "./mapMovement.js";
+import { keyboardControls } from "./utils/keyboardHandler.js";
 import { PLAYER_BLOCKS } from "./enums/playerBlocks.js";
 import { setupTileHighlight } from "./utils/highlightTile.js";
 import { createAreaRenderer } from "./utils/areaRenderer.js";
