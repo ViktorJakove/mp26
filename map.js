@@ -3,8 +3,11 @@ import { SCREEN_DIMENSIONS } from "./screenDimensions.js";
 import { AREA_GEN_DATA } from "./mapGenData/areaGenData.js";
 import { generateAreas } from "./generateAreas.js";
 import { keyboardControls } from "./mapMovement.js";
+import { PLAYER_BLOCKS } from "./enums/playerBlocks.js";
+import { setupTileHighlight } from "./highlightTile.js";
 
 const { CITY, LAKE, INDIANS, BISONS, FOREST, ROCK, LOCK } = AREA_TYPES;
+const {RAIL, FAST_RAIL, WAYPOINT} = PLAYER_BLOCKS;
 
 //pixi setup
 const app = new PIXI.Application({
@@ -36,16 +39,19 @@ const grid = new PIXI.Graphics();
 app.stage.addChild(grid);
 
 let level = 0;
+let placementMode = false;
 
 let areas = [];
 areas = generateAreas(level, null);
+
+const { getHighlightedTile } = setupTileHighlight(app, camera, () => gridScale, cellSize, drawGraphics, areas);
 
 function drawGrid() {
     grid.clear();
     const dimensions = SCREEN_DIMENSIONS(app, camera, gridScale, cellSize);
 
-    // Draw grid lines
-    grid.lineStyle(1, 0x999999); // Slightly darker grey for grid lines
+    //grid lines
+    grid.lineStyle(1, 0x999999);
     for (let worldX = dimensions.startX; worldX <= dimensions.worldRight + cellSize; worldX += cellSize) {
         const screenX = worldX - dimensions.worldLeft;
         grid.moveTo(screenX, 0);
@@ -57,6 +63,21 @@ function drawGrid() {
         grid.moveTo(0, screenY);
         grid.lineTo(dimensions.screenWidth, screenY);
     }
+    grid.beginFill(0x000000, 1);
+    grid.drawRect(0 * cellSize - dimensions.worldLeft, 0* cellSize - dimensions.worldTop, cellSize *2, cellSize);
+    grid.endFill();
+    //highlight
+    if (!placementMode) return;
+    const highlightedTile = getHighlightedTile();
+    if (highlightedTile) {
+        const screenX = highlightedTile.x * cellSize - dimensions.worldLeft;
+        const screenY = highlightedTile.y * cellSize - dimensions.worldTop;
+
+        grid.beginFill(0xffcc00, 0.5);
+        grid.drawRect(screenX, screenY, cellSize, cellSize);
+        grid.endFill();
+    }
+    
 }
 
 const fgContainer = new PIXI.Container();
@@ -256,7 +277,7 @@ function mapZoom(zoomFactor, event){
 }
 
 // init funkci!!!
-const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel);
+const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } });
 
 app.ticker.add(() => {
     keyboardMapMovement();

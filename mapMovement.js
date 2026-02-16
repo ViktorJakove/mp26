@@ -1,4 +1,4 @@
-export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel) {
+export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, placementModeObj) {
     const keyboardMapMoveSpeed = 28;
     const keyboardZoomSpeed = zoomSpeed / 2;
     const keysDown = new Set();
@@ -28,10 +28,16 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
     }
 
     document.addEventListener("keydown", (event) => {
-        // Handle Space once on initial press (no repeats while held)
-        if (event.code === "Space") {
-            if (!keysDown.has("Space")) addLevel();
-            keysDown.add("Space");
+        if (event.code === "Space") { //Space toggljuje pokladaci mod
+            placementModeObj.placementMode = !placementModeObj.placementMode;
+            console.log("Placement mode:", placementModeObj.placementMode ? "ON" : "OFF");
+            event.preventDefault();
+            return;
+        }
+        // temp
+        if (event.code === "KeyP") {
+            if (!keysDown.has("KeyP")) addLevel();
+            keysDown.add("KeyP");
             event.preventDefault();
             return;
         }

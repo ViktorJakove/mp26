@@ -57,6 +57,7 @@ function tryGeneration(level, lockArea){
             const y = getRandom(-areaHeight / 2 + 1, areaHeight / 2 - 1 - area.sizeY);
             const collision = placedAreas.some((placedArea) =>{
                 
+                //mesta maji mezi sebou 2 pole, ostatni 1 pole
                 const gap = area.type === CITY && placedArea.type === CITY ? 2 : 1;
                 //overlap check
                 if(!((x + area.sizeX+gap <= placedArea.x || x >= placedArea.x + placedArea.sizeX+gap) &&
