@@ -48,6 +48,8 @@ const { getHighlightedTile } = setupTileHighlight(app, camera, () => gridScale, 
 
 function drawGrid() {
     grid.clear();
+    if (!placementMode) return;
+
     const dimensions = SCREEN_DIMENSIONS(app, camera, gridScale, cellSize);
 
     //grid lines
@@ -64,7 +66,10 @@ function drawGrid() {
         grid.lineTo(dimensions.screenWidth, screenY);
     }
     //highlight
-    if (!placementMode) return;
+    drawHighlight(dimensions);
+    
+}
+function drawHighlight(dimensions){
     const highlightedTile = getHighlightedTile();
     if (highlightedTile) {
         const screenX = highlightedTile.x * cellSize - dimensions.worldLeft;
@@ -75,7 +80,6 @@ function drawGrid() {
         grid.drawRect(screenX, screenY, cellSize, cellSize);
         grid.endFill();
     }
-    
 }
 
 const fgContainer = new PIXI.Container();
