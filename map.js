@@ -21,6 +21,8 @@ document.documentElement.style.margin = "0";
 document.documentElement.style.overflow = "hidden";
 
 app.stage.sortableChildren = true;
+app.stage.interactive = true;
+app.stage.hitArea = app.screen;
 
 //camera
 const camera = { x: 0, y: 0 };
@@ -150,25 +152,43 @@ function addLevel(){
 let isDragging = false;
 let mouseInitialPos = { x: 0, y: 0 };
 
-app.view.addEventListener("mousedown", (event) => {
-    isDragging = true;
-    mouseInitialPos = { x: event.clientX, y: event.clientY };
+app.stage.on('pointerdown', (event) => {
+    const button = event.data.button;
+    if (placementMode ? (button === 2) : (button === 0 || button === 2)) {
+        isDragging = true;
+        mouseInitialPos = { x: event.data.global.x, y: event.data.global.y };
+    }
 });
-app.view.addEventListener("mouseup", () => { isDragging = false; });
-app.view.addEventListener("mouseout", () => { isDragging = false; });
-app.view.addEventListener("mousemove", (event) => {
+
+app.stage.on('pointerup', (event) => {
+    const button = event.data.button;
+    if (placementMode ? (button === 2) : (button === 0 || button === 2)) {
+        isDragging = false;
+    }
+});
+
+app.stage.on('pointerupoutside', () => {
+    isDragging = false;
+});
+
+app.stage.on('pointermove', (event) => {
     if (isDragging) {
-        const dx = (event.clientX - mouseInitialPos.x) / gridScale;
-        const dy = (event.clientY - mouseInitialPos.y) / gridScale;
+        const dx = (event.data.global.x - mouseInitialPos.x) / gridScale;
+        const dy = (event.data.global.y - mouseInitialPos.y) / gridScale;
 
         camera.x -= dx;
         camera.y -= dy;
 
-        mouseInitialPos = { x: event.clientX, y: event.clientY };
+        mouseInitialPos = { x: event.data.global.x, y: event.data.global.y };
 
         drawGraphics();
     }
 });
+
+app.view.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+});
+
 //zoom
 app.view.addEventListener("wheel", (event) => {
     event.preventDefault();
