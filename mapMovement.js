@@ -28,26 +28,34 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
     }
 
     document.addEventListener("keydown", (event) => {
-        if (event.code === "Space") { //Space toggljuje pokladaci mod
-            placementModeObj.placementMode = !placementModeObj.placementMode;
-            console.log("Placement mode:", placementModeObj.placementMode ? "ON" : "OFF");
-            event.preventDefault();
-            return;
-        }
-        // temp
-        if (event.code === "KeyP") {
-            if (!keysDown.has("KeyP")) addLevel();
-            keysDown.add("KeyP");
-            event.preventDefault();
-            return;
-        }
+        try {
+            if (event.code === "Space") { //Space toggljuje pokladaci mod
+                placementModeObj.placementMode = !placementModeObj.placementMode;
+                console.log("Placement mode:", placementModeObj.placementMode ? "ON" : "OFF");
+                event.preventDefault();
+                return;
+            }
+            // temp
+            if (event.code === "KeyP") {
+                if (!keysDown.has("KeyP")) addLevel();
+                keysDown.add("KeyP");
+                event.preventDefault();
+                return;
+            }
 
-        keysDown.add(event.code);
-        event.preventDefault();
+            keysDown.add(event.code);
+            event.preventDefault();
+        } catch (error) {
+            console.error("Error in keydown listener:", error);
+        }
     });
 
     document.addEventListener("keyup", (event) => {
-        keysDown.delete(event.code);
+        try {
+            keysDown.delete(event.code);
+        } catch (error) {
+            console.error("Error in keyup listener:", error);
+        }
     });
 
     return keyboardMapMovement;

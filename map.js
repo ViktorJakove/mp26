@@ -70,7 +70,8 @@ function drawGrid() {
         const screenX = highlightedTile.x * cellSize - dimensions.worldLeft;
         const screenY = highlightedTile.y * cellSize - dimensions.worldTop;
 
-        grid.beginFill(0xffcc00, 0.5);
+        let tileColor = highlightedTile.obstacle ? highlightedTile.buildOverColor : 0xffcc00;
+        grid.beginFill(tileColor,0.5);
         grid.drawRect(screenX, screenY, cellSize, cellSize);
         grid.endFill();
     }
