@@ -19,9 +19,17 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
     let lastCameraPos = { x: 0, y: 0 };
     let lastGridScale = 1;
     let areaDirty = true;
+    let shiftPressed = false;
 
     function getPooledGraphics() {
         return graphicsPool.pop() || new PIXI.Graphics();
+    }
+
+    function setShiftPressed(value) {
+        if (shiftPressed !== value) {
+            shiftPressed = value;
+            areaDirty = true;
+        }
     }
 
     function returnGraphics(graphics) {
@@ -131,10 +139,11 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
         });
         
         //upravit na ikonku (text kdyz shift) TEMPPP
-        if (gridScale > 0.7) {
+        if (!shiftPressed) {
             lastCameraPos = { x: camera.x, y: camera.y };
             lastGridScale = gridScale;
             areaDirty = false;
+            drawAreas();
             return;
         }
         
@@ -194,6 +203,7 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
 
     return {
         drawAreas,
-        markDirty
+        markDirty,
+        setShiftPressed
     };
 }
