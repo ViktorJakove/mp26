@@ -1,9 +1,7 @@
-import { AREA_TYPES } from "./enums/areaTypes.js";
 import { SCREEN_DIMENSIONS } from "./screenDimensions.js";
 import { AREA_GEN_DATA } from "./mapGenData/areaGenData.js";
 import { generateAreas } from "./generateAreas.js";
 import { keyboardControls } from "./utils/keyboardHandler.js";
-import { PLAYER_BLOCKS } from "./enums/playerBlocks.js";
 import { setupTileHighlight } from "./utils/highlightTile.js";
 import { createAreaRenderer } from "./utils/areaRenderer.js";
 
@@ -198,6 +196,18 @@ app.view.addEventListener("wheel", (event) => {
     mapZoom(zoomFactor, event);
 });
 
+function updateStageHitArea() {
+    app.stage.hitArea = new PIXI.Rectangle(
+        0,
+        0,
+        app.screen.width / gridScale,
+        app.screen.height / gridScale
+    );
+}
+
+// init
+updateStageHitArea();
+
 function mapZoom(zoomFactor, event){
     console.log("zooming");
     const newScale = Math.min(maxScale, Math.max(minScale, gridScale * zoomFactor));
@@ -214,10 +224,14 @@ function mapZoom(zoomFactor, event){
 
     gridScale = newScale;
     app.stage.scale.set(gridScale, gridScale, cellSize);
+    updateStageHitArea();
     areaRenderer.markDirty();
 
     drawGraphics();
 }
+window.addEventListener("resize", () => {
+    updateStageHitArea();
+});
 
 // init funkci!!!
 const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } });
