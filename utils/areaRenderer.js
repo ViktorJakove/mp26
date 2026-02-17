@@ -143,7 +143,6 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             lastCameraPos = { x: camera.x, y: camera.y };
             lastGridScale = gridScale;
             areaDirty = false;
-            drawAreas();
             return;
         }
         
