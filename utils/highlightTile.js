@@ -32,7 +32,7 @@ export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGrap
             });
 
             //rovnout passnout text 
-            let obstacleInfo = obstacle ? (obstacle.buildOverCost ? obstacle.buildOverCost + "$" : obstacle.buildOverInfo) : "";
+            let obstacleInfo = obstacle ? (obstacle.buildOverCost ? "+"+obstacle.buildOverCost + "$" : obstacle.buildOverInfo) : "";
             updatePointerTextRenderer(obstacleInfo,event.clientX,event.clientY, getGridScale);
 
             if (!isOccupied) {

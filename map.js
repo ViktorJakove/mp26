@@ -241,8 +241,12 @@ window.addEventListener("resize", () => {
     updateStageHitArea();
 });
 
+function resetDrag(){
+    isDragging = false;
+}
+
 // init funkci!!!
-const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } }, areaRenderer, pointerTextRenderer);
+const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } }, areaRenderer, pointerTextRenderer, resetDrag);
 
 app.ticker.add(() => {
     keyboardMapMovement();
