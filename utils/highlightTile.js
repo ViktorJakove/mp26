@@ -31,7 +31,9 @@ export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGrap
                 } else return within;
             });
 
-            updatePointerTextRenderer(obstacle,event.clientX,event.clientY, getGridScale);
+            //rovnout passnout
+            let obstacleInfo = obstacle ? (obstacle.buildOverCost ? obstacle.buildOverCost + "$" : obstacle.buildOverInfo) : "";
+            updatePointerTextRenderer(obstacleInfo,event.clientX,event.clientY, getGridScale);
 
             if (!isOccupied) {
                 highlightedTile = { x: tileX, y: tileY, obstacle: obstacle};

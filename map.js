@@ -80,7 +80,7 @@ function drawHighlight(dimensions){
         const screenX = highlightedTile.x * cellSize - dimensions.worldLeft;
         const screenY = highlightedTile.y * cellSize - dimensions.worldTop;
 
-        let tileColor = highlightedTile.obstacle ? highlightedTile.buildOverColor : 0xffcc00;
+        let tileColor = highlightedTile.obstacle ? highlightedTile.obstacle.buildOverColor : 0xffcc00;
         grid.beginFill(tileColor,0.5);
         grid.drawRect(screenX, screenY, cellSize, cellSize);
         grid.endFill();

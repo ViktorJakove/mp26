@@ -63,19 +63,23 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
     });
 
     document.addEventListener("keyup", (event) => {
-        switch (event.code) {
-            case "Space":
-                spacePressed = false;
-                break;
-            case "ShiftLeft":
-            case "ShiftRight":
-            case "Shift":
-                areaRenderer.setShiftPressed(false);
-                drawGraphics();
-                break;
+        try{
+            switch (event.code) {
+                case "Space":
+                    spacePressed = false;
+                    break;
+                case "ShiftLeft":
+                case "ShiftRight":
+                case "Shift":
+                    areaRenderer.setShiftPressed(false);
+                    drawGraphics();
+                    break;
+            }
+            keysDown.delete(event.code);
+            event.preventDefault();
+        }catch (error) {
+            console.error("Error in keyup listener:", error);
         }
-        keysDown.delete(event.code);
-        event.preventDefault();
     });
 
     return keyboardMapMovement;

@@ -60,15 +60,15 @@ export function createPointerTextRenderer(app){
     };
 
 }
-export function updatePointerTextRenderer(obstacleName, screenMouseX, screenMouseY, getGridScale) {
+export function updatePointerTextRenderer(obstacleInfo, screenMouseX, screenMouseY, getGridScale) {
     if (window.pointerTextRenderer) {
-        const text = obstacleName ? `Obstacle: ${obstacleName}` : "";
+        const text = obstacleInfo ? obstacleInfo: "";
         const gridScale = getGridScale();
         let textX = screenMouseX /gridScale
         let textY = screenMouseY /gridScale;
 
         window.pointerTextRenderer.updatePointerText(text, textX , textY, gridScale);
-        window.pointerTextRenderer.updateMousePosition(screenMouseX, screenMouseY, obstacleName);
+        window.pointerTextRenderer.updateMousePosition(screenMouseX, screenMouseY, obstacleInfo);
 
 
     }
