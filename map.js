@@ -4,6 +4,7 @@ import { generateAreas } from "./generateAreas.js";
 import { keyboardControls } from "./utils/keyboardHandler.js";
 import { setupTileHighlight } from "./utils/highlightTile.js";
 import { createAreaRenderer } from "./utils/areaRenderer.js";
+import { createPointerTextRenderer } from "./utils/pointerTextRenderer.js";
 
 //pixi setup
 const app = new PIXI.Application({
@@ -35,6 +36,9 @@ const maxScale = 2.5;
 const cellSize = 50;
 const grid = new PIXI.Graphics();
 app.stage.addChild(grid);
+
+const pointerTextRenderer = createPointerTextRenderer(app);
+window.pointerTextRenderer = pointerTextRenderer;
 
 let level = 0;
 let placementMode = false;
@@ -226,6 +230,8 @@ function mapZoom(zoomFactor, event){
     app.stage.scale.set(gridScale, gridScale, cellSize);
     updateStageHitArea();
     areaRenderer.markDirty();
+
+    pointerTextRenderer.refresh(() => gridScale);
 
     drawGraphics();
 }

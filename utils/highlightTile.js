@@ -1,4 +1,5 @@
 import { AREA_TYPES } from "../enums/areaTypes.js";
+import {updatePointerTextRenderer} from "./pointerTextRenderer.js";
 export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGraphics, areas) {
     let highlightedTile = null;
 
@@ -29,6 +30,8 @@ export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGrap
                     return false;
                 } else return within;
             });
+
+            updatePointerTextRenderer(obstacle,event.clientX,event.clientY, getGridScale);
 
             if (!isOccupied) {
                 highlightedTile = { x: tileX, y: tileY, obstacle: obstacle};
