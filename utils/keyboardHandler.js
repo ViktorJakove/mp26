@@ -1,4 +1,4 @@
-export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, placementModeObj, areaRenderer, pointerTextRenderer, resetDrag) {
+export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, /**/addLevel, /**/addStations, placementModeObj, areaRenderer, pointerTextRenderer, resetDrag) {
     const keyboardMapMoveSpeed = 28;
     const keyboardZoomSpeed = zoomSpeed / 2;
     const keysDown = new Set();
@@ -49,9 +49,13 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
                     }
                     event.preventDefault();
                     return;
+                //temp ficurs
                 case "KeyP":
-                    // temp
                     if (!keysDown.has("KeyP")) addLevel();
+                    event.preventDefault();
+                    return;
+                case "KeyO":
+                    if (!keysDown.has("KeyO")) addStations();
                     event.preventDefault();
                     return;
             }

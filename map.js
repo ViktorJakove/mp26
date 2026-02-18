@@ -5,6 +5,7 @@ import { keyboardControls } from "./utils/keyboardHandler.js";
 import { setupTileHighlight } from "./utils/highlightTile.js";
 import { createAreaRenderer } from "./utils/areaRenderer.js";
 import { createPointerTextRenderer } from "./utils/pointerTextRenderer.js";
+import { ROUTES_DATA,ROUTE_COUNT_DATA} from "./mapGenData/routesData.js";
 
 //pixi setup
 const app = new PIXI.Application({
@@ -41,6 +42,7 @@ const pointerTextRenderer = createPointerTextRenderer(app);
 window.pointerTextRenderer = pointerTextRenderer;
 
 let level = 0;
+let stationLevel = 0;
 let placementMode = false;
 
 let areas = [];
@@ -245,8 +247,19 @@ function resetDrag(){
     isDragging = false;
 }
 
+function addStations(){
+    let indexFirst = 0;
+    for(let i = 0; i < stationLevel; i++){
+        indexFirst += ROUTE_COUNT_DATA[i];
+    }
+    for(let i = indexFirst; i < indexFirst + ROUTE_COUNT_DATA[stationLevel]; i++){
+        console.log(ROUTES_DATA[i]);
+    }
+    stationLevel++;
+}
+
 // init funkci!!!
-const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } }, areaRenderer, pointerTextRenderer, resetDrag);
+const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, addStations, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } }, areaRenderer, pointerTextRenderer, resetDrag);
 
 app.ticker.add(() => {
     keyboardMapMovement();
