@@ -8,6 +8,7 @@ import { createPointerTextRenderer } from "./utils/pointerTextRenderer.js";
 import { ROUTES_DATA,ROUTE_COUNT_DATA} from "./mapGenData/routesData.js";
 import { CITY_GEN_DATA } from "./mapGenData/cityGenData.js";
 import { createStationRenderer } from "./utils/stationRenderer.js";
+import { ColorGenerator } from "./utils/colorGenerator.js";
 
 //pixi setup
 const app = new PIXI.Application({
@@ -252,6 +253,8 @@ function resetDrag(){
     isDragging = false;
 }
 
+const colorGen = new ColorGenerator({sat : 0.6,light : 0.43});
+
 function addStations(){
     let indexFirst = 0;
     for(let i = 0; i < stationLevel; i++){
@@ -266,7 +269,7 @@ function addStations(){
         //TEMPdebug
         console.log(cityA + "-" + cityB);
 
-        const routeColor = Math.floor(Math.random() * 0xaaaaaa, 0.5);
+        const routeColor = Math.floor(colorGen.next(), 0.5);
         [cityA, cityB].forEach(cityName => {
             const cityArea = areas.find(a => a.name === cityName);
 
