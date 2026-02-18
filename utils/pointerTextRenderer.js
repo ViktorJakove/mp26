@@ -26,8 +26,8 @@ export function createPointerTextRenderer(app){
     function updatePointerText(text,x,y, gridScale){
         const pointerText = getPointerText();
         pointerText.text = text;
-        pointerText.x = x;
-        pointerText.y = y;
+        pointerText.x = x + 15 / gridScale;
+        pointerText.y = y + 10 / gridScale;
         if (gridScale) {
             pointerText.scale.set(1 / gridScale, 1 / gridScale);
         }
@@ -46,7 +46,7 @@ export function createPointerTextRenderer(app){
 
     function refresh(getGridScale) {
         const gridScale = getGridScale();
-        const text = lastObstacle ? `Obstacle: ${lastObstacle}` : "";
+        const text = lastObstacle ? lastObstacle : "";
         const textX = mousePosition.x / gridScale;
         const textY = mousePosition.y / gridScale;
         updatePointerText(text, textX, textY, gridScale);
@@ -64,7 +64,7 @@ export function updatePointerTextRenderer(obstacleInfo, screenMouseX, screenMous
     if (window.pointerTextRenderer) {
         const text = obstacleInfo ? obstacleInfo: "";
         const gridScale = getGridScale();
-        let textX = screenMouseX /gridScale
+        let textX = screenMouseX /gridScale;
         let textY = screenMouseY /gridScale;
 
         window.pointerTextRenderer.updatePointerText(text, textX , textY, gridScale);
