@@ -1,4 +1,4 @@
-export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, placementModeObj, areaRenderer) {
+export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, placementModeObj, areaRenderer, pointerTextRenderer) {
     const keyboardMapMoveSpeed = 28;
     const keyboardZoomSpeed = zoomSpeed / 2;
     const keysDown = new Set();
@@ -35,6 +35,7 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
                     if (!spacePressed) {
                         spacePressed = true;
                         placementModeObj.placementMode = !placementModeObj.placementMode;
+                        pointerTextRenderer.togglePointerText(placementModeObj.placementMode);
                         console.log("Placement mode:", placementModeObj.placementMode ? "ON" : "OFF");
                     }
                     event.preventDefault();

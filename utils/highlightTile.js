@@ -31,7 +31,7 @@ export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGrap
                 } else return within;
             });
 
-            //rovnout passnout
+            //rovnout passnout text 
             let obstacleInfo = obstacle ? (obstacle.buildOverCost ? obstacle.buildOverCost + "$" : obstacle.buildOverInfo) : "";
             updatePointerTextRenderer(obstacleInfo,event.clientX,event.clientY, getGridScale);
 

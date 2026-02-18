@@ -1,9 +1,14 @@
 export const ROUTES_DATA =[
     [0,1],
-    [0,2],
     [1,2],
-    [1,3],
     [2,3],
-    [2,4],
-    [3,4]
+    [0,3],
+    [0,2],
+    [2,3],
+]
+export const ROUTE_COUNT_DATA =[
+    1,
+    1,
+    1,
+    3,
 ]

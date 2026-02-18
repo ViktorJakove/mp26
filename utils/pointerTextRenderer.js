@@ -19,6 +19,7 @@ export function createPointerTextRenderer(app){
             });
             pointerText.alpha = 0.8;
             pointerContainer.addChild(pointerText);
+            togglePointerText(false);
         }
         return pointerText;
     }
@@ -32,9 +33,9 @@ export function createPointerTextRenderer(app){
             pointerText.scale.set(1 / gridScale, 1 / gridScale);
         }
     }
-    function hidePointerText() {
+    function togglePointerText(value) {
         if (pointerText) {
-            pointerText.visible = false;
+            pointerText.visible = value;
         }
     }
 
@@ -54,7 +55,7 @@ export function createPointerTextRenderer(app){
 
     return {
         updatePointerText,
-        hidePointerText,
+        togglePointerText,
         updateMousePosition,
         refresh
     };
@@ -69,7 +70,5 @@ export function updatePointerTextRenderer(obstacleInfo, screenMouseX, screenMous
 
         window.pointerTextRenderer.updatePointerText(text, textX , textY, gridScale);
         window.pointerTextRenderer.updateMousePosition(screenMouseX, screenMouseY, obstacleInfo);
-
-
     }
 }

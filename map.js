@@ -72,6 +72,8 @@ function drawGrid() {
     }
     //highlight
     drawHighlight(dimensions);
+    //pointer infotext
+    pointerTextRenderer.refresh(() => gridScale);
     
 }
 function drawHighlight(dimensions){
@@ -240,7 +242,7 @@ window.addEventListener("resize", () => {
 });
 
 // init funkci!!!
-const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } }, areaRenderer);
+const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } }, areaRenderer, pointerTextRenderer);
 
 app.ticker.add(() => {
     keyboardMapMovement();
