@@ -1,4 +1,4 @@
-export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, /**/addLevel, /**/addStations, placementModeObj, areaRenderer, pointerTextRenderer, resetDrag) {
+export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, /**/addLevel, /**/addStations, placementModeObj, areaRenderer, pointerTextRenderer, resetDrag, stationRenderer) {
     const keyboardMapMoveSpeed = 28;
     const keyboardZoomSpeed = zoomSpeed / 2;
     const keysDown = new Set();
@@ -45,7 +45,9 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
                 case "Shift":
                     if (!keysDown.has(event.code)) {
                         areaRenderer.setShiftPressed(true);
+                        if (stationRenderer)stationRenderer.setShiftPressed(true);
                         keysDown.add(event.code);
+                        drawGraphics();
                     }
                     event.preventDefault();
                     return;
@@ -77,6 +79,7 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
                 case "ShiftRight":
                 case "Shift":
                     areaRenderer.setShiftPressed(false);
+                    if (stationRenderer)stationRenderer.setShiftPressed(false);
                     drawGraphics();
                     break;
             }

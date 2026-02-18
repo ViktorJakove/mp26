@@ -158,6 +158,7 @@ function addLevel(){
     level++;
     areas.push(...generateAreas(level, areas[areas.length - 1]));
     areaRenderer.markDirty();
+    stationRenderer.markDirty()
 }
 
 //mouse controls
@@ -240,6 +241,7 @@ function mapZoom(zoomFactor, event){
     app.stage.scale.set(gridScale, gridScale, cellSize);
     updateStageHitArea();
     areaRenderer.markDirty();
+    stationRenderer.markDirty()
 
     pointerTextRenderer.refresh(() => gridScale);
 
@@ -308,7 +310,7 @@ function addStations(){
             const tile = adjacentTiles.find(t => !stationRenderer.isTileOccupied(t.x, t.y))
                 ?? adjacentTiles[0];
 
-            stationRenderer.addStation(tile.x, tile.y, routeColor, stationIndex * 200);
+            stationRenderer.addStation(tile.x, tile.y, routeColor, stationIndex * 200, i);
             stationIndex++;
         });
     }
@@ -318,7 +320,7 @@ function addStations(){
 }
 
 // init funkci!!!
-const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, addStations, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } }, areaRenderer, pointerTextRenderer, resetDrag);
+const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, addStations, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } }, areaRenderer, pointerTextRenderer, resetDrag, stationRenderer);
 
 app.ticker.add(() => {
     keyboardMapMovement();
