@@ -6,6 +6,8 @@ import { setupTileHighlight } from "./utils/highlightTile.js";
 import { createAreaRenderer } from "./utils/areaRenderer.js";
 import { createPointerTextRenderer } from "./utils/pointerTextRenderer.js";
 import { ROUTES_DATA,ROUTE_COUNT_DATA} from "./mapGenData/routesData.js";
+import { CITY_GEN_DATA } from "./mapGenData/cityGenData.js";
+import { createStationRenderer } from "./utils/stationRenderer.js";
 
 //pixi setup
 const app = new PIXI.Application({
@@ -50,8 +52,10 @@ areas = generateAreas(level, null);
 
 const { getHighlightedTile } = setupTileHighlight(app, camera, () => gridScale, cellSize, drawGraphics, areas);
 
-// Create area renderer
+//area renderer init
 const areaRenderer = createAreaRenderer(app, camera, () => gridScale, cellSize);
+//nadry
+const stationRenderer = createStationRenderer(app, camera, () => gridScale, cellSize);
 
 function drawGrid() {
     grid.clear();
@@ -141,6 +145,7 @@ function drawForeground() {
 function drawGraphics(){
     drawGrid();
     areaRenderer.drawAreas(areas);
+    stationRenderer.drawStations();
     drawForeground();
 }
 
@@ -252,10 +257,41 @@ function addStations(){
     for(let i = 0; i < stationLevel; i++){
         indexFirst += ROUTE_COUNT_DATA[i];
     }
+
+
+    let stationIndex = 0;
     for(let i = indexFirst; i < indexFirst + ROUTE_COUNT_DATA[stationLevel]; i++){
-        console.log(ROUTES_DATA[i]);
+        const cityA = CITY_GEN_DATA[ROUTES_DATA[i][0]].name;
+        const cityB = CITY_GEN_DATA[ROUTES_DATA[i][1]].name;
+        //TEMPdebug
+        console.log(cityA + "-" + cityB);
+
+        const routeColor = Math.floor(Math.random() * 0xaaaaaa, 0.5);
+        [cityA, cityB].forEach(cityName => {
+            const cityArea = areas.find(a => a.name === cityName);
+
+            const adjacentTiles = [];
+
+            for (let tx = cityArea.x; tx < cityArea.x + cityArea.sizeX; tx++) {
+                adjacentTiles.push({ x: tx, y: cityArea.y - 1 });
+                adjacentTiles.push({ x: tx, y: cityArea.y + cityArea.sizeY });
+            }
+            for (let ty = cityArea.y; ty < cityArea.y + cityArea.sizeY; ty++) {
+                adjacentTiles.push({ x: cityArea.x - 1, y: ty });
+                adjacentTiles.push({ x: cityArea.x + cityArea.sizeX, y: ty });
+            }
+            adjacentTiles.sort(() => Math.random() - 0.5);
+
+            const tile = adjacentTiles.find(t => !stationRenderer.isTileOccupied(t.x, t.y))
+                ?? adjacentTiles[0];
+
+            stationRenderer.addStation(tile.x, tile.y, routeColor, stationIndex * 200);
+            stationIndex++;
+        });
     }
+
     stationLevel++;
+    drawGraphics();
 }
 
 // init funkci!!!
