@@ -1,10 +1,10 @@
-import { AREA_TYPES } from "./enums/areaTypes.js";
 import { SCREEN_DIMENSIONS } from "./screenDimensions.js";
 import { AREA_GEN_DATA } from "./mapGenData/areaGenData.js";
 import { generateAreas } from "./generateAreas.js";
-import { keyboardControls } from "./mapMovement.js";
-
-const { CITY, LAKE, INDIANS, BISONS, FOREST, ROCK, LOCK } = AREA_TYPES;
+import { keyboardControls } from "./utils/keyboardHandler.js";
+import { setupTileHighlight } from "./utils/highlightTile.js";
+import { createAreaRenderer } from "./utils/areaRenderer.js";
+import { createPointerTextRenderer } from "./utils/pointerTextRenderer.js";
 
 //pixi setup
 const app = new PIXI.Application({
@@ -20,6 +20,8 @@ document.documentElement.style.margin = "0";
 document.documentElement.style.overflow = "hidden";
 
 app.stage.sortableChildren = true;
+app.stage.interactive = true;
+app.stage.hitArea = app.screen;
 
 //camera
 const camera = { x: 0, y: 0 };
@@ -35,17 +37,28 @@ const cellSize = 50;
 const grid = new PIXI.Graphics();
 app.stage.addChild(grid);
 
+const pointerTextRenderer = createPointerTextRenderer(app);
+window.pointerTextRenderer = pointerTextRenderer;
+
 let level = 0;
+let placementMode = false;
 
 let areas = [];
 areas = generateAreas(level, null);
 
+const { getHighlightedTile } = setupTileHighlight(app, camera, () => gridScale, cellSize, drawGraphics, areas);
+
+// Create area renderer
+const areaRenderer = createAreaRenderer(app, camera, () => gridScale, cellSize);
+
 function drawGrid() {
     grid.clear();
+    if (!placementMode) return;
+
     const dimensions = SCREEN_DIMENSIONS(app, camera, gridScale, cellSize);
 
-    // Draw grid lines
-    grid.lineStyle(1, 0x999999); // Slightly darker grey for grid lines
+    //grid lines
+    grid.lineStyle(1, 0x999999);
     for (let worldX = dimensions.startX; worldX <= dimensions.worldRight + cellSize; worldX += cellSize) {
         const screenX = worldX - dimensions.worldLeft;
         grid.moveTo(screenX, 0);
@@ -56,6 +69,21 @@ function drawGrid() {
         const screenY = worldY - dimensions.worldTop;
         grid.moveTo(0, screenY);
         grid.lineTo(dimensions.screenWidth, screenY);
+    }
+    //highlight
+    drawHighlight(dimensions);
+    
+}
+function drawHighlight(dimensions){
+    const highlightedTile = getHighlightedTile();
+    if (highlightedTile) {
+        const screenX = highlightedTile.x * cellSize - dimensions.worldLeft;
+        const screenY = highlightedTile.y * cellSize - dimensions.worldTop;
+
+        let tileColor = highlightedTile.obstacle ? highlightedTile.obstacle.buildOverColor : 0xffcc00;
+        grid.beginFill(tileColor,0.5);
+        grid.drawRect(screenX, screenY, cellSize, cellSize);
+        grid.endFill();
     }
 }
 
@@ -106,93 +134,9 @@ function drawForeground() {
     app.stage.addChild(fgContainer);
 }
 
-const areaContainer = new PIXI.Container();
-areaContainer.zIndex = 1;
-const areaTextContainer = new PIXI.Container();
-areaTextContainer.zIndex = 11;
-app.stage.addChild(areaContainer);
-app.stage.addChild(areaTextContainer);
-
-function drawAreas() {
-    areaContainer.removeChildren();
-    areaTextContainer.removeChildren();
-
-    const dimensions = SCREEN_DIMENSIONS(app, camera, gridScale, cellSize);
-
-    Object.values(areas).forEach((area, index) => {
-        if(area.type === LOCK) return;
-
-        const areaGraphics = new PIXI.Graphics();
-        areaGraphics.beginFill(area.type.color, 0.5);
-
-        const screenX = (area.x * cellSize) - dimensions.worldLeft;
-        const screenY = (area.y * cellSize) - dimensions.worldTop;
-
-        areaGraphics.drawRect(screenX, screenY, area.sizeX * cellSize, area.sizeY * cellSize);
-        areaGraphics.endFill();
-        areaContainer.addChild(areaGraphics);
-
-        if (gridScale > 0.7) return;
-        if ((area.type === FOREST || area.type === ROCK)) {
-            if (Object.values(areas).findIndex(part => part.name === area.name) !== index) {
-                return;
-            }
-        }
-
-        const textPosition = getAreaTextPosition(area, dimensions, Object.values(areas), screenX, screenY);
-        
-        const areaText = new PIXI.Text(((area.type === BISONS) ? "bisons" : area.name)  + ((area.type === CITY || area.type === BISONS) ? '\n' + "population : " + area.peeps : ""),{ fontFamily: "Arial", fontSize: 14, fill: 0x000000 });
-        areaText.x = textPosition.textX;
-        areaText.y = textPosition.textY;
-        areaText.anchor.set(0.5);
-        areaText.style.align = "center";
-        areaText.scale.set(1 / gridScale,1/gridScale);
-        
-        areaTextContainer.addChild(areaText);
-    });
-}
-
-function getAreaTextPosition(area, dimensions, areas, screenX, screenY) {
-    let textX = screenX + area.sizeX * cellSize / 2;
-    let textY = screenY + area.sizeY * cellSize / 2;
-
-    if (area.type === FOREST || area.type === ROCK) {
-        const snakeParts = areas.filter(part => part.name === area.name); //all parst
-        const minX = Math.min(...snakeParts.map(part => part.x));
-        const maxX = Math.max(...snakeParts.map(part => part.x + part.sizeX));
-        const minY = Math.min(...snakeParts.map(part => part.y));
-        const maxY = Math.max(...snakeParts.map(part => part.y + part.sizeY));
-
-        const centerX = (minX + maxX) / 2;
-        const centerY = (minY + maxY) / 2;
-
-        //nejblizsi cast hada k centru
-        let closestTile = snakeParts[0];
-        let closestDistance = Infinity;
-
-        snakeParts.forEach(part => {
-            const tileCenterX = (part.x + part.sizeX / 2);
-            const tileCenterY = (part.y + part.sizeY / 2);
-            const distance = Math.sqrt(
-                Math.pow(centerX - tileCenterX, 2) + Math.pow(centerY - tileCenterY, 2)
-            );
-
-            if (distance < closestDistance) {
-                closestDistance = distance;
-                closestTile = part;
-            }
-        });
-
-        textX = (closestTile.x + closestTile.sizeX / 2) * cellSize - dimensions.worldLeft;
-        textY = (closestTile.y + closestTile.sizeY / 2) * cellSize - dimensions.worldTop;
-    }
-
-    return { textX, textY };
-}
-
 function drawGraphics(){
     drawGrid();
-    drawAreas();
+    areaRenderer.drawAreas(areas);
     drawForeground();
 }
 
@@ -203,31 +147,52 @@ function addLevel(){
     console.log("adding level");
     level++;
     areas.push(...generateAreas(level, areas[areas.length - 1]));
+    areaRenderer.markDirty();
 }
 
 //mouse controls
 let isDragging = false;
 let mouseInitialPos = { x: 0, y: 0 };
 
-app.view.addEventListener("mousedown", (event) => {
-    isDragging = true;
-    mouseInitialPos = { x: event.clientX, y: event.clientY };
+app.stage.on('pointerdown', (event) => {
+    const button = event.data.button;
+    if (placementMode ? (button === 2) : (button === 0 || button === 2)) {
+        isDragging = true;
+        mouseInitialPos = { x: event.data.global.x, y: event.data.global.y };
+    }
 });
-app.view.addEventListener("mouseup", () => { isDragging = false; });
-app.view.addEventListener("mouseout", () => { isDragging = false; });
-app.view.addEventListener("mousemove", (event) => {
+
+app.stage.on('pointerup', (event) => {
+    const button = event.data.button;
+    if (placementMode ? (button === 2) : (button === 0 || button === 2)) {
+        isDragging = false;
+    }
+});
+
+app.stage.on('pointerupoutside', () => {
+    isDragging = false;
+});
+
+app.stage.on('pointermove', (event) => {
     if (isDragging) {
-        const dx = (event.clientX - mouseInitialPos.x) / gridScale;
-        const dy = (event.clientY - mouseInitialPos.y) / gridScale;
+        const dx = (event.data.global.x - mouseInitialPos.x) / gridScale;
+        const dy = (event.data.global.y - mouseInitialPos.y) / gridScale;
 
         camera.x -= dx;
         camera.y -= dy;
 
-        mouseInitialPos = { x: event.clientX, y: event.clientY };
+        mouseInitialPos = { x: event.data.global.x, y: event.data.global.y };
 
         drawGraphics();
     }
 });
+
+//blokace okynka
+app.view.addEventListener("contextmenu", (event) => {
+    //TEMP FIX DEBUG SMAZONA
+    //event.preventDefault();
+});
+
 //zoom
 app.view.addEventListener("wheel", (event) => {
     event.preventDefault();
@@ -235,28 +200,47 @@ app.view.addEventListener("wheel", (event) => {
     mapZoom(zoomFactor, event);
 });
 
+function updateStageHitArea() {
+    app.stage.hitArea = new PIXI.Rectangle(
+        0,
+        0,
+        app.screen.width / gridScale,
+        app.screen.height / gridScale
+    );
+}
+
+// init
+updateStageHitArea();
+
 function mapZoom(zoomFactor, event){
     console.log("zooming");
     const newScale = Math.min(maxScale, Math.max(minScale, gridScale * zoomFactor));
     
     if(event){
-    const mouseX = event.clientX - app.screen.width / 2;
-    const mouseY = event.clientY - app.screen.height / 2;
-    const worldMouseX = camera.x + mouseX / gridScale;
-    const worldMouseY = camera.y + mouseY / gridScale;
-    
-    camera.x = worldMouseX - mouseX / newScale;
-    camera.y = worldMouseY - mouseY / newScale;
+        const mouseX = event.clientX - app.screen.width / 2;
+        const mouseY = event.clientY - app.screen.height / 2;
+        const worldMouseX = camera.x + mouseX / gridScale;
+        const worldMouseY = camera.y + mouseY / gridScale;
+        
+        camera.x = worldMouseX - mouseX / newScale;
+        camera.y = worldMouseY - mouseY / newScale;
     }
 
     gridScale = newScale;
-    app.stage.scale.set(gridScale, gridScale,cellSize);
+    app.stage.scale.set(gridScale, gridScale, cellSize);
+    updateStageHitArea();
+    areaRenderer.markDirty();
+
+    pointerTextRenderer.refresh(() => gridScale);
 
     drawGraphics();
 }
+window.addEventListener("resize", () => {
+    updateStageHitArea();
+});
 
 // init funkci!!!
-const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel);
+const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } }, areaRenderer);
 
 app.ticker.add(() => {
     keyboardMapMovement();
