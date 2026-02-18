@@ -261,6 +261,8 @@ function addStations(){
         indexFirst += ROUTE_COUNT_DATA[i];
     }
 
+    const halfW = AREA_GEN_DATA.areaSize[level][0] / 2;
+    const halfH = AREA_GEN_DATA.areaSize[level][1] / 2;
 
     let stationIndex = 0;
     for(let i = indexFirst; i < indexFirst + ROUTE_COUNT_DATA[stationLevel]; i++){
@@ -273,15 +275,33 @@ function addStations(){
         [cityA, cityB].forEach(cityName => {
             const cityArea = areas.find(a => a.name === cityName);
 
+            const distToLeft   = cityArea.x + halfW;
+            const distToRight  = halfW - (cityArea.x + cityArea.sizeX);
+            const distToTop    = cityArea.y + halfH;
+            const distToBottom = halfH - (cityArea.y + cityArea.sizeY);
+
+            const minDist = Math.min(distToLeft, distToRight, distToTop, distToBottom);
+
+            const blockedSides = {
+                left:   distToLeft   === minDist,
+                right:  distToRight  === minDist,
+                top:    distToTop    === minDist,
+                bottom: distToBottom === minDist,
+            };
+
             const adjacentTiles = [];
 
             for (let tx = cityArea.x; tx < cityArea.x + cityArea.sizeX; tx++) {
-                adjacentTiles.push({ x: tx, y: cityArea.y - 1 });
-                adjacentTiles.push({ x: tx, y: cityArea.y + cityArea.sizeY });
+                if (!blockedSides.top)
+                    adjacentTiles.push({ x: tx, y: cityArea.y - 1 });
+                if (!blockedSides.bottom)
+                    adjacentTiles.push({ x: tx, y: cityArea.y + cityArea.sizeY });
             }
             for (let ty = cityArea.y; ty < cityArea.y + cityArea.sizeY; ty++) {
-                adjacentTiles.push({ x: cityArea.x - 1, y: ty });
-                adjacentTiles.push({ x: cityArea.x + cityArea.sizeX, y: ty });
+                if (!blockedSides.left)
+                    adjacentTiles.push({ x: cityArea.x - 1, y: ty });
+                if (!blockedSides.right)
+                    adjacentTiles.push({ x: cityArea.x + cityArea.sizeX, y: ty });
             }
             adjacentTiles.sort(() => Math.random() - 0.5);
 

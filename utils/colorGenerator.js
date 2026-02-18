@@ -1,3 +1,4 @@
+//https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
 export class ColorGenerator {
     constructor(params = {}) {
         this.hue = Math.random() * 360;
