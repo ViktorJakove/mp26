@@ -1,7 +1,7 @@
-import { createAreaRenderer } from "./utils/renderers/areaRenderer.js";
-import { createStationRenderer } from "./utils/renderers/stationRenderer.js";
-import { createRailRenderer } from "./utils/renderers/railRenderer.js";
-import{ createPointerTextRenderer } from "./utils/renderers/pointerTextRenderer.js";
+import { createAreaRenderer } from "../renderers/areaRenderer.js";
+import { createStationRenderer } from "../renderers/stationRenderer.js";
+import { createRailRenderer } from "../renderers/railRenderer.js";
+import{ createPointerTextRenderer } from "../renderers/pointerTextRenderer.js";
 
 //init
 export function creatRenderers(app, camera,getGridScale,cellSize){
