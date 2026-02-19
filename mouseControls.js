@@ -1,4 +1,4 @@
-export function setupMouseControls(app, camera, getGridScale, cellSize, getPlacementMode, railRenderer, drawGraphics) {
+export function setupMouseControls(app, camera, getGridScale, cellSize, getPlacementMode, railRenderer, drawGraphics, getSelectedRailType) {
     let isDragging = false;
     let mouseInitialPos = { x: 0, y: 0 };
     let isPlacingRail = false;
@@ -19,7 +19,7 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
         if (getPlacementMode() && button === 0) {
             isPlacingRail = true;
             const {tileX, tileY} = getTileFromMouse(event);
-            if(railRenderer.addRail(tileX, tileY))drawGraphics();
+            if(railRenderer.addRail(tileX, tileY, getSelectedRailType()))drawGraphics();
             return;
         }
         if (getPlacementMode() ? (button === 2) : (button === 0 || button === 2)) {
@@ -41,7 +41,7 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
     app.stage.on('pointermove', (event) => {
         if(getPlacementMode() && isPlacingRail){
             const {tileX, tileY} = getTileFromMouse(event);
-            if(railRenderer.addRail(tileX, tileY))drawGraphics();
+            if(railRenderer.addRail(tileX, tileY, getSelectedRailType()))drawGraphics();
             return;
         }
 

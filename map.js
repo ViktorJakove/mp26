@@ -8,6 +8,8 @@ import { createDrawGraphics } from "./drawGraphics.js";
 import { setupMouseControls } from "./mouseControls.js";
 import { createStationManager } from "./stationManager.js";
 import { createRouteChecker } from "./utils/routeChecker.js";
+import { createRailSelectorRenderer } from "./utils/renderers/railSeclectorRenderer.js";
+import { RAIL_TYPES } from "./enums/railTypes.js";
 
 //pixi setup
 const app = createApp();
@@ -35,6 +37,7 @@ const getAreas = () => areas;
 //rends
 const renderers = creatRenderers(app, camera, getGridScale, cellSize, getAreas, getLevel);
 const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer } = renderers;
+const railSelector = createRailSelectorRenderer(app);
 
 //graphics
 const fgContainer = new PIXI.Container();
@@ -56,7 +59,7 @@ railRenderer.setOnRailPlaceCheckConn(()=>{
 drawGraphics();
 
 //mouse controls
-const { resetDrag } = setupMouseControls(app, camera, getGridScale, cellSize, getPlacementMode, railRenderer, () => drawGraphics());
+const { resetDrag } = setupMouseControls(app, camera, getGridScale, cellSize, getPlacementMode, railRenderer, () => drawGraphics(), ()=>railSelector.getSelectedType());
 
 //zoom
 app.view.addEventListener("wheel", (event) => {
@@ -98,7 +101,7 @@ window.addEventListener("resize", () => {
 });
 
 // init funkci!!!
-const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, addStations, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } }, areaRenderer, pointerTextRenderer, resetDrag, stationRenderer);
+const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, addStations, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } }, areaRenderer, pointerTextRenderer, resetDrag, stationRenderer,railSelector);
 
 app.ticker.add(() => {
     keyboardMapMovement();

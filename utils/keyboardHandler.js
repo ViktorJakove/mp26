@@ -1,4 +1,4 @@
-export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, /**/addLevel, /**/addStations, placementModeObj, areaRenderer, pointerTextRenderer, resetDrag, stationRenderer) {
+export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, /**/addLevel, /**/addStations, placementModeObj, areaRenderer, pointerTextRenderer, resetDrag, stationRenderer,railSelector) {
     const keyboardMapMoveSpeed = 28;
     const keyboardZoomSpeed = zoomSpeed / 2;
     const keysDown = new Set();
@@ -35,6 +35,12 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
                     if (!spacePressed) {
                         spacePressed = true;
                         placementModeObj.placementMode = !placementModeObj.placementMode;
+                        if(placementModeObj.placementMode === true){
+                            railSelector.setVisible(true);
+                            railSelector.draw();
+                        }else{
+                            railSelector.setVisible(false);
+                        }
                         pointerTextRenderer.togglePointerText(placementModeObj.placementMode);
                         resetDrag();
                     }
