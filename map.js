@@ -37,7 +37,7 @@ const getAreas = () => areas;
 //rends
 const renderers = creatRenderers(app, camera, getGridScale, cellSize, getAreas, getLevel);
 const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer } = renderers;
-const railSelector = createRailSelectorRenderer(app);
+const railSelector = createRailSelectorRenderer(app,getGridScale);
 
 //graphics
 const fgContainer = new PIXI.Container();
@@ -93,6 +93,7 @@ function mapZoom(zoomFactor, event){
     railRenderer.markDirty();
 
     pointerTextRenderer.refresh(() => gridScale);
+    railSelector.draw();
 
     drawGraphics();
 }

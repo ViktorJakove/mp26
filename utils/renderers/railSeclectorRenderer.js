@@ -2,7 +2,7 @@ import { RAIL_TYPES, DESTROY_ENTRY } from "../../enums/railTypes.js";
 
 const TYPES_LIST = [...Object.values(RAIL_TYPES), DESTROY_ENTRY];
 
-export function createRailSelectorRenderer(app) {
+export function createRailSelectorRenderer(app, getGridScale) {
     const selectorContainer = new PIXI.Container();
     selectorContainer.zIndex = 30;
     selectorContainer.interactive = true;
@@ -47,7 +47,9 @@ export function createRailSelectorRenderer(app) {
     function draw() {
         if (!visible) return;
         selectorContainer.removeChildren();
-
+        
+        const gridScale = getGridScale();
+        
         //bg
         const bg = new PIXI.Graphics();
         bg.beginFill(0x222222, 0.85);
@@ -129,12 +131,14 @@ export function createRailSelectorRenderer(app) {
             selectorContainer.addChild(hitArea);
         });
 
-        selectorContainer.x = 10;
-        selectorContainer.y = app.screen.height - PANEL_H - 10;
+        selectorContainer.scale.set(1 / gridScale, 1 / gridScale);
+        selectorContainer.x = 10 / gridScale;
+        selectorContainer.y = (app.screen.height - PANEL_H) / gridScale - 10 / gridScale;
     }
 
     window.addEventListener("resize", () => {
-        selectorContainer.y = app.screen.height - PANEL_H - 10;
+        const gridScale = getGridScale();
+        selectorContainer.y = (app.screen.height - PANEL_H) / gridScale - 10 / gridScale;
         draw();
     });
 
