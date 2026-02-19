@@ -60,5 +60,18 @@ export function createRailRenderer(app, camera, getGridScale, cellSize) {
         railDirty = true;
     }
 
-    return { addRail, drawRails, isTileOccupied, markDirty };
+    function getRails() {
+        return rails.map(r => ({ x: r.x, y: r.y }));
+    }
+    function loadRails(data) {
+        rails.length = 0;
+        occupiedTiles.clear();
+        for (const r of data) {
+            rails.push({ x: r.x, y: r.y });
+            occupiedTiles.add(`${r.x},${r.y}`);
+        }
+        railDirty = true;
+    }
+
+    return { addRail, drawRails, isTileOccupied, markDirty, getRails, loadRails };
 }
