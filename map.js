@@ -29,10 +29,11 @@ areas = generateAreas(level, null);
 const getGridScale = () => gridScale;
 const getPlacementMode = () => placementMode;
 const getLevel = () => level;
+const setLevel = (value) => level = value;
 const getAreas = () => areas;
 
 //rends
-const renderers = creatRenderers(app, camera, getGridScale, cellSize, getAreas);
+const renderers = creatRenderers(app, camera, getGridScale, cellSize, getAreas, getLevel);
 const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer } = renderers;
 
 //graphics
@@ -41,7 +42,7 @@ fgContainer.zIndex = 10;
 const { getHighlightedTile } = setupTileHighlight(app, camera, () => gridScale, cellSize, () => drawGraphics(), areas);
 const{ drawGraphics } = createDrawGraphics(app, camera, getGridScale, cellSize, getLevel, getHighlightedTile, getPlacementMode, getAreas, renderers, fgContainer);
 
-const { addLevel, addStations } = createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel);
+const { addLevel, addStations } = createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel, setLevel);
 
 const {checkRouteConnections} = createRouteChecker(stationRenderer, railRenderer);
 railRenderer.setOnRailPlaceCheckConn(()=>{

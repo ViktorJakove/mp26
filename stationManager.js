@@ -4,17 +4,18 @@ import { CITY_GEN_DATA } from "./mapGenData/cityGenData.js";
 import { ColorGenerator } from "./utils/colorGenerator.js";
 import { generateAreas } from "./generateAreas.js";
 
-export function createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel) {
+export function createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel, setLevel) {
     let stationLevel = 0;
     const colorGen = new ColorGenerator({ sat: 0.6, light: 0.43 });
 
-    function addLevel(areas, level) {
+    function addLevel() {
         console.log("adding level");
-        level++;
+        const areas = getAreas();
+        const level = getLevel() + 1;
         areas.push(...generateAreas(level, areas[areas.length - 1]));
+        setLevel(level);
         areaRenderer.markDirty();
         stationRenderer.markDirty();
-        return level;
     }
 
     function addStations() {

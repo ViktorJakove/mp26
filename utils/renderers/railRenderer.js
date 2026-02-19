@@ -1,8 +1,9 @@
 import { SCREEN_DIMENSIONS } from "../../screenDimensions.js";
 import { createRailPathfinder } from "../railPathfinder.js";
 import { AREA_TYPES } from "../../enums/areaTypes.js";
+import { AREA_GEN_DATA } from "../../mapGenData/areaGenData.js";
 
-export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas) {
+export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas,getLevel) {
     const railContainer = new PIXI.Container();
     railContainer.zIndex = 3;
     app.stage.addChild(railContainer);
@@ -26,6 +27,12 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
             return tileX >= area.x && tileX < area.x + area.sizeX &&
                    tileY >= area.y && tileY < area.y + area.sizeY;
         });
+    }
+    function isOutOfBounds(tileX, tileY) {
+        
+        const width = AREA_GEN_DATA.areaSize[getLevel()][0];
+        const height = AREA_GEN_DATA.areaSize[getLevel()][1];
+        return tileX < 0 || tileY < 0 || tileX >= width || tileY >= height;
     }
 
     function addRail(tileX, tileY) {
