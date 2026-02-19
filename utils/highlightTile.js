@@ -1,5 +1,5 @@
 import { AREA_TYPES } from "../enums/areaTypes.js";
-import {updatePointerTextRenderer} from "./pointerTextRenderer.js";
+import {updatePointerTextRenderer} from "./renderers/pointerTextRenderer.js";
 export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGraphics, areas) {
     let highlightedTile = null;
 
@@ -31,8 +31,8 @@ export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGrap
                 } else return within;
             });
 
-            //rovnout passnout
-            let obstacleInfo = obstacle ? (obstacle.buildOverCost ? obstacle.buildOverCost + "$" : obstacle.buildOverInfo) : "";
+            //rovnout passnout text 
+            let obstacleInfo = obstacle ? (obstacle.buildOverCost ? "+"+obstacle.buildOverCost + "$" : obstacle.buildOverInfo) : "";
             updatePointerTextRenderer(obstacleInfo,event.clientX,event.clientY, getGridScale);
 
             if (!isOccupied) {

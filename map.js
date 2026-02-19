@@ -3,8 +3,13 @@ import { AREA_GEN_DATA } from "./mapGenData/areaGenData.js";
 import { generateAreas } from "./generateAreas.js";
 import { keyboardControls } from "./utils/keyboardHandler.js";
 import { setupTileHighlight } from "./utils/highlightTile.js";
-import { createAreaRenderer } from "./utils/areaRenderer.js";
-import { createPointerTextRenderer } from "./utils/pointerTextRenderer.js";
+import { createAreaRenderer } from "./utils/renderers/areaRenderer.js";
+import { createPointerTextRenderer } from "./utils/renderers/pointerTextRenderer.js";
+import { ROUTES_DATA,ROUTE_COUNT_DATA} from "./mapGenData/routesData.js";
+import { CITY_GEN_DATA } from "./mapGenData/cityGenData.js";
+import { createStationRenderer } from "./utils/renderers/stationRenderer.js";
+import { ColorGenerator } from "./utils/colorGenerator.js";
+import { createRailRenderer } from "./utils/renderers/railRenderer.js";
 
 //pixi setup
 const app = new PIXI.Application({
@@ -41,6 +46,7 @@ const pointerTextRenderer = createPointerTextRenderer(app);
 window.pointerTextRenderer = pointerTextRenderer;
 
 let level = 0;
+let stationLevel = 0;
 let placementMode = false;
 
 let areas = [];
@@ -48,8 +54,12 @@ areas = generateAreas(level, null);
 
 const { getHighlightedTile } = setupTileHighlight(app, camera, () => gridScale, cellSize, drawGraphics, areas);
 
-// Create area renderer
+//area renderer init
 const areaRenderer = createAreaRenderer(app, camera, () => gridScale, cellSize);
+//nadry
+const stationRenderer = createStationRenderer(app, camera, () => gridScale, cellSize);
+//kolejs
+const railRenderer = createRailRenderer(app, camera, () => gridScale, cellSize);
 
 function drawGrid() {
     grid.clear();
@@ -72,6 +82,8 @@ function drawGrid() {
     }
     //highlight
     drawHighlight(dimensions);
+    //pointer infotext
+    pointerTextRenderer.refresh(() => gridScale);
     
 }
 function drawHighlight(dimensions){
@@ -80,7 +92,7 @@ function drawHighlight(dimensions){
         const screenX = highlightedTile.x * cellSize - dimensions.worldLeft;
         const screenY = highlightedTile.y * cellSize - dimensions.worldTop;
 
-        let tileColor = highlightedTile.obstacle ? highlightedTile.obstacle.buildOverColor : 0xffcc00;
+        let tileColor = highlightedTile.obstacle ? highlightedTile.buildOverColor : 0xffcc00;
         grid.beginFill(tileColor,0.5);
         grid.drawRect(screenX, screenY, cellSize, cellSize);
         grid.endFill();
@@ -137,6 +149,8 @@ function drawForeground() {
 function drawGraphics(){
     drawGrid();
     areaRenderer.drawAreas(areas);
+    stationRenderer.drawStations();
+    railRenderer.drawRails(); 
     drawForeground();
 }
 
@@ -148,6 +162,7 @@ function addLevel(){
     level++;
     areas.push(...generateAreas(level, areas[areas.length - 1]));
     areaRenderer.markDirty();
+    stationRenderer.markDirty()
 }
 
 //mouse controls
@@ -156,6 +171,17 @@ let mouseInitialPos = { x: 0, y: 0 };
 
 app.stage.on('pointerdown', (event) => {
     const button = event.data.button;
+    if (placementMode && button === 0) {
+        const worldX = camera.x + (event.data.global.x / gridScale) - app.screen.width / 2 / gridScale;
+        const worldY = camera.y + (event.data.global.y / gridScale) - app.screen.height / 2 / gridScale;
+        const tileX = Math.floor(worldX / cellSize);
+        const tileY = Math.floor(worldY / cellSize);
+
+        if (railRenderer.addRail(tileX, tileY)) {
+            drawGraphics();
+        }
+        return;
+    }
     if (placementMode ? (button === 2) : (button === 0 || button === 2)) {
         isDragging = true;
         mouseInitialPos = { x: event.data.global.x, y: event.data.global.y };
@@ -230,6 +256,8 @@ function mapZoom(zoomFactor, event){
     app.stage.scale.set(gridScale, gridScale, cellSize);
     updateStageHitArea();
     areaRenderer.markDirty();
+    stationRenderer.markDirty();
+    railRenderer.markDirty();
 
     pointerTextRenderer.refresh(() => gridScale);
 
@@ -239,8 +267,76 @@ window.addEventListener("resize", () => {
     updateStageHitArea();
 });
 
+function resetDrag(){
+    isDragging = false;
+}
+
+const colorGen = new ColorGenerator({sat : 0.6,light : 0.43});
+
+function addStations(){
+    let indexFirst = 0;
+    for(let i = 0; i < stationLevel; i++){
+        indexFirst += ROUTE_COUNT_DATA[i];
+    }
+
+    const halfW = AREA_GEN_DATA.areaSize[level][0] / 2;
+    const halfH = AREA_GEN_DATA.areaSize[level][1] / 2;
+
+    let stationIndex = 0;
+    for(let i = indexFirst; i < indexFirst + ROUTE_COUNT_DATA[stationLevel]; i++){
+        const cityA = CITY_GEN_DATA[ROUTES_DATA[i][0]].name;
+        const cityB = CITY_GEN_DATA[ROUTES_DATA[i][1]].name;
+        //TEMPdebug
+        console.log(cityA + "-" + cityB);
+
+        const routeColor = Math.floor(colorGen.next(), 0.5);
+        [cityA, cityB].forEach(cityName => {
+            const cityArea = areas.find(a => a.name === cityName);
+
+            const distToLeft   = cityArea.x + halfW;
+            const distToRight  = halfW - (cityArea.x + cityArea.sizeX);
+            const distToTop    = cityArea.y + halfH;
+            const distToBottom = halfH - (cityArea.y + cityArea.sizeY);
+
+            const minDist = Math.min(distToLeft, distToRight, distToTop, distToBottom);
+
+            const blockedSides = {
+                left:   distToLeft   === minDist,
+                right:  distToRight  === minDist,
+                top:    distToTop    === minDist,
+                bottom: distToBottom === minDist,
+            };
+
+            const adjacentTiles = [];
+
+            for (let tx = cityArea.x; tx < cityArea.x + cityArea.sizeX; tx++) {
+                if (!blockedSides.top)
+                    adjacentTiles.push({ x: tx, y: cityArea.y - 1 });
+                if (!blockedSides.bottom)
+                    adjacentTiles.push({ x: tx, y: cityArea.y + cityArea.sizeY });
+            }
+            for (let ty = cityArea.y; ty < cityArea.y + cityArea.sizeY; ty++) {
+                if (!blockedSides.left)
+                    adjacentTiles.push({ x: cityArea.x - 1, y: ty });
+                if (!blockedSides.right)
+                    adjacentTiles.push({ x: cityArea.x + cityArea.sizeX, y: ty });
+            }
+            adjacentTiles.sort(() => Math.random() - 0.5);
+
+            const tile = adjacentTiles.find(t => !stationRenderer.isTileOccupied(t.x, t.y))
+                ?? adjacentTiles[0];
+
+            stationRenderer.addStation(tile.x, tile.y, routeColor, stationIndex * 200, i);
+            stationIndex++;
+        });
+    }
+
+    stationLevel++;
+    drawGraphics();
+}
+
 // init funkci!!!
-const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } }, areaRenderer);
+const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, addStations, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } }, areaRenderer, pointerTextRenderer, resetDrag, stationRenderer);
 
 app.ticker.add(() => {
     keyboardMapMovement();
