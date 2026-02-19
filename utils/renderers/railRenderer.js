@@ -1,12 +1,15 @@
 import { SCREEN_DIMENSIONS } from "../../screenDimensions.js";
+import { createRailPathfinder } from "../railPathfinder.js";
 
-export function createRailRenderer(app, camera, getGridScale, cellSize) {
+export function createRailRenderer(app, camera, getGridScale, cellSize, onRailPlaceCheckConn) {
     const railContainer = new PIXI.Container();
     railContainer.zIndex = 3;
     app.stage.addChild(railContainer);
 
     const rails = []; //x, y, sprite
     const occupiedTiles = new Set();
+
+    const {areStationsConnected} = createRailPathfinder(occupiedTiles);
 
     let railDirty = true;
     let lastCameraPos = { x: 0, y: 0 };
@@ -22,6 +25,9 @@ export function createRailRenderer(app, camera, getGridScale, cellSize) {
         occupiedTiles.add(`${tileX},${tileY}`);
         rails.push({ x: tileX, y: tileY });
         railDirty = true;
+
+        if (onRailPlaced) onRailPlaced();
+
         return true;
     }
 
@@ -73,5 +79,10 @@ export function createRailRenderer(app, camera, getGridScale, cellSize) {
         railDirty = true;
     }
 
-    return { addRail, drawRails, isTileOccupied, markDirty, getRails, loadRails };
+    let onRailPlaced = null;
+    function setOnRailPlaceCheckConn(callback) {
+        onRailPlaced = callback;
+    }
+
+    return { addRail, drawRails, isTileOccupied, markDirty, getRails, loadRails, areStationsConnected, setOnRailPlaceCheckConn};
 }

@@ -1,21 +1,13 @@
-import { SCREEN_DIMENSIONS } from "./screenDimensions.js";
-import { AREA_GEN_DATA } from "./mapGenData/areaGenData.js";
 import { generateAreas } from "./generateAreas.js";
 import { keyboardControls } from "./utils/keyboardHandler.js";
 import { setupTileHighlight } from "./utils/highlightTile.js";
-import { createAreaRenderer } from "./utils/renderers/areaRenderer.js";
-import { createPointerTextRenderer } from "./utils/renderers/pointerTextRenderer.js";
-import { ROUTES_DATA,ROUTE_COUNT_DATA} from "./mapGenData/routesData.js";
-import { CITY_GEN_DATA } from "./mapGenData/cityGenData.js";
-import { createStationRenderer } from "./utils/renderers/stationRenderer.js";
-import { ColorGenerator } from "./utils/colorGenerator.js";
-import { createRailRenderer } from "./utils/renderers/railRenderer.js";
 import { createApp } from "./utils/setup/appSetup.js";
 import { createCamera, createZoomValues } from "./camera.js";
 import { creatRenderers } from "./utils/setup/renderersSetup.js";
 import { createDrawGraphics } from "./drawGraphics.js";
 import { setupMouseControls } from "./mouseControls.js";
 import { createStationManager } from "./stationManager.js";
+import { createRouteChecker } from "./utils/routeChecker.js";
 
 //pixi setup
 const app = createApp();
@@ -49,9 +41,15 @@ fgContainer.zIndex = 10;
 const { getHighlightedTile } = setupTileHighlight(app, camera, () => gridScale, cellSize, () => drawGraphics(), areas);
 const{ drawGraphics } = createDrawGraphics(app, camera, getGridScale, cellSize, getLevel, getHighlightedTile, getPlacementMode, getAreas, renderers, fgContainer);
 
-const { addLevel, addStations } = createStationManager(
-    stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel
-);
+const { addLevel, addStations } = createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel);
+
+const {checkRouteConnections} = createRouteChecker(stationRenderer, railRenderer);
+railRenderer.setOnRailPlaceCheckConn(()=>{
+    const result = checkRouteConnections();
+    const allConnected = result.length > 0 && result.every(route => route.connected);
+    if(allConnected)addStations();
+})
+
 
 //init draw
 drawGraphics();
