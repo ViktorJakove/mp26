@@ -32,7 +32,7 @@ const getLevel = () => level;
 const getAreas = () => areas;
 
 //rends
-const renderers = creatRenderers(app, camera, getGridScale, cellSize);
+const renderers = creatRenderers(app, camera, getGridScale, cellSize, getAreas);
 const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer } = renderers;
 
 //graphics

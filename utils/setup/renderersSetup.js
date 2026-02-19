@@ -4,7 +4,7 @@ import { createRailRenderer } from "../renderers/railRenderer.js";
 import{ createPointerTextRenderer } from "../renderers/pointerTextRenderer.js";
 
 //init
-export function creatRenderers(app, camera,getGridScale,cellSize){
+export function creatRenderers(app, camera,getGridScale,cellSize,getAreas){
     
     //pointer hint
     const pointerTextRenderer = createPointerTextRenderer(app);
@@ -15,7 +15,7 @@ export function creatRenderers(app, camera,getGridScale,cellSize){
     //nadry
     const stationRenderer = createStationRenderer(app, camera, getGridScale, cellSize);
     //kolejs
-    const railRenderer = createRailRenderer(app, camera, getGridScale, cellSize);
+    const railRenderer = createRailRenderer(app, camera, getGridScale, cellSize,getAreas);
 
     return {areaRenderer,stationRenderer,railRenderer,pointerTextRenderer};
 }

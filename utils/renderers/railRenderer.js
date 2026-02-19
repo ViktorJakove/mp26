@@ -1,7 +1,8 @@
 import { SCREEN_DIMENSIONS } from "../../screenDimensions.js";
 import { createRailPathfinder } from "../railPathfinder.js";
+import { AREA_TYPES } from "../../enums/areaTypes.js";
 
-export function createRailRenderer(app, camera, getGridScale, cellSize, onRailPlaceCheckConn) {
+export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas) {
     const railContainer = new PIXI.Container();
     railContainer.zIndex = 3;
     app.stage.addChild(railContainer);
@@ -18,9 +19,17 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, onRailPl
     function isTileOccupied(tileX, tileY) {
         return occupiedTiles.has(`${tileX},${tileY}`);
     }
+    function isTileBlocked(tileX, tileY) {
+        const areas = getAreas();
+        return areas.some(area => {
+            if (area.type !== AREA_TYPES.CITY && area.type !== AREA_TYPES.LAKE) return false;
+            return tileX >= area.x && tileX < area.x + area.sizeX &&
+                   tileY >= area.y && tileY < area.y + area.sizeY;
+        });
+    }
 
     function addRail(tileX, tileY) {
-        if (isTileOccupied(tileX, tileY)) return false;
+        if (isTileOccupied(tileX, tileY) || isTileBlocked(tileX,tileY)) return false;
 
         occupiedTiles.add(`${tileX},${tileY}`);
         rails.push({ x: tileX, y: tileY });
