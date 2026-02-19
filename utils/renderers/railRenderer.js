@@ -30,13 +30,13 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
     }
     function isOutOfBounds(tileX, tileY) {
         
-        const width = AREA_GEN_DATA.areaSize[getLevel()][0];
-        const height = AREA_GEN_DATA.areaSize[getLevel()][1];
-        return tileX < 0 || tileY < 0 || tileX >= width || tileY >= height;
+        const width = AREA_GEN_DATA.areaSize[getLevel()][0]/2;
+        const height = AREA_GEN_DATA.areaSize[getLevel()][1]/2;
+        return tileX >= width || tileY >= height || tileX < -width || tileY < -height;
     }
 
     function addRail(tileX, tileY) {
-        if (isTileOccupied(tileX, tileY) || isTileBlocked(tileX,tileY)) return false;
+        if (isTileOccupied(tileX, tileY) || isTileBlocked(tileX,tileY) || isOutOfBounds(tileX,tileY)) return false;
 
         occupiedTiles.add(`${tileX},${tileY}`);
         rails.push({ x: tileX, y: tileY });
