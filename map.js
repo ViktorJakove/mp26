@@ -3,12 +3,13 @@ import { AREA_GEN_DATA } from "./mapGenData/areaGenData.js";
 import { generateAreas } from "./generateAreas.js";
 import { keyboardControls } from "./utils/keyboardHandler.js";
 import { setupTileHighlight } from "./utils/highlightTile.js";
-import { createAreaRenderer } from "./utils/areaRenderer.js";
-import { createPointerTextRenderer } from "./utils/pointerTextRenderer.js";
+import { createAreaRenderer } from "./utils/renderers/areaRenderer.js";
+import { createPointerTextRenderer } from "./utils/renderers/pointerTextRenderer.js";
 import { ROUTES_DATA,ROUTE_COUNT_DATA} from "./mapGenData/routesData.js";
 import { CITY_GEN_DATA } from "./mapGenData/cityGenData.js";
-import { createStationRenderer } from "./utils/stationRenderer.js";
+import { createStationRenderer } from "./utils/renderers/stationRenderer.js";
 import { ColorGenerator } from "./utils/colorGenerator.js";
+import { createRailRenderer } from "./utils/renderers/railRenderer.js";
 
 //pixi setup
 const app = new PIXI.Application({
@@ -57,6 +58,8 @@ const { getHighlightedTile } = setupTileHighlight(app, camera, () => gridScale, 
 const areaRenderer = createAreaRenderer(app, camera, () => gridScale, cellSize);
 //nadry
 const stationRenderer = createStationRenderer(app, camera, () => gridScale, cellSize);
+//kolejs
+const railRenderer = createRailRenderer(app, camera, () => gridScale, cellSize);
 
 function drawGrid() {
     grid.clear();
@@ -147,6 +150,7 @@ function drawGraphics(){
     drawGrid();
     areaRenderer.drawAreas(areas);
     stationRenderer.drawStations();
+    railRenderer.drawRails(); 
     drawForeground();
 }
 
@@ -167,6 +171,17 @@ let mouseInitialPos = { x: 0, y: 0 };
 
 app.stage.on('pointerdown', (event) => {
     const button = event.data.button;
+    if (placementMode && button === 0) {
+        const worldX = camera.x + (event.data.global.x / gridScale) - app.screen.width / 2 / gridScale;
+        const worldY = camera.y + (event.data.global.y / gridScale) - app.screen.height / 2 / gridScale;
+        const tileX = Math.floor(worldX / cellSize);
+        const tileY = Math.floor(worldY / cellSize);
+
+        if (railRenderer.addRail(tileX, tileY)) {
+            drawGraphics();
+        }
+        return;
+    }
     if (placementMode ? (button === 2) : (button === 0 || button === 2)) {
         isDragging = true;
         mouseInitialPos = { x: event.data.global.x, y: event.data.global.y };
@@ -241,7 +256,8 @@ function mapZoom(zoomFactor, event){
     app.stage.scale.set(gridScale, gridScale, cellSize);
     updateStageHitArea();
     areaRenderer.markDirty();
-    stationRenderer.markDirty()
+    stationRenderer.markDirty();
+    railRenderer.markDirty();
 
     pointerTextRenderer.refresh(() => gridScale);
 

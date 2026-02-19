@@ -1,4 +1,4 @@
-import { SCREEN_DIMENSIONS } from "../screenDimensions.js";
+import { SCREEN_DIMENSIONS } from "../../screenDimensions.js";
 
 export function createStationRenderer(app, camera, getGridScale, cellSize) {
     const stationContainer = new PIXI.Container();

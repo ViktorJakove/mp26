@@ -1,5 +1,5 @@
 import { AREA_TYPES } from "../enums/areaTypes.js";
-import {updatePointerTextRenderer} from "./pointerTextRenderer.js";
+import {updatePointerTextRenderer} from "./renderers/pointerTextRenderer.js";
 export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGraphics, areas) {
     let highlightedTile = null;
 

@@ -1,6 +1,6 @@
 
-import { AREA_TYPES } from "../enums/areaTypes.js";
-import { SCREEN_DIMENSIONS } from "../screenDimensions.js";
+import { AREA_TYPES } from "../../enums/areaTypes.js";
+import { SCREEN_DIMENSIONS } from "../../screenDimensions.js";
 
 const { CITY, LAKE, INDIANS, BISONS, FOREST, ROCK, LOCK } = AREA_TYPES;
 
