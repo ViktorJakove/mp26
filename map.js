@@ -10,40 +10,25 @@ import { CITY_GEN_DATA } from "./mapGenData/cityGenData.js";
 import { createStationRenderer } from "./utils/renderers/stationRenderer.js";
 import { ColorGenerator } from "./utils/colorGenerator.js";
 import { createRailRenderer } from "./utils/renderers/railRenderer.js";
+import { createApp } from "./appSetup.js";
+import { createCamera, createZoomValues } from "./camera.js";
+import { creatRenderers } from "./renderersSetup.js";
 
 //pixi setup
-const app = new PIXI.Application({
-    resizeTo: window,
-    autoDensity: true,
-    backgroundColor: 0xeeeeee,
-    antialias: true
-});
-document.body.appendChild(app.view);
-document.body.style.margin = "0";
-document.body.style.overflow = "hidden";
-document.documentElement.style.margin = "0";
-document.documentElement.style.overflow = "hidden";
-
-app.stage.sortableChildren = true;
-app.stage.interactive = true;
-app.stage.hitArea = app.screen;
+const app = createApp();
 
 //camera
-const camera = { x: 0, y: 0 };
+const camera = createCamera();
 
 //zoom valeus
-let gridScale = 1;
-const zoomSpeed = 0.1;
-const minScale = 0.2;
-const maxScale = 2.5;
+const { gridScale: initScale, zoomSpeed, minScale, maxScale } = createZoomValues();
+let gridScale = initScale;
+
 
 //grid setup
 const cellSize = 50;
 const grid = new PIXI.Graphics();
 app.stage.addChild(grid);
-
-const pointerTextRenderer = createPointerTextRenderer(app);
-window.pointerTextRenderer = pointerTextRenderer;
 
 let level = 0;
 let stationLevel = 0;
@@ -52,14 +37,12 @@ let placementMode = false;
 let areas = [];
 areas = generateAreas(level, null);
 
+const getGridScale = () => gridScale;
+
 const { getHighlightedTile } = setupTileHighlight(app, camera, () => gridScale, cellSize, drawGraphics, areas);
 
-//area renderer init
-const areaRenderer = createAreaRenderer(app, camera, () => gridScale, cellSize);
-//nadry
-const stationRenderer = createStationRenderer(app, camera, () => gridScale, cellSize);
-//kolejs
-const railRenderer = createRailRenderer(app, camera, () => gridScale, cellSize);
+const renderers = creatRenderers(app, camera, getGridScale, cellSize);
+const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer } = renderers;
 
 function drawGrid() {
     grid.clear();
