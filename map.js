@@ -42,7 +42,7 @@ fgContainer.zIndex = 10;
 const { getHighlightedTile } = setupTileHighlight(app, camera, () => gridScale, cellSize, () => drawGraphics(), areas);
 const{ drawGraphics } = createDrawGraphics(app, camera, getGridScale, cellSize, getLevel, getHighlightedTile, getPlacementMode, getAreas, renderers, fgContainer);
 
-const { addLevel, addStations } = createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel, setLevel);
+const { addLevel, addStations } = createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel, setLevel, railRenderer);
 
 const {checkRouteConnections} = createRouteChecker(stationRenderer, railRenderer);
 railRenderer.setOnRailPlaceCheckConn(()=>{

@@ -47,6 +47,19 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
         return true;
     }
 
+    function removeRail(tileX, tileY) {
+        const key = `${tileX},${tileY}`;
+        if (!occupiedTiles.has(key)) return;
+
+        occupiedTiles.delete(key);
+        const index = rails.findIndex(r => r.x === tileX && r.y === tileY);
+        if (index !== -1) {
+            rails.splice(index, 1);
+            railDirty = true;
+        }
+
+    }
+
     function drawRails() {
         const gridScale = getGridScale();
         const cameraChanged = camera.x !== lastCameraPos.x || camera.y !== lastCameraPos.y;
@@ -100,5 +113,5 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
         onRailPlaced = callback;
     }
 
-    return { addRail, drawRails, isTileOccupied, markDirty, getRails, loadRails, areStationsConnected, setOnRailPlaceCheckConn};
+    return { addRail, removeRail, drawRails, isTileOccupied, markDirty, getRails, loadRails, areStationsConnected, setOnRailPlaceCheckConn};
 }

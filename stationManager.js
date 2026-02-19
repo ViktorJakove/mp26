@@ -4,7 +4,7 @@ import { CITY_GEN_DATA } from "./mapGenData/cityGenData.js";
 import { ColorGenerator } from "./utils/colorGenerator.js";
 import { generateAreas } from "./generateAreas.js";
 
-export function createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel, setLevel) {
+export function createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel, setLevel, railRenderer) {
     let stationLevel = 0;
     const colorGen = new ColorGenerator({ sat: 0.6, light: 0.43 });
 
@@ -66,6 +66,7 @@ export function createStationManager(stationRenderer, areaRenderer, drawGraphics
 
                 const tile = adjacentTiles.find(t => !stationRenderer.isTileOccupied(t.x, t.y)) ?? adjacentTiles[0];
                 stationRenderer.addStation(tile.x, tile.y, routeColor, stationIndex * 200, i);
+                if(railRenderer.isTileOccupied(tile.x, tile.y))railRenderer.removeRail(tile.x, tile.y);
                 stationIndex++;
             });
         }
