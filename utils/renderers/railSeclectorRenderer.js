@@ -1,6 +1,6 @@
-import { RAIL_TYPES } from "../../enums/railTypes.js";
+import { RAIL_TYPES, DESTROY_ENTRY } from "../../enums/railTypes.js";
 
-const TYPES_LIST = Object.values(RAIL_TYPES);
+const TYPES_LIST = [...Object.values(RAIL_TYPES), DESTROY_ENTRY];
 
 export function createRailSelectorRenderer(app) {
     const selectorContainer = new PIXI.Container();
@@ -70,25 +70,39 @@ export function createRailSelectorRenderer(app) {
                 selectorContainer.addChild(highlight);
             }
 
-            //ikonka
-            try {
-                const sprite = new PIXI.Sprite(PIXI.Texture.from(type.texture));
-                sprite.x = x;
-                sprite.y = y;
-                sprite.width  = ICON_SIZE;
-                sprite.height = ICON_SIZE;
-                selectorContainer.addChild(sprite);
-            } catch {
+            //ikonka + destroy ikonk
+            if (type.isDestroy) {
                 const g = new PIXI.Graphics();
-                g.lineStyle(2, 0xffffff);
+                g.beginFill(0xaa0000, 0.85);
                 g.drawRect(x + 2, y + 2, ICON_SIZE - 4, ICON_SIZE - 4);
-                const cx = x + ICON_SIZE / 2;
-                const cy = y + ICON_SIZE / 2;
-                if (type.connections[0]) { g.moveTo(cx, cy); g.lineTo(cx, y); }
-                if (type.connections[1]) { g.moveTo(cx, cy); g.lineTo(x + ICON_SIZE, cy); }
-                if (type.connections[2]) { g.moveTo(cx, cy); g.lineTo(cx, y + ICON_SIZE); }
-                if (type.connections[3]) { g.moveTo(cx, cy); g.lineTo(x, cy); }
+                g.endFill();
+                // X
+                g.lineStyle(4, 0xffffff);
+                g.moveTo(x + 10, y + 10);
+                g.lineTo(x + ICON_SIZE - 10, y + ICON_SIZE - 10);
+                g.moveTo(x + ICON_SIZE - 10, y + 10);
+                g.lineTo(x + 10, y + ICON_SIZE - 10);
                 selectorContainer.addChild(g);
+            } else {
+                try {
+                    const sprite = new PIXI.Sprite(PIXI.Texture.from(type.texture));
+                    sprite.x = x;
+                    sprite.y = y;
+                    sprite.width  = ICON_SIZE;
+                    sprite.height = ICON_SIZE;
+                    selectorContainer.addChild(sprite);
+                } catch {
+                    const g = new PIXI.Graphics();
+                    g.lineStyle(2, 0xffffff);
+                    g.drawRect(x + 2, y + 2, ICON_SIZE - 4, ICON_SIZE - 4);
+                    const cx = x + ICON_SIZE / 2;
+                    const cy = y + ICON_SIZE / 2;
+                    if (type.connections[0]) { g.moveTo(cx, cy); g.lineTo(cx, y); }
+                    if (type.connections[1]) { g.moveTo(cx, cy); g.lineTo(x + ICON_SIZE, cy); }
+                    if (type.connections[2]) { g.moveTo(cx, cy); g.lineTo(cx, y + ICON_SIZE); }
+                    if (type.connections[3]) { g.moveTo(cx, cy); g.lineTo(x, cy); }
+                    selectorContainer.addChild(g);
+                }
             }
 
             //label

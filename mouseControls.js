@@ -13,13 +13,26 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
         const worldY = camera.y + (event.data.global.y / gridScale) - app.screen.height / 2 / gridScale;
         return {tileX: Math.floor(worldX / cellSize), tileY: Math.floor(worldY / cellSize)};
     }
+    function handleRailAction(tileX, tileY) {
+        const selected = getSelectedRailType();
+        if (selected.isDestroy) {
+            if (railRenderer.isTileOccupied(tileX, tileY)) {
+                railRenderer.removeRail(tileX, tileY);
+                drawGraphics();
+            }
+            return;
+        }
+        if (!railRenderer.isTileOccupied(tileX, tileY)) {
+            if (railRenderer.addRail(tileX, tileY, selected)) drawGraphics();
+        }
+    }
 
     app.stage.on('pointerdown', (event) => {
         const button = event.data.button;
         if (getPlacementMode() && button === 0) {
             isPlacingRail = true;
             const {tileX, tileY} = getTileFromMouse(event);
-            if(railRenderer.addRail(tileX, tileY, getSelectedRailType()))drawGraphics();
+            handleRailAction(tileX, tileY);
             return;
         }
         if (getPlacementMode() ? (button === 2) : (button === 0 || button === 2)) {
@@ -41,7 +54,7 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
     app.stage.on('pointermove', (event) => {
         if(getPlacementMode() && isPlacingRail){
             const {tileX, tileY} = getTileFromMouse(event);
-            if(railRenderer.addRail(tileX, tileY, getSelectedRailType()))drawGraphics();
+            handleRailAction(tileX, tileY);
             return;
         }
 

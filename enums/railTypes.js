@@ -30,11 +30,6 @@ export const RAIL_TYPES = {
         connections: [true, false, false, true],  // N-W
         texture: "../../static/map/rails/rail_nw.png"
     },
-    CROSS: {
-        id: "CROSS",
-        connections: [true, true, true, true],
-        texture: "../../static/map/rails/rail_cross.png"
-    },
     T_N: {
         id: "T_N",
         connections: [true, true, false, true],   // N-E-W
@@ -55,13 +50,22 @@ export const RAIL_TYPES = {
         connections: [true, false, true, true],   // N-S-W
         texture: "../../static/map/rails/rail_t_w.png"
     },
+    CROSS: {
+        id: "CROSS",
+        connections: [true, true, true, true],
+        texture: "../../static/map/rails/rail_cross.png"
+    }
+};
+export const DESTROY_ENTRY = {
+    id: "DESTROY",
+    connections: [false, false, false, false],
+    isDestroy: true
 };
 
 //0=N, 1=E, 2=S, 3=W
-export const OPPOSITE = [2, 3, 0, 1]; // N<->S, E<->W
+export const OPPOSITE = [2, 3, 0, 1]; // N-S, E-W
 
 export function canConnect(typeA, sideFromA) {
-    // sideFromA: which side of A faces neighbor (0=N,1=E,2=S,3=W)
     if (!typeA.connections[sideFromA]) return false;
     return true;
 }

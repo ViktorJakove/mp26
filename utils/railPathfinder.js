@@ -1,6 +1,6 @@
+import { OPPOSITE } from '../enums/railTypes.js';
 export function createRailPathfinder(occupiedTiles) {
     const DELTAS = [[0,-1],[1,0],[0,1],[-1,0]];
-    const OPPOSITE = [2, 3, 0, 1]; // N<->S, E<->W
 
     function getNeighborKeys(x, y) {
         const rail = occupiedTiles.get(`${x},${y}`);
