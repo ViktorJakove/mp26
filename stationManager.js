@@ -86,25 +86,31 @@ export function createStationManager(stationRenderer, areaRenderer, drawGraphics
         stationLevel++;
         drawGraphics();
     }
+
     function spawnTrainsForConnectedRoutes(connectedRouteIndices) {
         if (!trainRenderer) return;
 
         const stations = stationRenderer.getStations();
+        const allRouteIndices = [...new Set(stations.map(s => s.index))];
 
-        for (const routeIndex of connectedRouteIndices) {
-            if (trainRenderer.hasTrainForRoute(routeIndex)) continue;
+        for (const routeIndex of allRouteIndices) {
+            if (connectedRouteIndices.includes(routeIndex)) {
+                if (trainRenderer.hasTrainForRoute(routeIndex)) continue;
 
-            const pair = stations.filter(s => s.index === routeIndex);
-            if (pair.length !== 2) continue;
+                const pair = stations.filter(s => s.index === routeIndex);
+                if (pair.length !== 2) continue;
 
-            const [a, b] = pair;
-            const path = railRenderer.getPath(a.x, a.y, b.x, b.y);
-            if (!path) continue;
+                const [a, b] = pair;
+                const path = railRenderer.getPath(a.x, a.y, b.x, b.y);
+                if (!path) continue;
 
-            const color = routeColors.get(routeIndex) ?? 0xffffff;
-            trainRenderer.addTrain(path, color, routeIndex);
+                const color = routeColors.get(routeIndex) ?? 0xffffff;
+                trainRenderer.addTrain(path, color, routeIndex);
+            } else {
+                trainRenderer.removeTrainForRoute(routeIndex);
+            }
         }
     }
 
-    return { addLevel, addStations, spawnTrainsForConnectedRoutes };
+    return { addLevel, addStations, spawnTrainsForConnectedRoutes};
 }

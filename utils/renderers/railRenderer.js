@@ -83,6 +83,7 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
             railDirty = true;
         }
 
+        if(onRailPlaced)onRailPlaced();
     }
 
     function drawRails() {

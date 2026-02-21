@@ -95,9 +95,14 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize) {
         };
     }
 
+    function removeTrainForRoute(routeIndex) {
+        const idx = trains.findIndex(t => t.routeIndex === routeIndex);
+        if (idx !== -1) trains.splice(idx, 1);
+    }
+
     function markDirty() {
         drawTrains();
     }
 
-    return { addTrain, clearTrains, markDirty, hasTrainForRoute };
+    return { addTrain, clearTrains, markDirty, hasTrainForRoute, removeTrainForRoute };
 }
