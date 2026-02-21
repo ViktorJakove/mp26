@@ -12,7 +12,7 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
     const rails = []; //x, y, sprite
     const occupiedTiles = new Map();
 
-    const {areStationsConnected} = createRailPathfinder(occupiedTiles);
+    const { areStationsConnected, getPath } = createRailPathfinder(occupiedTiles);
 
     let railDirty = true;
     let lastCameraPos = { x: 0, y: 0 };
@@ -139,6 +139,7 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
     function setOnRailPlaceCheckConn(callback) {
         onRailPlaced = callback;
     }
+    
 
-    return { addRail, removeRail, drawRails, isTileOccupied, markDirty, getRails, loadRails, areStationsConnected, setOnRailPlaceCheckConn};
+    return { addRail, removeRail, drawRails, isTileOccupied, markDirty, getRails, loadRails, areStationsConnected, getPath, setOnRailPlaceCheckConn };
 }

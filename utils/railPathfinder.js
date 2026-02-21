@@ -43,5 +43,37 @@ export function createRailPathfinder(occupiedTiles) {
         return false;
     }
 
-    return { areStationsConnected };
+    function getPath(x1, y1, x2, y2) {
+        if (!occupiedTiles.has(`${x1},${y1}`) || !occupiedTiles.has(`${x2},${y2}`)) return null;
+        if (x1 === x2 && y1 === y2) return [{ x: x1, y: y1 }];
+    
+        const visited = new Map(); // key -> parentKey
+        const queue = [`${x1},${y1}`];
+        visited.set(`${x1},${y1}`, null);
+        const target = `${x2},${y2}`;
+    
+        while (queue.length > 0) {
+            const current = queue.shift();
+            if (current === target) {
+                const path = [];
+                let node = current;
+                while (node !== null) {
+                    const [nx, ny] = node.split(',').map(Number);
+                    path.push({ x: nx, y: ny });
+                    node = visited.get(node);
+                }
+                return path.reverse();
+            }
+            const [cx, cy] = current.split(',').map(Number);
+            for (const neighbor of getNeighborKeys(cx, cy)) {
+                if (!visited.has(neighbor)) {
+                    visited.set(neighbor, current);
+                    queue.push(neighbor);
+                }
+            }
+        }
+        return null;
+    }
+
+    return { areStationsConnected, getPath };
 }

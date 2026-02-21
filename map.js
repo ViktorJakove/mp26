@@ -9,7 +9,6 @@ import { setupMouseControls } from "./mouseControls.js";
 import { createStationManager } from "./stationManager.js";
 import { createRouteChecker } from "./utils/routeChecker.js";
 import { createRailSelectorRenderer } from "./utils/renderers/railSeclectorRenderer.js";
-import { RAIL_TYPES } from "./enums/railTypes.js";
 
 //pixi setup
 const app = createApp();
@@ -36,7 +35,7 @@ const getAreas = () => areas;
 
 //rends
 const renderers = creatRenderers(app, camera, getGridScale, cellSize, getAreas, getLevel);
-const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer } = renderers;
+const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer, trainRenderer } = renderers;
 const railSelector = createRailSelectorRenderer(app,getGridScale);
 
 //graphics
@@ -45,13 +44,18 @@ fgContainer.zIndex = 10;
 const { getHighlightedTile } = setupTileHighlight(app, camera, () => gridScale, cellSize, () => drawGraphics(), areas);
 const{ drawGraphics } = createDrawGraphics(app, camera, getGridScale, cellSize, getLevel, getHighlightedTile, getPlacementMode, getAreas, renderers, fgContainer);
 
-const { addLevel, addStations } = createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel, setLevel, railRenderer);
+const { addLevel, addStations, spawnTrainsForConnectedRoutes } = createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel, setLevel, railRenderer, trainRenderer);
 
 const {checkRouteConnections} = createRouteChecker(stationRenderer, railRenderer);
+
 railRenderer.setOnRailPlaceCheckConn(()=>{
     const result = checkRouteConnections();
-    const allConnected = result.length > 0 && result.every(route => route.connected);
-    if(allConnected)addStations();
+
+    const connectedIndices = result.filter(r => r.connected).map(r => r.routeIndex);
+    spawnTrainsForConnectedRoutes(connectedIndices);
+
+    const allConnected = result.length > 0 && result.every(r => r.connected);
+    if (allConnected) addStations();
 })
 
 

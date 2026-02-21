@@ -29,7 +29,7 @@ export function createStationRenderer(app, camera, getGridScale, cellSize) {
 
     function getPooledText() {
         const text = textPool.pop() || new PIXI.Text('');
-        // reset to avoid style bleed from previous use
+        //reset
         text.text = '';
         text.style = {};
         text.anchor.set(0);
