@@ -7,8 +7,9 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize) {
 
     const trains = [];
 
-    const TRAIN_SPEED = 0.04;
+    const TRAIN_SPEED = 3;
     const TRAIN_SIZE = 0.6;
+    const STATION_WAIT_TIME = 3500; //ms
 
     /**
      * @param {Array<{x,y}>} path
@@ -22,7 +23,9 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize) {
             direction: 1,      // 1 = dopredu, -1 = dozadu
             color,
             routeIndex,
-            speed: TRAIN_SPEED + Math.random() * 0.02
+            speed: TRAIN_SPEED,
+            waitTimer: 0,
+            waiting: false
         });
     }
     function hasTrainForRoute(routeIndex) {
@@ -33,20 +36,26 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize) {
         trains.length = 0;
     }
 
-    function clearTrains() {
-        trains.length = 0;
-    }
-
-    app.ticker.add((delta) => {
+    app.ticker.add(() => {
         for (const train of trains) {
-            train.progress += train.direction * train.speed * delta;
+
+            if(train.waiting){
+                train.waitTimer += app.ticker.deltaMS;
+                if(train.waitTimer >= STATION_WAIT_TIME){
+                    train.waiting = false;
+                    train.waitTimer = 0;
+                    train.direction *= -1; //změna směru
+                }else continue; //nehybat!!
+            }
+            
+            train.progress += train.direction * train.speed / 1000 * app.ticker.deltaMS;
 
             if (train.progress >= train.path.length - 1) {
                 train.progress = train.path.length - 1;
-                train.direction = -1;
+                train.waiting = true; //čekán
             } else if (train.progress <= 0) {
                 train.progress = 0;
-                train.direction = 1;
+                train.waiting = true;
             }
         }
         drawTrains();
