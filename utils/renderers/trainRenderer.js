@@ -37,7 +37,6 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize) {
     }
 
     function blocked(train, trainIndex) {
-        // Get the actual next tile coordinates the train wants to move into
         let nextProgressIndex;
         if (train.direction === 1) {
             nextProgressIndex = Math.floor(train.progress) + 1;
@@ -53,11 +52,9 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize) {
     
             const other = trains[j];
     
-            // Get the actual world tile the other train currently occupies
             const otherTileIndex = Math.floor(other.progress);
             const otherTile = other.path[Math.min(otherTileIndex, other.path.length - 1)];
     
-            // Compare actual world coordinates
             if (otherTile.x === nextTile.x && otherTile.y === nextTile.y) {
                 return true;
             }
