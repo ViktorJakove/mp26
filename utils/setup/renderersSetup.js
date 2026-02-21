@@ -5,7 +5,7 @@ import{ createPointerTextRenderer } from "../renderers/pointerTextRenderer.js";
 import { createTrainRenderer } from "../renderers/trainRenderer.js";
 
 //init
-export function creatRenderers(app, camera,getGridScale,cellSize,getAreas,getLevel){
+export function creatRenderers(app, camera,getGridScale,cellSize,getAreas,getLevel, addMoney){
     
     //pointer hint
     const pointerTextRenderer = createPointerTextRenderer(app);
@@ -18,7 +18,7 @@ export function creatRenderers(app, camera,getGridScale,cellSize,getAreas,getLev
     //kolejs
     const railRenderer = createRailRenderer(app, camera, getGridScale, cellSize,getAreas,getLevel);
     //vlaky
-    const trainRenderer = createTrainRenderer(app, camera, getGridScale, cellSize);
+    const trainRenderer = createTrainRenderer(app, camera, getGridScale, cellSize, addMoney);
 
     return {areaRenderer,stationRenderer,railRenderer,pointerTextRenderer, trainRenderer};
 }

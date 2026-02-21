@@ -1,13 +1,14 @@
 import { SCREEN_DIMENSIONS } from "../../screenDimensions.js";
+import { VAGONS_PER_PEEPS } from "../../enums/vagonsPerPeeps.js";
 
-export function createTrainRenderer(app, camera, getGridScale, cellSize) {
+export function createTrainRenderer(app, camera, getGridScale, cellSize, addMoney) {
     const trainContainer = new PIXI.Container();
     trainContainer.zIndex = 5;
     app.stage.addChild(trainContainer);
 
     const trains = [];
 
-    const TRAIN_SPEED = 8; /*3*/ 
+    const TRAIN_SPEED = 15; /*3*/ 
     const TRAIN_SIZE = 0.6;
     const STATION_WAIT_TIME = 3500; //ms
     const WAGON_OFFSET = 0.75;
@@ -16,14 +17,23 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize) {
      * @param {Array<{x,y}>} path
      * @param {number} color
      */
-    function addTrain(path, color, routeIndex) {
+    function addTrain(path, color, routeIndex, routeCities = []) {
         if (!path) return;
 
-        //TEMP podle populace měst
-        const wagons = [
+        
+        const avgPeeps = ((routeCities[0] ?? 0) + (routeCities[1] ?? 0)) / 2;
+        console.log("avgPeeps", avgPeeps);
+
+        let wagons = [];
+        let getPeepIndex = 0;
+
+        for (let i = 0; i < VAGONS_PER_PEEPS.length; i++) if (avgPeeps > VAGONS_PER_PEEPS[i]) getPeepIndex += i;
+        for (let w = 0; w < getPeepIndex; w++) { wagons.push ({ progress: -WAGON_OFFSET * (w + 1) }); }
+
+        /*const wagons = [
             { progress: -WAGON_OFFSET },
             { progress: -WAGON_OFFSET * 2 },
-        ];
+        ];*/
         trains.push({
             path,
             progress: 0,
@@ -33,7 +43,8 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize) {
             speed: TRAIN_SPEED,
             waitTimer: 0,
             waiting: false,
-            wagons
+            wagons,
+            routeCities
         });
     }
     function hasTrainForRoute(routeIndex) {
@@ -61,15 +72,15 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize) {
             const other = trains[j];
     
             const otherTileIndex = Math.floor(other.progress);
-        const otherTile = other.path[Math.min(otherTileIndex, other.path.length - 1)];
-        if (otherTile.x === nextTile.x && otherTile.y === nextTile.y) return true;
+            const otherTile = other.path[Math.min(otherTileIndex, other.path.length - 1)];
+            if (otherTile.x === nextTile.x && otherTile.y === nextTile.y) return true;
 
-        for (const wagon of other.wagons) {
-            const wagonProgress = other.progress + wagon.progress * other.direction;
-            const wagonTileIndex = Math.max(0, Math.min(Math.floor(wagonProgress), other.path.length - 1));
-            const wagonTile = other.path[wagonTileIndex];
-            if (wagonTile && wagonTile.x === nextTile.x && wagonTile.y === nextTile.y) return true;
-        }
+            for (const wagon of other.wagons) {
+                const wagonProgress = other.progress + wagon.progress * other.direction;
+                const wagonTileIndex = Math.max(0, Math.min(Math.floor(wagonProgress), other.path.length - 1));
+                const wagonTile = other.path[wagonTileIndex];
+                if (wagonTile && wagonTile.x === nextTile.x && wagonTile.y === nextTile.y) return true;
+            }
         }
     
         return false;
@@ -85,7 +96,7 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize) {
                 for (const wagon of train.wagons) {
                     const delta = train.speed / 1000 * app.ticker.deltaMS;
                     if (wagon.progress < 0) wagon.progress = Math.min(0, wagon.progress + delta);
-                    if (wagon.progress > 0) wagon.progress = Math.max(0, wagon.progress - delta);
+                    else if (wagon.progress > 0) wagon.progress = Math.max(0, wagon.progress - delta);
                 }
             
                 if (train.waitTimer >= STATION_WAIT_TIME) {
@@ -100,15 +111,22 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize) {
             if (blocked(train, i)) continue;
     
             train.progress += train.direction * train.speed / 1000 * app.ticker.deltaMS;
-    
+            
+            if(train.waiting) continue;
             if (train.progress >= train.path.length - 1) {
                 train.progress = train.path.length - 1;
                 train.waiting = true;
                 train.waitTimer = 0;
+                //temp podle prumeru populace
+                addMoney(train.path.length * 10);
+                console.log(train.path.length * 10);
             } else if (train.progress <= 0) {
                 train.progress = 0;
                 train.waiting = true;
                 train.waitTimer = 0;
+                //temp podle prumeru populace
+                addMoney(train.path.length * 10);
+                console.log(train.path.length * 10);
             }
         }
         if (trains.length > 0) drawTrains();

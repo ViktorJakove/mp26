@@ -68,7 +68,7 @@ export function createStationManager(stationRenderer, areaRenderer, drawGraphics
                 adjacentTiles.sort(() => Math.random() - 0.5);
     
                 const tile = adjacentTiles.find(t => !stationRenderer.isTileOccupied(t.x, t.y)) ?? adjacentTiles[0];
-                stationRenderer.addStation(tile.x, tile.y, routeColor, stationIndex * 200, i);
+                stationRenderer.addStation(tile.x, tile.y, routeColor, stationIndex * 200, i, cityArea.peeps);
                 if (railRenderer.isTileOccupied(tile.x, tile.y)) railRenderer.removeRail(tile.x, tile.y);
                 stationTiles.push(tile);
                 stationIndex++;
@@ -79,7 +79,10 @@ export function createStationManager(stationRenderer, areaRenderer, drawGraphics
                     stationTiles[0].x, stationTiles[0].y,
                     stationTiles[1].x, stationTiles[1].y
                 );
-                if (path) trainRenderer.addTrain(path, routeColor);
+                if (path) trainRenderer.addTrain(path, routeColor, i, {
+                    cityA: areas.find(a => a.name === cityA),
+                    cityB: areas.find(a => a.name === cityB)
+                });
             }
         }
     
@@ -105,7 +108,7 @@ export function createStationManager(stationRenderer, areaRenderer, drawGraphics
                 if (!path) continue;
 
                 const color = routeColors.get(routeIndex) ?? 0xffffff;
-                trainRenderer.addTrain(path, color, routeIndex);
+                trainRenderer.addTrain(path, color, routeIndex, [a.peeps, b.peeps]);
             } else {
                 trainRenderer.removeTrainForRoute(routeIndex);
             }

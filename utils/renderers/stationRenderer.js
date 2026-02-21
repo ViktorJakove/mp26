@@ -52,10 +52,8 @@ export function createStationRenderer(app, camera, getGridScale, cellSize) {
         stationDirty = true;
     }
 
-    let stationIndex = 0;
-
-    function addStation(tileX, tileY, color, delay, routeIndex) {
-        stations.push({ x: tileX, y: tileY, color, alpha: 0, delay, index: routeIndex});
+    function addStation(tileX, tileY, color, delay, routeIndex, peeps) {
+        stations.push({ x: tileX, y: tileY, color, alpha: 0, delay, index: routeIndex, peeps});
         stationDirty = true;
     }
 
@@ -140,7 +138,7 @@ export function createStationRenderer(app, camera, getGridScale, cellSize) {
         }
     }
     function getStations(){
-        return stations.map(s => ({x: s.x, y: s.y, color: s.color, index: s.index}));
+        return stations.map(s => ({x: s.x, y: s.y, color: s.color, index: s.index, peeps :s.peeps}));
     }
 
     return { addStation, drawStations, isTileOccupied, setShiftPressed, markDirty, loadStations, getStations };
