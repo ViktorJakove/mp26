@@ -7,7 +7,7 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize) {
 
     const trains = [];
 
-    const TRAIN_SPEED = 3;
+    const TRAIN_SPEED = 8; /*3*/ 
     const TRAIN_SIZE = 0.6;
     const STATION_WAIT_TIME = 3500; //ms
     const WAGON_OFFSET = 0.75;
@@ -82,10 +82,18 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize) {
     
             if (train.waiting) {
                 train.waitTimer += app.ticker.deltaMS;
+                for (const wagon of train.wagons) {
+                    const delta = train.speed / 1000 * app.ticker.deltaMS;
+                    if (wagon.progress < 0) wagon.progress = Math.min(0, wagon.progress + delta);
+                    if (wagon.progress > 0) wagon.progress = Math.max(0, wagon.progress - delta);
+                }
+            
                 if (train.waitTimer >= STATION_WAIT_TIME) {
                     train.waiting = false;
                     train.waitTimer = 0;
                     train.direction *= -1;
+                    // reset offset 
+                    for (let w = 0; w < train.wagons.length; w++) train.wagons[w].progress = WAGON_OFFSET * (w + 1);
                 } else continue;
             }
     
@@ -141,23 +149,24 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize) {
     //lokomotiva
     const g = new PIXI.Graphics();
     g.beginFill(train.color, 1);
-    g.drawRoundedRect(screenX + offset, screenY + offset, size, size, 4);
+    g.drawRect(screenX + offset, screenY + offset, size, size, 4);
     g.endFill();
     trainContainer.addChild(g);
 
     //vagonky
     for (const wagon of train.wagons) {
-        const wagonProgress = train.progress - train.direction * Math.abs(wagon.progress);
-        const clampedProgress = Math.max(0, Math.min(wagonProgress, train.path.length - 1));
-    
+        const rawProgress = train.progress - train.direction * Math.abs(wagon.progress);
+        const wagonProgress = Math.max(0, Math.min(train.path.length - 1, rawProgress));
+
         const { x: wwx, y: wwy } = getWagonWorldPos(train, wagonProgress);
+    
     
         const wScreenX = wwx - dimensions.worldLeft;
         const wScreenY = wwy - dimensions.worldTop;
     
         const wg = new PIXI.Graphics();
         wg.beginFill(train.color, 0.75);
-        wg.drawRoundedRect(wScreenX + offset, wScreenY + offset, size, size, 4);
+        wg.drawRect(wScreenX + offset, wScreenY + offset, size, size, 4);
         wg.endFill();
         trainContainer.addChild(wg);
     }
