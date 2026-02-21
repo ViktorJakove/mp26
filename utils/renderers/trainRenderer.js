@@ -10,13 +10,20 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize) {
     const TRAIN_SPEED = 3;
     const TRAIN_SIZE = 0.6;
     const STATION_WAIT_TIME = 3500; //ms
+    const WAGON_OFFSET = 0.75;
 
     /**
      * @param {Array<{x,y}>} path
      * @param {number} color
      */
     function addTrain(path, color, routeIndex) {
-        if (!path || path.length < 2) return;
+        if (!path) return;
+
+        //TEMP podle populace měst
+        const wagons = [
+            { progress: -WAGON_OFFSET },
+            { progress: -WAGON_OFFSET * 2 },
+        ];
         trains.push({
             path,
             progress: 0,
@@ -25,7 +32,8 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize) {
             routeIndex,
             speed: TRAIN_SPEED,
             waitTimer: 0,
-            waiting: false
+            waiting: false,
+            wagons
         });
     }
     function hasTrainForRoute(routeIndex) {
@@ -53,11 +61,15 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize) {
             const other = trains[j];
     
             const otherTileIndex = Math.floor(other.progress);
-            const otherTile = other.path[Math.min(otherTileIndex, other.path.length - 1)];
-    
-            if (otherTile.x === nextTile.x && otherTile.y === nextTile.y) {
-                return true;
-            }
+        const otherTile = other.path[Math.min(otherTileIndex, other.path.length - 1)];
+        if (otherTile.x === nextTile.x && otherTile.y === nextTile.y) return true;
+
+        for (const wagon of other.wagons) {
+            const wagonProgress = other.progress + wagon.progress * other.direction;
+            const wagonTileIndex = Math.max(0, Math.min(Math.floor(wagonProgress), other.path.length - 1));
+            const wagonTile = other.path[wagonTileIndex];
+            if (wagonTile && wagonTile.x === nextTile.x && wagonTile.y === nextTile.y) return true;
+        }
         }
     
         return false;
@@ -94,12 +106,23 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize) {
         if (trains.length > 0) drawTrains();
     });
 
+    function getWagonWorldPos(train, wagonProgress) {
+        const clampedProgress = Math.max(0, Math.min(wagonProgress, train.path.length - 1));
+        const index = Math.floor(clampedProgress);
+        const nextIndex = Math.min(index + 1, train.path.length - 1);
+        const t = clampedProgress - index;
     
+        const current = train.path[index];
+        const next = train.path[nextIndex];
+    
+        return {
+            x: (current.x + t * (next.x - current.x)) * cellSize,
+            y: (current.y + t * (next.y - current.y)) * cellSize,
+        };
+    }
 
     function drawTrains() {
-        while (trainContainer.children.length > 0) {
-            trainContainer.removeChildAt(0);
-        }
+        while (trainContainer.children.length > 0) trainContainer.removeChildAt(0);
 
         if (trains.length === 0) return;
 
@@ -109,20 +132,35 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize) {
         for (const train of trains) {
             const { x: wx, y: wy } = getInterpolatedWorldPos(train);
 
-            const screenX = wx - dimensions.worldLeft;
-            const screenY = wy - dimensions.worldTop;
+    const screenX = wx - dimensions.worldLeft;
+    const screenY = wy - dimensions.worldTop;
 
-            const offset = cellSize * (1 - TRAIN_SIZE) / 2;
-            const size = cellSize * TRAIN_SIZE;
+    const offset = cellSize * (1 - TRAIN_SIZE) / 2;
+    const size = cellSize * TRAIN_SIZE;
 
-            const g = new PIXI.Graphics();
+    //lokomotiva
+    const g = new PIXI.Graphics();
+    g.beginFill(train.color, 1);
+    g.drawRoundedRect(screenX + offset, screenY + offset, size, size, 4);
+    g.endFill();
+    trainContainer.addChild(g);
 
-            //vlak TEMP
-            g.beginFill(train.color, 1);
-            g.drawRoundedRect(screenX + offset, screenY + offset, size, size, 4);
-            g.endFill();
-
-            trainContainer.addChild(g);
+    //vagonky
+    for (const wagon of train.wagons) {
+        const wagonProgress = train.progress - train.direction * Math.abs(wagon.progress);
+        const clampedProgress = Math.max(0, Math.min(wagonProgress, train.path.length - 1));
+    
+        const { x: wwx, y: wwy } = getWagonWorldPos(train, wagonProgress);
+    
+        const wScreenX = wwx - dimensions.worldLeft;
+        const wScreenY = wwy - dimensions.worldTop;
+    
+        const wg = new PIXI.Graphics();
+        wg.beginFill(train.color, 0.75);
+        wg.drawRoundedRect(wScreenX + offset, wScreenY + offset, size, size, 4);
+        wg.endFill();
+        trainContainer.addChild(wg);
+    }
         }
     }
     function getInterpolatedWorldPos(train) {
