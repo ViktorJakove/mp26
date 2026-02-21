@@ -36,30 +36,68 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize) {
         trains.length = 0;
     }
 
+    function blocked(train, trainIndex) {
+        // Get the actual next tile coordinates the train wants to move into
+        let nextProgressIndex;
+        if (train.direction === 1) {
+            nextProgressIndex = Math.floor(train.progress) + 1;
+        } else {
+            nextProgressIndex = Math.ceil(train.progress) - 1;
+        }
+        nextProgressIndex = Math.max(0, Math.min(nextProgressIndex, train.path.length - 1));
+    
+        const nextTile = train.path[nextProgressIndex];
+    
+        for (let j = 0; j < trains.length; j++) {
+            if (j === trainIndex) continue;
+    
+            const other = trains[j];
+    
+            // Get the actual world tile the other train currently occupies
+            const otherTileIndex = Math.floor(other.progress);
+            const otherTile = other.path[Math.min(otherTileIndex, other.path.length - 1)];
+    
+            // Compare actual world coordinates
+            if (otherTile.x === nextTile.x && otherTile.y === nextTile.y) {
+                return true;
+            }
+        }
+    
+        return false;
+    }
+    
     app.ticker.add(() => {
-        for (const train of trains) {
-
-            if(train.waiting){
+    
+        for (let i = 0; i < trains.length; i++) {
+            const train = trains[i];
+    
+            if (train.waiting) {
                 train.waitTimer += app.ticker.deltaMS;
-                if(train.waitTimer >= STATION_WAIT_TIME){
+                if (train.waitTimer >= STATION_WAIT_TIME) {
                     train.waiting = false;
                     train.waitTimer = 0;
-                    train.direction *= -1; //změna směru
-                }else continue; //nehybat!!
+                    train.direction *= -1;
+                } else continue;
             }
-            
+    
+            if (blocked(train, i)) continue;
+    
             train.progress += train.direction * train.speed / 1000 * app.ticker.deltaMS;
-
+    
             if (train.progress >= train.path.length - 1) {
                 train.progress = train.path.length - 1;
-                train.waiting = true; //čekán
+                train.waiting = true;
+                train.waitTimer = 0;
             } else if (train.progress <= 0) {
                 train.progress = 0;
                 train.waiting = true;
+                train.waitTimer = 0;
             }
         }
-        drawTrains();
+        if (trains.length > 0) drawTrains();
     });
+
+    
 
     function drawTrains() {
         while (trainContainer.children.length > 0) {
@@ -113,5 +151,5 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize) {
         drawTrains();
     }
 
-    return { addTrain, clearTrains, markDirty, hasTrainForRoute, removeTrainForRoute };
+    return { addTrain, clearTrains, markDirty, hasTrainForRoute, removeTrainForRoute, drawTrains};
 }

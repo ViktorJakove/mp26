@@ -2,7 +2,7 @@ import { SCREEN_DIMENSIONS } from "./screenDimensions.js";
 import { AREA_GEN_DATA } from "./mapGenData/areaGenData.js";
 
 export function createDrawGraphics(app, camera, getGridScale, cellSize, getLevel, getHighlightedTile, getPlacementMode, getAreas, renderers, fgContainer) {
-    const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer } = renderers;
+    const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer, trainRenderer} = renderers;
 
     const grid = new PIXI.Graphics();
     app.stage.addChild(grid);
@@ -95,6 +95,7 @@ export function createDrawGraphics(app, camera, getGridScale, cellSize, getLevel
         areaRenderer.drawAreas(getAreas());
         stationRenderer.drawStations();
         railRenderer.drawRails();
+        if (trainRenderer) trainRenderer.drawTrains();
         drawForeground();
     }
 
