@@ -49,6 +49,7 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
                         areaRenderer.setShiftPressed(true);
                         setShiftPressed(true);
                         if (stationRenderer)stationRenderer.setShiftPressed(true);
+                        pointerTextRenderer.refresh(() => gridScale);
                         keysDown.add(event.code);
                         drawGraphics();
                     }
@@ -84,6 +85,7 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
                     areaRenderer.setShiftPressed(false);
                     setShiftPressed(false);
                     if (stationRenderer)stationRenderer.setShiftPressed(false);
+                    pointerTextRenderer.refresh(() => gridScale);
                     drawGraphics();
                     break;
             }

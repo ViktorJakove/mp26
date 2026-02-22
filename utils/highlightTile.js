@@ -1,7 +1,7 @@
 import { AREA_TYPES } from "../enums/areaTypes.js";
 import {updatePointerTextRenderer} from "./renderers/pointerTextRenderer.js";
 import {getShiftPressed} from "./shiftState.js";
-export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGraphics, areas) {
+export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGraphics, areas, getPlacementMode) {
     let highlightedTile = null;
 
     app.view.addEventListener("mousemove", (event) => {
@@ -9,6 +9,7 @@ export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGrap
             //dynamicky ziskat aktualni gridscale (ashift)
             const gridScale = getGridScale(); 
             const shiftPressed = getShiftPressed();
+            const placementMode = getPlacementMode();
 
             const mouseX = event.clientX - app.screen.width / 2;
             const mouseY = event.clientY - app.screen.height / 2;
@@ -33,7 +34,7 @@ export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGrap
                     if (shiftPressed && (placedArea.type === AREA_TYPES.CITY || placedArea.type === AREA_TYPES.LAKE || placedArea.type === AREA_TYPES.INDIANS ||placedArea.type === AREA_TYPES.FOREST || placedArea.type === AREA_TYPES.ROCK)) {
                         obstacleInfo = placedArea.description;
                         return true;
-                    }else if(placedArea.type === AREA_TYPES.FOREST || placedArea.type === AREA_TYPES.ROCK || placedArea.type === AREA_TYPES.INDIANS || placedArea.type === AREA_TYPES.BISONS){
+                    }else if(placementMode && (placedArea.type === AREA_TYPES.FOREST || placedArea.type === AREA_TYPES.ROCK || placedArea.type === AREA_TYPES.INDIANS || placedArea.type === AREA_TYPES.BISONS)){
                         obstacle = placedArea.type;
                         obstacleInfo = obstacle.buildOverCost ? "+"+obstacle.buildOverCost + "$" : obstacle.buildOverInfo;
                         return true;
