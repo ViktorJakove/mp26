@@ -48,7 +48,8 @@ function tryGeneration(level, lockArea){
 
     for (const area of sortedAreas) {
         let cycles = 0;
-        const maxCycles = 1000;
+        //tady
+        const maxCycles = 5000;
         let placed = false;
 
         while(cycles < maxCycles){
@@ -57,20 +58,25 @@ function tryGeneration(level, lockArea){
             const y = getRandom(-areaHeight / 2 + 1, areaHeight / 2 - 1 - area.sizeY);
             const collision = placedAreas.some((placedArea) =>{
                 
-                //mesta maji mezi sebou 2 pole, ostatni 1 pole
+                //mesta 2, osattni 1
                 const gap = area.type === CITY && placedArea.type === CITY ? 2 : 1;
-                //overlap check
-                if(!((x + area.sizeX+gap <= placedArea.x || x >= placedArea.x + placedArea.sizeX+gap) &&
-                (y + area.sizeY-gap <= placedArea.y || y >= placedArea.y + placedArea.sizeY-gap))) return true;
+
+                if (!(x + area.sizeX + gap <= placedArea.x || 
+                    x >= placedArea.x + placedArea.sizeX + gap ||
+                    y + area.sizeY + gap <= placedArea.y || 
+                    y >= placedArea.y + placedArea.sizeY + gap)) {
+                    return true; 
+                }
                 
                 //city doc-neighbor distance check
-                const MIN_CITY_XDISTANCE = areaWidth/4;
+                const MIN_CITY_XDISTANCE = (level === 1) ? areaWidth / 4 : 0;
 
                 if(area.type === CITY && placedArea.type === CITY){
                     const placedAreaOrderInDoc = cityOrderMap.get(placedArea.name) ?? -1;
                     return Math.abs(area.orderInDoc - placedAreaOrderInDoc) === 1 && Math.min(Math.abs(x - placedArea.x),Math.abs(x + area.sizeX - placedArea.x),Math.abs(x - placedArea.x + placedArea.sizeX)) <= MIN_CITY_XDISTANCE;
                 }
             });
+
 
             if(!collision){
                 placedAreas.push(new Area(
@@ -80,7 +86,8 @@ function tryGeneration(level, lockArea){
                     area.sizeX,
                     area.sizeY,
                     area.name,
-                    area.type === CITY ? getRandom(area.peepsMin, area.peepsMax) : 0
+                    area.type === CITY ? getRandom(area.peepsMin, area.peepsMax) : 0,
+                    area.description ? area.description : ""
                 ));
                 placed = true;
                 break;
@@ -103,78 +110,102 @@ function tryGeneration(level, lockArea){
     const occupiedSnakeSet = new Set();
 
     for (const area of sortedSnakeAreas) {
-        let x = getRandom(-areaWidth / 2 + 1, areaWidth / 2 - 1);
-        let y = getRandom(-areaHeight / 2 + 1, areaHeight / 2 - 1);
 
-        let lastDir = null;
+        let snakePlaced = false;
+        let snakeAttempts = 0;
+        const maxSnakeAttempts = area.length*3; // how many times we retry whole snake
     
-    for (let i = 0; i < area.length; i++) {
-            let placed = false;
-            let cycles = 0;
-            const maxCycles = area.length * area.thickness * 3;
+        while (!snakePlaced && snakeAttempts < maxSnakeAttempts) {
+            snakeAttempts++;
     
-            while (!placed && cycles < maxCycles) {
-                cycles++;
-
-                //smer (pro sutry neopakujici se - jsou min rovny)
-                let OKdirections = DIRECTIONS;
-
-                if(area.type === ROCK && lastDir){
-                    OKdirections = DIRECTIONS.filter(d => !isOppositeDir(d, lastDir));
-                }
-                const dir = OKdirections[getRandom(0, OKdirections.length - 1)];
-                lastDir = dir;
-
-                const newX = x + dir.xChange * area.thickness;
-                const newY = y + dir.yChange * area.thickness;
-
-                const withinBounds = (
-                    newX >= -areaWidth / 2 &&
-                    newX + area.thickness <= areaWidth / 2 &&
-                    newY >= -areaHeight / 2 &&
-                    newY + area.thickness <= areaHeight / 2
-                );
-
-                const collision = squareCollides(
-                    newX,
-                    newY,
-                    area.thickness,
-                    placedAreas,
-                    occupiedSnakeSet
-                );
+            let x = getRandom(-areaWidth / 2 + 1, areaWidth / 2 - 1);
+            let y = getRandom(-areaHeight / 2 + 1, areaHeight / 2 - 1);
+            let lastDir = null;
     
-                if (withinBounds && !collision) {
-                    for (let dx = 0; dx < area.thickness; dx++) {
-                        for (let dy = 0; dy < area.thickness; dy++) {
-
-                            if (!shouldPlaceTile(area)) continue;
-                            const tileX = newX + dx;
-                            const tileY = newY + dy;
-                            placedSnakeAreaParts.push(
-                                new Area(
-                                    area.type,
-                                    tileX,
-                                    tileY,
-                                    1,
-                                    1,
-                                    area.name,
-                                    0
-                                )
-                            );
-                            occupiedSnakeSet.add(`${tileX},${tileY}`);
-                        }
+            const tempParts = [];           // store tiles for this attempt
+            const tempOccupied = new Set(); // local collision set
+            let failed = false;
+    
+            for (let i = 0; i < area.length; i++) {
+                let placed = false;
+                let cycles = 0;
+                const maxCycles = area.length * area.thickness * 3;
+    
+                while (!placed && cycles < maxCycles) {
+                    cycles++;
+    
+                    let OKdirections = DIRECTIONS;
+                    if (area.type === ROCK && lastDir) {
+                        OKdirections = DIRECTIONS.filter(d => !isOppositeDir(d, lastDir));
                     }
-                    x = newX;
-                    y = newY;
-                    placed = true;
+    
+                    const dir = OKdirections[getRandom(0, OKdirections.length - 1)];
+                    lastDir = dir;
+    
+                    const newX = x + dir.xChange * area.thickness;
+                    const newY = y + dir.yChange * area.thickness;
+    
+                    const withinBounds = (
+                        newX >= -areaWidth / 2 &&
+                        newX + area.thickness <= areaWidth / 2 &&
+                        newY >= -areaHeight / 2 &&
+                        newY + area.thickness <= areaHeight / 2
+                    );
+    
+                    const collision = squareCollides(
+                        newX,
+                        newY,
+                        area.thickness,
+                        placedAreas,
+                        occupiedSnakeSet
+                    ) || squareCollides(
+                        newX,
+                        newY,
+                        area.thickness,
+                        [],
+                        tempOccupied
+                    );
+    
+                    if (withinBounds && !collision) {
+                        for (let dx = 0; dx < area.thickness; dx++) {
+                            for (let dy = 0; dy < area.thickness; dy++) {
+    
+                                if (!shouldPlaceTile(area)) continue;
+    
+                                const tileX = newX + dx;
+                                const tileY = newY + dy;
+    
+                                tempParts.push(
+                                    new Area(area.type, tileX, tileY, 1, 1, area.name, 0,area.description ? area.description : "")
+                                );
+    
+                                tempOccupied.add(`${tileX},${tileY}`);
+                            }
+                        }
+    
+                        x = newX;
+                        y = newY;
+                        placed = true;
+                    }
+                }
+    
+                if (!placed) {
+                    failed = true;
+                    break; // restart this snake
                 }
             }
-    
-            if (!placed) return null;
+            if (!failed) {
+                for (const part of tempParts) {
+                    placedSnakeAreaParts.push(part);
+                    occupiedSnakeSet.add(`${part.x},${part.y}`);
+                }
+                snakePlaced = true;
+            }
         }
+        if (!snakePlaced) return null;
     }
     
-    placedSnakeAreaParts.push(new Area(LOCK,-AREA_GEN_DATA.areaSize[level][0]/2,-AREA_GEN_DATA.areaSize[level][1]/2,AREA_GEN_DATA.areaSize[level][0],AREA_GEN_DATA.areaSize[level][1],"",0));
+    placedSnakeAreaParts.push(new Area(LOCK,-AREA_GEN_DATA.areaSize[level][0]/2,-AREA_GEN_DATA.areaSize[level][1]/2,AREA_GEN_DATA.areaSize[level][0],AREA_GEN_DATA.areaSize[level][1],"",0,""));
 
     return placedAreas.concat(placedSnakeAreaParts);
 }

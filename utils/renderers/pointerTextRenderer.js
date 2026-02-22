@@ -19,27 +19,28 @@ export function createPointerTextRenderer(app){
             });
             pointerText.alpha = 0.8;
             pointerContainer.addChild(pointerText);
-            togglePointerText(false);
+            pointerText.visible = false;
         }
         return pointerText;
     }
 
-    function updatePointerText(text,x,y, gridScale){
+    function updatePointerText(text, screenX, screenY, gridScale){
         const pointerText = getPointerText();
         pointerText.text = text;
-        pointerText.x = x + 15 / gridScale;
-        pointerText.y = y + 10 / gridScale;
-        if (gridScale) {
-            pointerText.scale.set(1 / gridScale, 1 / gridScale);
-        }
+        
+        pointerText.x = screenX + 15;
+        pointerText.y = screenY + 10;
+        
+        pointerText.scale.set(1 / gridScale, 1 / gridScale);
+        
+        pointerText.visible = text.length > 0;
     }
+    
+    
     function togglePointerText(value) {
-        if (pointerText) {
-            pointerText.visible = value;
-        }
     }
 
-    function updateMousePosition(x, y,obstacleName) {
+    function updateMousePosition(x, y, obstacleName) {
         mousePosition.x = x;
         mousePosition.y = y;
         lastObstacle = obstacleName;
@@ -48,9 +49,8 @@ export function createPointerTextRenderer(app){
     function refresh(getGridScale) {
         const gridScale = getGridScale();
         const text = lastObstacle ? lastObstacle : "";
-        const textX = mousePosition.x / gridScale;
-        const textY = mousePosition.y / gridScale;
-        updatePointerText(text, textX, textY, gridScale);
+        
+        updatePointerText(text, mousePosition.x, mousePosition.y, gridScale);
     }
 
     return {
@@ -59,16 +59,14 @@ export function createPointerTextRenderer(app){
         updateMousePosition,
         refresh
     };
-
 }
+
 export function updatePointerTextRenderer(obstacleInfo, screenMouseX, screenMouseY, getGridScale) {
     if (window.pointerTextRenderer) {
-        const text = obstacleInfo ? obstacleInfo: "";
+        const text = obstacleInfo ? obstacleInfo : "";
         const gridScale = getGridScale();
-        let textX = screenMouseX /gridScale;
-        let textY = screenMouseY /gridScale;
-
-        window.pointerTextRenderer.updatePointerText(text, textX , textY, gridScale);
+        
+        window.pointerTextRenderer.updatePointerText(text, screenMouseX, screenMouseY, gridScale);
         window.pointerTextRenderer.updateMousePosition(screenMouseX, screenMouseY, obstacleInfo);
     }
 }

@@ -29,7 +29,7 @@ export function createStationRenderer(app, camera, getGridScale, cellSize) {
 
     function getPooledText() {
         const text = textPool.pop() || new PIXI.Text('');
-        // reset to avoid style bleed from previous use
+        //reset
         text.text = '';
         text.style = {};
         text.anchor.set(0);
@@ -52,10 +52,8 @@ export function createStationRenderer(app, camera, getGridScale, cellSize) {
         stationDirty = true;
     }
 
-    let stationIndex = 0;
-
-    function addStation(tileX, tileY, color, delay, routeIndex) {
-        stations.push({ x: tileX, y: tileY, color, alpha: 0, delay, index: routeIndex});
+    function addStation(tileX, tileY, color, delay, routeIndex, peeps) {
+        stations.push({ x: tileX, y: tileY, color, alpha: 0, delay, index: routeIndex, peeps});
         stationDirty = true;
     }
 
@@ -133,5 +131,15 @@ export function createStationRenderer(app, camera, getGridScale, cellSize) {
         stationDirty = false;
     }
 
-    return { addStation, drawStations, isTileOccupied, setShiftPressed, markDirty };
+    function loadStations(data){
+        stations.length = 0;
+        for (const s of data){
+            stations.push({x: s.x, y: s.y, color: s.color, alpha: 0.7, delay: 0, index: s.index});
+        }
+    }
+    function getStations(){
+        return stations.map(s => ({x: s.x, y: s.y, color: s.color, index: s.index, peeps :s.peeps}));
+    }
+
+    return { addStation, drawStations, isTileOccupied, setShiftPressed, markDirty, loadStations, getStations };
 }

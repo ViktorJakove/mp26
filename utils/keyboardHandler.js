@@ -1,4 +1,5 @@
-export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, /**/addLevel, /**/addStations, placementModeObj, areaRenderer, pointerTextRenderer, resetDrag, stationRenderer) {
+import { setShiftPressed } from "./shiftState.js";
+export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, /**/addLevel, /**/addStations, placementModeObj, areaRenderer, pointerTextRenderer, resetDrag, stationRenderer,hudRenderer) {
     const keyboardMapMoveSpeed = 28;
     const keyboardZoomSpeed = zoomSpeed / 2;
     const keysDown = new Set();
@@ -35,6 +36,7 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
                     if (!spacePressed) {
                         spacePressed = true;
                         placementModeObj.placementMode = !placementModeObj.placementMode;
+                        hudRenderer.draw()
                         pointerTextRenderer.togglePointerText(placementModeObj.placementMode);
                         resetDrag();
                     }
@@ -45,7 +47,9 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
                 case "Shift":
                     if (!keysDown.has(event.code)) {
                         areaRenderer.setShiftPressed(true);
+                        setShiftPressed(true);
                         if (stationRenderer)stationRenderer.setShiftPressed(true);
+                        pointerTextRenderer.refresh(() => gridScale);
                         keysDown.add(event.code);
                         drawGraphics();
                     }
@@ -79,7 +83,9 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
                 case "ShiftRight":
                 case "Shift":
                     areaRenderer.setShiftPressed(false);
+                    setShiftPressed(false);
                     if (stationRenderer)stationRenderer.setShiftPressed(false);
+                    pointerTextRenderer.refresh(() => gridScale);
                     drawGraphics();
                     break;
             }

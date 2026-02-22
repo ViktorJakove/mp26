@@ -1,9 +1,9 @@
 export const AREA_GEN_DATA = {
     areaSize: [[30,18],[100,80],[200,200]],
-    cityCount:[4,4,5],
-    lakeCount: [1,2,5],
-    forestCount: [2,2,0],
-    mountainCount: [1,3,0],
-    bisonAreasCount: [1,2,23],
-    indianAreasCount: [0,0,0]
+    cityCount:[5,8,20],
+    lakeCount: [1,7,5],
+    forestCount: [2,10,0],
+    mountainCount: [1,8,0],
+    bisonAreasCount: [1,9,23],
+    indianAreasCount: [0,6,0]
 }
