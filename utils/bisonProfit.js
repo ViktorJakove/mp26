@@ -82,5 +82,5 @@ export function calcBisonProfitForPath(path, getAreas, occupiedTiles) {
         total++;
     }
 
-    return total * 5;
+    return Math.round(total /2);
 }

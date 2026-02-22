@@ -5,7 +5,7 @@ import { AREA_GEN_DATA } from "../../mapGenData/areaGenData.js";
 import { OPPOSITE } from "../../enums/railTypes.js"
 import { getBisonAdjacentTiles, countConnectedBisonRails , calcBisonProfitForPath} from "../bisonProfit.js";
 
-export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas,getLevel, getMoney, addMoney, getRelations, setRelations) {
+export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas,getLevel, getMoney, addMoney, subMoney, getRelations, setRelations) {
     const railContainer = new PIXI.Container();
     railContainer.zIndex = 3;
     app.stage.addChild(railContainer);
@@ -83,7 +83,7 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
     }
 
     function addRail(tileX, tileY, railType) {
-        if(!railType){
+        if(!railType || getMoney() < railType.cost) {
             console.log("yaoliuáhzewsfaho");
             return false;
         }
@@ -95,20 +95,13 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
 
         railDirty = true;
 
-        /*const bisonAdjacent = getBisonAdjacentTiles(getAreas);
-        if (bisonAdjacent.has(`${tileX},${tileY}`)) {
-            const connectedCount = countConnectedBisonRails(tileX, tileY, occupiedTiles, getAreas);
-            if (connectedCount > 1 && addMoney) {
-                addMoney(connectedCount * 5);
-                console.log(`Connected ${connectedCount} bison rails! +${connectedCount * 5} money`);
-            }
-        }*/
-
         if (setRelations && getRelations && isTileOnIndianArea(tileX, tileY)) {
             setRelations(getRelations() + 1);
         }
 
         if (onRailPlaced) onRailPlaced();
+
+        subMoney(railType.cost);
 
         return true;
     }
@@ -116,6 +109,9 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
     function removeRail(tileX, tileY) {
         const key = `${tileX},${tileY}`;
         if (!occupiedTiles.has(key)) return;
+
+        const rail = occupiedTiles.get(key);
+        addMoney(Math.round(rail.type.cost / 2));	
 
         occupiedTiles.delete(key);
         const index = rails.findIndex(r => r.x === tileX && r.y === tileY);

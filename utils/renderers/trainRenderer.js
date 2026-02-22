@@ -13,6 +13,8 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
     const STATION_WAIT_TIME = 3500; //ms
     const WAGON_OFFSET = 0.75;
 
+    let avgPeeps = 0;
+
     /**
      * @param {Array<{x,y}>} path
      * @param {number} color
@@ -21,8 +23,7 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         if (!path) return;
 
         
-        const avgPeeps = ((routeCities[0] ?? 0) + (routeCities[1] ?? 0)) / 2;
-        console.log("avgPeeps", avgPeeps);
+        avgPeeps = ((routeCities[0] ?? 0) + (routeCities[1] ?? 0)) / 2;
 
         let wagons = [];
         let getPeepIndex = 0;
@@ -104,7 +105,7 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
                 console.log(`Bison bonus: +${bisonBonus}`);
             }
         }
-        addMoney(train.path.length);
+        addMoney(Math.round(avgPeeps));
     }
 
     app.ticker.add(() => {

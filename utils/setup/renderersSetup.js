@@ -18,7 +18,7 @@ export function creatRenderers(app, camera,getGridScale,cellSize,getAreas,getLev
     //nadry
     const stationRenderer = createStationRenderer(app, camera, getGridScale, cellSize);
     //kolejs
-    const railRenderer = createRailRenderer(app, camera, getGridScale, cellSize,getAreas,getLevel,getMoney, addMoney, getRelations, setRelations);
+    const railRenderer = createRailRenderer(app, camera, getGridScale, cellSize,getAreas,getLevel,getMoney, addMoney, subMoney, getRelations, setRelations);
     //vlaky
     const trainRenderer = createTrainRenderer(app, camera, getGridScale, cellSize, addMoney, railRenderer.getBisonProfit);
 
