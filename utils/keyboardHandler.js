@@ -39,6 +39,7 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
                         hudRenderer.draw()
                         pointerTextRenderer.togglePointerText(placementModeObj.placementMode);
                         resetDrag();
+                        drawGraphics();
                     }
                     event.preventDefault();
                     return;
@@ -78,6 +79,7 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
             switch (event.code) {
                 case "Space":
                     spacePressed = false;
+                    drawGraphics();
                     break;
                 case "ShiftLeft":
                 case "ShiftRight":

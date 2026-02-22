@@ -28,14 +28,13 @@ export function createPointerTextRenderer(app){
         const pointerText = getPointerText();
         pointerText.text = text;
         
-        pointerText.x = screenX + 15;
-        pointerText.y = screenY + 10;
+        pointerText.x = screenX / gridScale + 15 / gridScale;
+        pointerText.y = screenY / gridScale + 10 / gridScale;
         
         pointerText.scale.set(1 / gridScale, 1 / gridScale);
         
         pointerText.visible = text.length > 0;
     }
-    
     
     function togglePointerText(value) {
     }
