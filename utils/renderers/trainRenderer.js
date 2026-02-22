@@ -56,10 +56,9 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         train.progress = nearestEnd;
         train.waiting = true;
         train.waitTimer = 0;
-        const dih = nearestEnd === 0 ? 1 : -1;
-        train.direction = dih;
-        for (let w = 0; w < train.wagons.length; w++) train.wagons[w].progress = -WAGON_OFFSET * (w + 1);
-
+        train.direction = nearestEnd === 0 ? 1 : -1;
+        for (let w = 0; w < train.wagons.length; w++) train.wagons[w].progress = 0;
+        train.snapToStation = true;
     }
 
     function clearTrains() {
@@ -106,22 +105,24 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
 
             if (train.waiting) {
                 train.waitTimer += app.ticker.deltaMS;
-                for (const wagon of train.wagons) {
-                    const delta = train.speed / 1000 * app.ticker.deltaMS;
-                    if (wagon.progress < 0) {
-                        wagon.progress = Math.min(0, wagon.progress + delta);
-                        anyMoved = true;
-                    } else if (wagon.progress > 0) {
-                        wagon.progress = Math.max(0, wagon.progress - delta);
-                        anyMoved = true;
+                if(!train.snapToStation) {
+                    for (const wagon of train.wagons) {
+                        const delta = train.speed / 1000 * app.ticker.deltaMS;
+                        if (wagon.progress < 0) {
+                            wagon.progress = Math.min(0, wagon.progress + delta);
+                            anyMoved = true;
+                        } else if (wagon.progress > 0) {
+                            wagon.progress = Math.max(0, wagon.progress - delta);
+                            anyMoved = true;
+                        }
                     }
                 }
             
                 if (train.waitTimer >= STATION_WAIT_TIME) {
                     train.waiting = false;
                     train.waitTimer = 0;
-                    train.direction *= -1;
-                    // reset offset 
+                    if (!train.snapToStation) train.direction *= -1; // only flip if natural arrival
+                    train.snapToStation = false;
                     for (let w = 0; w < train.wagons.length; w++) train.wagons[w].progress = -WAGON_OFFSET * (w + 1);
                 } else continue;
             }
