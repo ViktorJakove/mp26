@@ -25,6 +25,7 @@ let level = 0;
 let placementMode = false;
 
 let money = 1000;
+let relations = 1;
 
 let areas = [];
 areas = generateAreas(level, null);
@@ -34,12 +35,14 @@ const getPlacementMode = () => placementMode;
 const getLevel = () => level;
 const setLevel = (value) => level = value;
 const getAreas = () => areas;
+const getRelations = () => relations;
+const setRelations = (value) => relations = value;
 const getMoney = () => money;
 const subMoney = (amount) => money -= amount;
 const addMoney = (amount) => money += amount;
 
 //rends
-const renderers = creatRenderers(app, camera, getGridScale, cellSize, getAreas, getLevel, addMoney,subMoney, getMoney, getPlacementMode);
+const renderers = creatRenderers(app, camera, getGridScale, cellSize, getAreas, getLevel, addMoney,subMoney, getMoney, getPlacementMode, getRelations,setRelations);
 const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer, trainRenderer, hudRenderer } = renderers;
 //const railSelector = createRailSelectorRenderer(app,getGridScale);
 

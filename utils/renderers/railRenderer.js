@@ -4,7 +4,7 @@ import { AREA_TYPES } from "../../enums/areaTypes.js";
 import { AREA_GEN_DATA } from "../../mapGenData/areaGenData.js";
 import { OPPOSITE } from "../../enums/railTypes.js"
 
-export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas,getLevel) {
+export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas,getLevel, getMoney, setMoney, getRelations, setRelations) {
     const railContainer = new PIXI.Container();
     railContainer.zIndex = 3;
     app.stage.addChild(railContainer);
@@ -72,6 +72,14 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
         }
         return true;
     }
+    function isTileOnIndianArea(tileX, tileY) {
+        const areas = getAreas();
+        return areas.some(area =>
+            area.type === AREA_TYPES.INDIANS &&
+            tileX >= area.x && tileX < area.x + area.sizeX &&
+            tileY >= area.y && tileY < area.y + area.sizeY
+        );
+    }
 
     function addRail(tileX, tileY, railType) {
         if(!railType){
@@ -85,6 +93,10 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
         occupiedTiles.set(`${tileX},${tileY}`,rail);
 
         railDirty = true;
+
+        if (setRelations && getRelations && isTileOnIndianArea(tileX, tileY)) {
+            setRelations(getRelations() + 1);
+        }
 
         if (onRailPlaced) onRailPlaced();
 
@@ -100,6 +112,10 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
         if (index !== -1) {
             rails.splice(index, 1);
             railDirty = true;
+        }
+
+        if (setRelations && getRelations && isTileOnIndianArea(tileX, tileY)) {
+            setRelations(getRelations() - 1);
         }
 
         if(onRailPlaced)onRailPlaced();

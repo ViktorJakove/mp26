@@ -7,7 +7,7 @@ import { createHUDRenderer } from "../renderers/hudRenderer.js";
 
 
 //init
-export function creatRenderers(app, camera,getGridScale,cellSize,getAreas,getLevel, addMoney, subMoney, getMoney, getPlacementMode) {
+export function creatRenderers(app, camera,getGridScale,cellSize,getAreas,getLevel, addMoney, subMoney, getMoney, getPlacementMode, getRelations,setRelations) {
     
     //pointer hint
     const pointerTextRenderer = createPointerTextRenderer(app);
@@ -18,7 +18,7 @@ export function creatRenderers(app, camera,getGridScale,cellSize,getAreas,getLev
     //nadry
     const stationRenderer = createStationRenderer(app, camera, getGridScale, cellSize);
     //kolejs
-    const railRenderer = createRailRenderer(app, camera, getGridScale, cellSize,getAreas,getLevel);
+    const railRenderer = createRailRenderer(app, camera, getGridScale, cellSize,getAreas,getLevel,getMoney, setRelations, getRelations, setRelations);
     //vlaky
     const trainRenderer = createTrainRenderer(app, camera, getGridScale, cellSize, addMoney);
 
