@@ -44,3 +44,43 @@ export function countConnectedBisonRails(tileX, tileY, occupiedTiles, getAreas) 
     }
     return count;
 }
+
+function isBisonAreaDisturbed(area, occupiedTiles) {
+    for (let x = area.x; x < area.x + area.sizeX; x++) {
+        for (let y = area.y; y < area.y + area.sizeY; y++) {
+            if (occupiedTiles.has(`${x},${y}`)) return true;
+        }
+    }
+    return false;
+}
+
+export function calcBisonProfitForPath(path, getAreas, occupiedTiles) {
+    const areas = getAreas();
+    const bisonAreas = areas.filter(a => a.type === AREA_TYPES.BISONS);
+    const deltas = [[0,-1],[1,0],[0,1],[-1,0]];
+
+    //pouze neporusene
+    const validAdjacentTiles = new Set();
+    for (const area of bisonAreas) {
+        if (isBisonAreaDisturbed(area, occupiedTiles)) continue;
+        for (let x = area.x; x < area.x + area.sizeX; x++) {
+            for (let y = area.y; y < area.y + area.sizeY; y++) {
+                for (const [dx, dy] of deltas) {
+                    validAdjacentTiles.add(`${x + dx},${y + dy}`);
+                }
+            }
+        }
+    }
+
+    const counted = new Set();
+    let total = 0;
+
+    for (const tile of path) {
+        const key = `${tile.x},${tile.y}`;
+        if (!validAdjacentTiles.has(key) || counted.has(key)) continue;
+        counted.add(key);
+        total++;
+    }
+
+    return total * 5;
+}

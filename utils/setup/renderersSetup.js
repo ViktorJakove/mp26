@@ -20,7 +20,7 @@ export function creatRenderers(app, camera,getGridScale,cellSize,getAreas,getLev
     //kolejs
     const railRenderer = createRailRenderer(app, camera, getGridScale, cellSize,getAreas,getLevel,getMoney, addMoney, getRelations, setRelations);
     //vlaky
-    const trainRenderer = createTrainRenderer(app, camera, getGridScale, cellSize, addMoney, railRenderer.calcBisonProfitForPath);
+    const trainRenderer = createTrainRenderer(app, camera, getGridScale, cellSize, addMoney, railRenderer.getBisonProfit);
 
     const hudRenderer = createHUDRenderer(app, getGridScale, getMoney, getPlacementMode);
 

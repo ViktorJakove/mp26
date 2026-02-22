@@ -3,7 +3,7 @@ import { createRailPathfinder } from "../railPathfinder.js";
 import { AREA_TYPES } from "../../enums/areaTypes.js";
 import { AREA_GEN_DATA } from "../../mapGenData/areaGenData.js";
 import { OPPOSITE } from "../../enums/railTypes.js"
-import { getBisonAdjacentTiles, countConnectedBisonRails } from "../bisonProfit.js";
+import { getBisonAdjacentTiles, countConnectedBisonRails , calcBisonProfitForPath} from "../bisonProfit.js";
 
 export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas,getLevel, getMoney, addMoney, getRelations, setRelations) {
     const railContainer = new PIXI.Container();
@@ -186,19 +186,11 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
         onRailPlaced = callback;
     }
 
-    function calcBisonProfitForPath(path) {
-        const bisonAdjacent = getBisonAdjacentTiles(getAreas);
-        const counted = new Set();
-        let total = 0;
-    
-        for (const tile of path) {
-            const key = `${tile.x},${tile.y}`;
-            if (!bisonAdjacent.has(key) || counted.has(key)) continue;
-            counted.add(key);
-            total++;
-        }
-        return total * 5;
+    function getBisonProfit(path) {
+        const profit = calcBisonProfitForPath(path, getAreas, occupiedTiles);
+        console.log(profit);
+        return profit;
     }
 
-    return { addRail, removeRail, drawRails, isTileOccupied, markDirty, getRails, loadRails, areStationsConnected, getPath, setOnRailPlaceCheckConn, calcBisonProfitForPath };
+    return { addRail, removeRail, drawRails, isTileOccupied, markDirty, getRails, loadRails, areStationsConnected, getPath, setOnRailPlaceCheckConn, getBisonProfit };
 }
