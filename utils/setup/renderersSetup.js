@@ -18,9 +18,9 @@ export function creatRenderers(app, camera,getGridScale,cellSize,getAreas,getLev
     //nadry
     const stationRenderer = createStationRenderer(app, camera, getGridScale, cellSize);
     //kolejs
-    const railRenderer = createRailRenderer(app, camera, getGridScale, cellSize,getAreas,getLevel,getMoney, setRelations, getRelations, setRelations);
+    const railRenderer = createRailRenderer(app, camera, getGridScale, cellSize,getAreas,getLevel,getMoney, addMoney, getRelations, setRelations);
     //vlaky
-    const trainRenderer = createTrainRenderer(app, camera, getGridScale, cellSize, addMoney);
+    const trainRenderer = createTrainRenderer(app, camera, getGridScale, cellSize, addMoney, railRenderer.calcBisonProfitForPath);
 
     const hudRenderer = createHUDRenderer(app, getGridScale, getMoney, getPlacementMode);
 

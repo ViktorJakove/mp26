@@ -1,7 +1,7 @@
 import { SCREEN_DIMENSIONS } from "../../screenDimensions.js";
 import { VAGONS_PER_PEEPS } from "../../enums/wagonsPerPeeps.js";
 
-export function createTrainRenderer(app, camera, getGridScale, cellSize, addMoney) {
+export function createTrainRenderer(app, camera, getGridScale, cellSize, addMoney, calcBisonProfitForPath) {
     const trainContainer = new PIXI.Container();
     trainContainer.zIndex = 5;
     app.stage.addChild(trainContainer);
@@ -96,6 +96,17 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         return false;
     }
     
+    function profit(train){
+        if (calcBisonProfitForPath) {
+            const bisonBonus = calcBisonProfitForPath(train.path);
+            if (bisonBonus > 0) {
+                addMoney(bisonBonus);
+                console.log(`Bison bonus: +${bisonBonus}`);
+            }
+        }
+        addMoney(train.path.length);
+    }
+
     app.ticker.add(() => {
         let anyMoved = false;
 
@@ -121,7 +132,7 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
                 if (train.waitTimer >= STATION_WAIT_TIME) {
                     train.waiting = false;
                     train.waitTimer = 0;
-                    if (!train.snapToStation) train.direction *= -1; // only flip if natural arrival
+                    if (!train.snapToStation) train.direction *= -1;
                     train.snapToStation = false;
                     for (let w = 0; w < train.wagons.length; w++) train.wagons[w].progress = -WAGON_OFFSET * (w + 1);
                 } else continue;
@@ -137,20 +148,18 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
                 train.progress = train.path.length - 1;
                 train.waiting = true;
                 train.waitTimer = 0;
-                //temp podle prumeru populace
-                addMoney(train.path.length * 10);
-                console.log(train.path.length * 10);
+                profit(train);
             } else if (train.progress <= 0) {
                 train.progress = 0;
                 train.waiting = true;
                 train.waitTimer = 0;
-                //temp podle prumeru populace
-                addMoney(train.path.length * 10);
-                console.log(train.path.length * 10);
+                profit(train);
             }
         }
         if (anyMoved && trains.length > 0) drawTrains();
     });
+
+    
 
     function getWagonWorldPos(train, wagonProgress) {
         const clampedProgress = Math.max(0, Math.min(wagonProgress, train.path.length - 1));

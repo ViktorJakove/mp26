@@ -3,8 +3,9 @@ import { createRailPathfinder } from "../railPathfinder.js";
 import { AREA_TYPES } from "../../enums/areaTypes.js";
 import { AREA_GEN_DATA } from "../../mapGenData/areaGenData.js";
 import { OPPOSITE } from "../../enums/railTypes.js"
+import { getBisonAdjacentTiles, countConnectedBisonRails } from "../bisonProfit.js";
 
-export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas,getLevel, getMoney, setMoney, getRelations, setRelations) {
+export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas,getLevel, getMoney, addMoney, getRelations, setRelations) {
     const railContainer = new PIXI.Container();
     railContainer.zIndex = 3;
     app.stage.addChild(railContainer);
@@ -94,6 +95,15 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
 
         railDirty = true;
 
+        /*const bisonAdjacent = getBisonAdjacentTiles(getAreas);
+        if (bisonAdjacent.has(`${tileX},${tileY}`)) {
+            const connectedCount = countConnectedBisonRails(tileX, tileY, occupiedTiles, getAreas);
+            if (connectedCount > 1 && addMoney) {
+                addMoney(connectedCount * 5);
+                console.log(`Connected ${connectedCount} bison rails! +${connectedCount * 5} money`);
+            }
+        }*/
+
         if (setRelations && getRelations && isTileOnIndianArea(tileX, tileY)) {
             setRelations(getRelations() + 1);
         }
@@ -175,7 +185,20 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
     function setOnRailPlaceCheckConn(callback) {
         onRailPlaced = callback;
     }
-    
 
-    return { addRail, removeRail, drawRails, isTileOccupied, markDirty, getRails, loadRails, areStationsConnected, getPath, setOnRailPlaceCheckConn };
+    function calcBisonProfitForPath(path) {
+        const bisonAdjacent = getBisonAdjacentTiles(getAreas);
+        const counted = new Set();
+        let total = 0;
+    
+        for (const tile of path) {
+            const key = `${tile.x},${tile.y}`;
+            if (!bisonAdjacent.has(key) || counted.has(key)) continue;
+            counted.add(key);
+            total++;
+        }
+        return total * 5;
+    }
+
+    return { addRail, removeRail, drawRails, isTileOccupied, markDirty, getRails, loadRails, areStationsConnected, getPath, setOnRailPlaceCheckConn, calcBisonProfitForPath };
 }
