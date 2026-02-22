@@ -8,7 +8,7 @@ import { createDrawGraphics } from "./drawGraphics.js";
 import { setupMouseControls } from "./mouseControls.js";
 import { createStationManager } from "./stationManager.js";
 import { createRouteChecker } from "./utils/routeChecker.js";
-import { createRailSelectorRenderer } from "./utils/renderers/railSeclectorRenderer.js";
+//import { createRailSelectorRenderer } from "./utils/renderers/railSeclectorRenderer.js";
 
 //pixi setup
 const app = createApp();
@@ -39,9 +39,9 @@ const subMoney = (amount) => money -= amount;
 const addMoney = (amount) => money += amount;
 
 //rends
-const renderers = creatRenderers(app, camera, getGridScale, cellSize, getAreas, getLevel, addMoney);
-const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer, trainRenderer } = renderers;
-const railSelector = createRailSelectorRenderer(app,getGridScale);
+const renderers = creatRenderers(app, camera, getGridScale, cellSize, getAreas, getLevel, addMoney,subMoney, getMoney, getPlacementMode);
+const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer, trainRenderer, hudRenderer } = renderers;
+//const railSelector = createRailSelectorRenderer(app,getGridScale);
 
 //graphics
 const fgContainer = new PIXI.Container();
@@ -68,7 +68,7 @@ railRenderer.setOnRailPlaceCheckConn(()=>{
 drawGraphics();
 
 //mouse controls
-const { resetDrag } = setupMouseControls(app, camera, getGridScale, cellSize, getPlacementMode, railRenderer, () => drawGraphics(), ()=>railSelector.getSelectedType());
+const { resetDrag } = setupMouseControls(app, camera, getGridScale, cellSize, getPlacementMode, railRenderer, () => drawGraphics(), ()=>hudRenderer.getSelectedType());
 
 //zoom
 app.view.addEventListener("wheel", (event) => {
@@ -102,7 +102,7 @@ function mapZoom(zoomFactor, event){
     railRenderer.markDirty();
 
     pointerTextRenderer.refresh(() => gridScale);
-    railSelector.draw();
+    hudRenderer.draw();
 
     drawGraphics();
 }
@@ -111,7 +111,7 @@ window.addEventListener("resize", () => {
 });
 
 // init funkci!!!
-const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, addStations, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } }, areaRenderer, pointerTextRenderer, resetDrag, stationRenderer,railSelector);
+const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, addStations, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } }, areaRenderer, pointerTextRenderer, resetDrag, stationRenderer,hudRenderer);
 
 app.ticker.add(() => {
     keyboardMapMovement();

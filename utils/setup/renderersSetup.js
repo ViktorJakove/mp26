@@ -3,9 +3,11 @@ import { createStationRenderer } from "../renderers/stationRenderer.js";
 import { createRailRenderer } from "../renderers/railRenderer.js";
 import{ createPointerTextRenderer } from "../renderers/pointerTextRenderer.js";
 import { createTrainRenderer } from "../renderers/trainRenderer.js";
+import { createHUDRenderer } from "../renderers/hudRenderer.js";
+
 
 //init
-export function creatRenderers(app, camera,getGridScale,cellSize,getAreas,getLevel, addMoney){
+export function creatRenderers(app, camera,getGridScale,cellSize,getAreas,getLevel, addMoney, subMoney, getMoney, getPlacementMode) {
     
     //pointer hint
     const pointerTextRenderer = createPointerTextRenderer(app);
@@ -20,5 +22,7 @@ export function creatRenderers(app, camera,getGridScale,cellSize,getAreas,getLev
     //vlaky
     const trainRenderer = createTrainRenderer(app, camera, getGridScale, cellSize, addMoney);
 
-    return {areaRenderer,stationRenderer,railRenderer,pointerTextRenderer, trainRenderer};
+    const hudRenderer = createHUDRenderer(app, getGridScale, getMoney, getPlacementMode);
+
+    return {areaRenderer,stationRenderer,railRenderer,pointerTextRenderer, trainRenderer, hudRenderer};
 }
