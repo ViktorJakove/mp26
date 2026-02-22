@@ -3,31 +3,41 @@ export const LAKE_GEN_DATA=[
         name: "Pristine Pool",
         sizeX: 3,
         sizeY: 3,
-        description: "Local water source."
+        description: "Místní zdroj vody."
     },{
-        name: "Pristine Pool2",
+        name: "Ping pond",
         sizeX: 2,
         sizeY: 3,
-        description: "Local water source."
+        description: "Co že dělal po válce?"
     },{
         name: "MudButt",
         sizeX: 3,
         sizeY: 4,
-        description: "Local diarrhea source."
+        description: "Místní zdroj průjmu."
     },{
         name: "Clam Cove",
-        sizeX: 2,
-        sizeY: 4,
-        description: "Exceptionally pure."
+        sizeX: 12,
+        sizeY: 14,
+        description: "Neskutečně čirá voda."
     },{
         name: "Pristine Pool3",
-        sizeX: 2,
-        sizeY: 3,
+        sizeX: 7,
+        sizeY: 2,
+        description: "Local water source."
+    },{
+        name: "Pristine Pool4",
+        sizeX: 9,
+        sizeY: 9,
         description: "Local water source."
     },{
         name: "Pristine Pool4",
         sizeX: 2,
         sizeY: 3,
+        description: "Local water source."
+    },{
+        name: "Pristine Pool4",
+        sizeX: 1,
+        sizeY: 15,
         description: "Local water source."
     },
 ];
@@ -69,8 +79,18 @@ export const FOREST_GEN_DATA=[
         description: "Exceptionally pure."
     },{
         name: "The e",
-        length: 50,
+        length: 100,
         thickness: 1,
+        description: "Exceptionally pure."
+    },{
+        name: "The f",
+        length: 20,
+        thickness: 2,
+        description: "Exceptionally pure."
+    },{
+        name: "The g",
+        length: 100,
+        thickness: 2,
         description: "Exceptionally pure."
     }
 ];
@@ -115,27 +135,42 @@ export const MOUNTAIN_GEN_DATA=[
         length: 35,
         thickness: 1,
         description: "Exceptionally pure."
+    },{
+        name: "hugecock",
+        length: 35,
+        thickness: 2,
+        description: "Exceptionally pure."
     }
 ];export const INDIAN_GEN_DATA=[
     {
-        name: "Apache territory",
-        sizeX: 8,
+        name: "Apači",
+        sizeX: 10,
         sizeY: 10,
-        description: "Local water source."
+        description: "Náčelník: Inčučuna"
     },{
-        name: "ShizzPeez",
+        name: "Čipevajani",
         sizeX:8,
         sizeY: 6,
-        description: "Local diarrhea source."
+        description: "Náčelník: Matonabbee"
     },{
-        name: "ShizzPeez",
-        sizeX:8,
-        sizeY: 6,
-        description: "Local diarrhea source."
+        name: "ShizzPeeze",
+        sizeX:6,
+        sizeY: 12,
+        description: "piss."
     },{
         name: "Clam Cove",
-        sizeX: 3,
-        sizeY: 2,
+        sizeX: 12,
+        sizeY:11,
+        description: "Exceptionally pure."
+    },{
+        name: "Clam Cove",
+        sizeX: 7,
+        sizeY:7,
+        description: "Exceptionally pure."
+    },{
+        name: "Clam Cove",
+        sizeX: 15,
+        sizeY:8,
         description: "Exceptionally pure."
     }
 ];
@@ -149,5 +184,17 @@ export const BISON_GEN_DATA=[
     },{
         sizeX: 3,
         sizeY: 3,
+    },{
+        sizeX: 5,
+        sizeY: 6,
+    },{
+        sizeX: 10,
+        sizeY: 6,
+    },{
+        sizeX: 11,
+        sizeY: 12,
+    },{
+        sizeX: 15,
+        sizeY: 13,
     }
 ];
