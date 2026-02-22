@@ -67,16 +67,17 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
     function drawLeftBar() {
         leftBarContainer.removeChildren();
 
+        // Always update visibility based on current placement mode
+        leftBarContainer.visible = getPlacementMode();
+        
         if (!getPlacementMode()) {
-            leftBarContainer.visible = false;
             return;
         }
-        leftBarContainer.visible = true;
 
         const gridScale = getGridScale();
 
         const PANEL_W = ICON_SIZE + PADDING * 2;
-        const PANEL_H = TYPES_LIST.length * (ICON_SIZE + PADDING) + PADDING;
+        const PANEL_H = TYPES_LIST.length * (ICON_SIZE + PADDING + 10) + PADDING; // Extra height for cost
 
         const bg = new PIXI.Graphics();
         bg.beginFill(0x222222, 0.88);
@@ -86,7 +87,7 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
 
         TYPES_LIST.forEach((type, i) => {
             const x = PADDING;
-            const y = PADDING + i * (ICON_SIZE + PADDING);
+            const y = PADDING + i * (ICON_SIZE + PADDING + 10); // Add spacing for cost
 
             //highlight
             if (i === selectedIndex) {
@@ -129,24 +130,25 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
                     if (type.connections[3]) { g.moveTo(cx, cy); g.lineTo(x, cy); }
                     leftBarContainer.addChild(g);
                 }
-            }
 
-            //label
-            const label = new PIXI.Text(type.id.replace(/_/g, '\n'), {
-                fontFamily: "Arial",
-                fontSize: 7,
-                fill: 0xffffff,
-                align: "center",
-            });
-            label.anchor.set(0.5, 1);
-            label.x = x + ICON_SIZE / 2;
-            label.y = y + ICON_SIZE - 2;
-            leftBarContainer.addChild(label);
+                // Cost label (instead of name)
+                const costLabel = new PIXI.Text(`$${type.cost}`, {
+                    fontFamily: "Arial",
+                    fontSize: 12,
+                    fill: 0xf5c518,
+                    align: "center",
+                    fontWeight: "bold",
+                });
+                costLabel.anchor.set(0.5, 0);
+                costLabel.x = x + ICON_SIZE / 2;
+                costLabel.y = y + ICON_SIZE + 2;
+                leftBarContainer.addChild(costLabel);
+            }
 
             //hit area
             const hit = new PIXI.Graphics();
             hit.beginFill(0xffffff, 0.001);
-            hit.drawRect(x, y, ICON_SIZE, ICON_SIZE);
+            hit.drawRect(x, y, ICON_SIZE, ICON_SIZE + 10); // Extend hit area to cover cost display
             hit.endFill();
             hit.interactive = true;
             hit.cursor = "pointer";
@@ -169,6 +171,11 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
         const currentMoney = getMoney();
         const currentPlacementMode = getPlacementMode();
         const currentGridScale = getGridScale();
+
+        // Force redraw if placement mode changed, regardless of other state
+        if (currentPlacementMode !== lastPlacementMode) {
+            hudDirty = true;
+        }
 
         if (!hudDirty
             && currentMoney === lastMoney

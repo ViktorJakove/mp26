@@ -82,9 +82,32 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
         );
     }
 
+    function getBuildOverCost(tileX, tileY) {
+        const areas = getAreas();
+        let totalExtraCost = 0;
+        
+        areas.forEach(area => {
+            if (area.type === AREA_TYPES.LOCK) return;
+            
+            const within = tileX >= area.x &&
+                tileX < area.x + area.sizeX &&
+                tileY >= area.y &&
+                tileY < area.y + area.sizeY;
+                
+            if (within && area.type.buildOverCost) {
+                totalExtraCost += area.type.buildOverCost;
+            }
+        });
+        
+        return totalExtraCost;
+    }
+
     function addRail(tileX, tileY, railType) {
-        if(!railType || getMoney() < railType.cost) {
-            console.log("yaoliuáhzewsfaho");
+        const buildOverCost = getBuildOverCost(tileX, tileY);
+        const totalCost = railType.cost + buildOverCost;
+        
+        if(!railType || getMoney() < totalCost) {
+            console.log(`Not enough money! Need $${totalCost} ($${railType.cost} + $${buildOverCost} terrain fee)`);
             return false;
         }
         if (isTileOccupied(tileX, tileY) || isTileBlocked(tileX,tileY) || isOutOfBounds(tileX,tileY) || !isCompatibleWithNeighbors(tileX,tileY,railType)) return false;
@@ -101,7 +124,10 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
 
         if (onRailPlaced) onRailPlaced();
 
-        //subMoney(railType.cost); TEMP
+        // Subtract total cost (rail cost + terrain fees)
+        subMoney(totalCost);
+        
+        console.log(`Placed rail for $${totalCost} ($${railType.cost} + $${buildOverCost} terrain fee)`);
 
         return true;
     }

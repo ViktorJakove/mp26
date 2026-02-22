@@ -105,7 +105,10 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
                 console.log(`Bison bonus: +${bisonBonus}`);
             }
         }
-        addMoney(Math.round(avgPeeps/2));
+
+        let profit = avgPeeps > 50 ?  avgPeeps /4 : avgPeeps / 3;
+
+        addMoney(Math.round(profit));
     }
 
     app.ticker.add(() => {
