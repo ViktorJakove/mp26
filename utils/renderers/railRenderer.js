@@ -18,6 +18,25 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
     let lastCameraPos = { x: 0, y: 0 };
     let lastGridScale = 1;
 
+    const spritePool = [];
+
+    const textureCache = new Map();
+
+    function getTexture(path) {
+        if (!textureCache.has(path)) {
+            textureCache.set(path, PIXI.Texture.from(path));
+        }
+        return textureCache.get(path);
+    }
+
+    function getPooledSprite() {
+        return spritePool.pop() || new PIXI.Sprite();
+    }
+    function returnSprite(sprite) {
+        sprite.texture = PIXI.Texture.EMPTY;
+        spritePool.push(sprite);
+    }
+
     function getRailAt(tileX, tileY) {
         return occupiedTiles.get(`${tileX},${tileY}`) ?? null;
     }
@@ -94,18 +113,18 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
         if (!railDirty && !cameraChanged && !scaleChanged) return;
 
         while (railContainer.children.length > 0) {
-            railContainer.removeChildAt(0);
+            returnSprite(railContainer.removeChildAt(0));
         }
 
         const dimensions = SCREEN_DIMENSIONS(app, camera, gridScale, cellSize);
-        //const texture = PIXI.Texture.from("../../static/map/rails/T_rail.png");
 
         for (const rail of rails) {
             const screenX = rail.x * cellSize - dimensions.worldLeft;
             const screenY = rail.y * cellSize - dimensions.worldTop;
 
-            const texture = PIXI.Texture.from(rail.type.texture);
-            const sprite = new PIXI.Sprite(texture);
+            const texture = getTexture(rail.type.texture);
+            const sprite = getPooledSprite();
+            sprite.texture = texture;
             sprite.x = screenX;
             sprite.y = screenY;
             sprite.width = cellSize;

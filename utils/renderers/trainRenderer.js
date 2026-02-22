@@ -87,10 +87,12 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
     }
     
     app.ticker.add(() => {
-    
+        let anyMoved = false;
+
         for (let i = 0; i < trains.length; i++) {
             const train = trains[i];
-    
+            const prevProgress = train.progress;
+
             if (train.waiting) {
                 train.waitTimer += app.ticker.deltaMS;
                 for (const wagon of train.wagons) {
@@ -109,8 +111,9 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
             }
     
             if (blocked(train, i)) continue;
-    
+
             train.progress += train.direction * train.speed / 1000 * app.ticker.deltaMS;
+            if (train.progress !== prevProgress) anyMoved = true;
             
             if(train.waiting) continue;
             if (train.progress >= train.path.length - 1) {
@@ -129,7 +132,7 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
                 console.log(train.path.length * 10);
             }
         }
-        if (trains.length > 0) drawTrains();
+        if (anyMoved && trains.length > 0) drawTrains();
     });
 
     function getWagonWorldPos(train, wagonProgress) {
@@ -147,49 +150,56 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         };
     }
 
+    const trainGraphicsPool = [];
+    let lastTrainPositions = [];
+
+    function getPooledTrainGraphic() {
+        return trainGraphicsPool.pop() || new PIXI.Graphics();
+    }
+    function returnTrainGraphic(g) {
+        g.clear();
+        trainGraphicsPool.push(g);
+    }
+
     function drawTrains() {
-        while (trainContainer.children.length > 0) trainContainer.removeChildAt(0);
+        // Return all children to pool
+        while (trainContainer.children.length > 0) {
+            returnTrainGraphic(trainContainer.removeChildAt(0));
+        }
 
         if (trains.length === 0) return;
 
         const gridScale = getGridScale();
         const dimensions = SCREEN_DIMENSIONS(app, camera, gridScale, cellSize);
+        const offset = cellSize * (1 - TRAIN_SIZE) / 2;
+        const size = cellSize * TRAIN_SIZE;
 
         for (const train of trains) {
             const { x: wx, y: wy } = getInterpolatedWorldPos(train);
+            const screenX = wx - dimensions.worldLeft;
+            const screenY = wy - dimensions.worldTop;
 
-    const screenX = wx - dimensions.worldLeft;
-    const screenY = wy - dimensions.worldTop;
+            const g = getPooledTrainGraphic();
+            g.beginFill(train.color, 1);
+            g.drawRect(screenX + offset, screenY + offset, size, size);
+            g.endFill();
+            trainContainer.addChild(g);
 
-    const offset = cellSize * (1 - TRAIN_SIZE) / 2;
-    const size = cellSize * TRAIN_SIZE;
+            for (const wagon of train.wagons) {
+                const wagonProgress = train.progress + wagon.progress * train.direction;
+                const { x: wwx, y: wwy } = getWagonWorldPos(train, wagonProgress);
+                const wsx = wwx - dimensions.worldLeft;
+                const wsy = wwy - dimensions.worldTop;
 
-    //lokomotiva
-    const g = new PIXI.Graphics();
-    g.beginFill(train.color, 1);
-    g.drawRect(screenX + offset, screenY + offset, size, size, 4);
-    g.endFill();
-    trainContainer.addChild(g);
-
-    //vagonky
-    for (const wagon of train.wagons) {
-        const rawProgress = train.progress - train.direction * Math.abs(wagon.progress);
-        const wagonProgress = Math.max(0, Math.min(train.path.length - 1, rawProgress));
-
-        const { x: wwx, y: wwy } = getWagonWorldPos(train, wagonProgress);
-    
-    
-        const wScreenX = wwx - dimensions.worldLeft;
-        const wScreenY = wwy - dimensions.worldTop;
-    
-        const wg = new PIXI.Graphics();
-        wg.beginFill(train.color, 0.75);
-        wg.drawRect(wScreenX + offset, wScreenY + offset, size, size, 4);
-        wg.endFill();
-        trainContainer.addChild(wg);
-    }
+                const wg = getPooledTrainGraphic();
+                wg.beginFill(train.color, 0.75);
+                wg.drawRect(wsx + offset, wsy + offset, size, size);
+                wg.endFill();
+                trainContainer.addChild(wg);
+            }
         }
     }
+
     function getInterpolatedWorldPos(train) {
         const { path, progress } = train;
         const floorIdx = Math.min(Math.floor(progress), path.length - 2);

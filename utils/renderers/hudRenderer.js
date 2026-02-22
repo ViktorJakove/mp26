@@ -4,7 +4,6 @@ const TYPES_LIST = [...Object.values(RAIL_TYPES), DESTROY_ENTRY];
 
 export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode) {
 
-    // --- TOP BAR ---
     const topBarContainer = new PIXI.Container();
     topBarContainer.zIndex = 25;
     topBarContainer.interactive = true;
@@ -41,7 +40,6 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
         topBarContainer.y = 0;
     }
 
-    // --- LEFT BAR ---
     const leftBarContainer = new PIXI.Container();
     leftBarContainer.zIndex = 25;
     leftBarContainer.interactive = true;
@@ -90,7 +88,7 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
             const x = PADDING;
             const y = PADDING + i * (ICON_SIZE + PADDING);
 
-            // highlight
+            //highlight
             if (i === selectedIndex) {
                 const hl = new PIXI.Graphics();
                 hl.beginFill(0xffcc00, 0.55);
@@ -99,7 +97,7 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
                 leftBarContainer.addChild(hl);
             }
 
-            // icon
+            //ikona(jezis)
             if (type.isDestroy) {
                 const g = new PIXI.Graphics();
                 g.beginFill(0xaa0000, 0.9);
@@ -133,7 +131,7 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
                 }
             }
 
-            // label
+            //label
             const label = new PIXI.Text(type.id.replace(/_/g, '\n'), {
                 fontFamily: "Arial",
                 fontSize: 7,
@@ -145,7 +143,7 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
             label.y = y + ICON_SIZE - 2;
             leftBarContainer.addChild(label);
 
-            // hit area — on top of everything
+            //hit area
             const hit = new PIXI.Graphics();
             hit.beginFill(0xffffff, 0.001);
             hit.drawRect(x, y, ICON_SIZE, ICON_SIZE);
