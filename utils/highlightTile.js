@@ -17,6 +17,7 @@ export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGrap
             const tileY = Math.floor(worldMouseY / cellSize);
 
             //zdali je obsazena dlazd
+            let obstacleInfo = "";
             let obstacle = null;
             const isOccupied = areas.some(placedArea => {
                 let within = tileX >= placedArea.x &&
@@ -25,14 +26,23 @@ export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGrap
                 tileY < placedArea.y + placedArea.sizeY &&
                 placedArea.type != AREA_TYPES.LOCK;
 
-                if (within && (placedArea.type === AREA_TYPES.FOREST || placedArea.type === AREA_TYPES.ROCK || placedArea.type === AREA_TYPES.INDIANS || placedArea.type === AREA_TYPES.BISONS)) {
-                    obstacle = placedArea.type;
-                    return false;
-                } else return within;
+                if (within) {
+                    if(placedArea.type === AREA_TYPES.FOREST || placedArea.type === AREA_TYPES.ROCK || placedArea.type === AREA_TYPES.INDIANS || placedArea.type === AREA_TYPES.BISONS){
+                        obstacle = placedArea.type;
+                        obstacleInfo = obstacle.buildOverCost ? "+"+obstacle.buildOverCost + "$" : obstacle.buildOverInfo;
+                        return true;
+                    }else if (placedArea.type === AREA_TYPES.CITY || placedArea.type === AREA_TYPES.LAKE) {
+                        obstacleInfo = placedArea.description;
+                        return true;
+                    }
+                    return true;
+                }
+                return false;
             });
 
             //rovnout passnout text 
-            let obstacleInfo = obstacle ? (obstacle.buildOverCost ? "+"+obstacle.buildOverCost + "$" : obstacle.buildOverInfo) : "";
+            //let obstacleInfo = obstacle ? (obstacle.buildOverCost ? "+"+obstacle.buildOverCost + "$" : obstacle.buildOverInfo) : (obstacle.description);
+            
             updatePointerTextRenderer(obstacleInfo,event.clientX,event.clientY, getGridScale);
 
             if (!isOccupied) {

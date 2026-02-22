@@ -77,6 +77,7 @@ function tryGeneration(level, lockArea){
                 }
             });
 
+
             if(!collision){
                 placedAreas.push(new Area(
                     area.type,
@@ -85,7 +86,8 @@ function tryGeneration(level, lockArea){
                     area.sizeX,
                     area.sizeY,
                     area.name,
-                    area.type === CITY ? getRandom(area.peepsMin, area.peepsMax) : 0
+                    area.type === CITY ? getRandom(area.peepsMin, area.peepsMax) : 0,
+                    area.description ? area.description : ""
                 ));
                 placed = true;
                 break;
@@ -174,7 +176,7 @@ function tryGeneration(level, lockArea){
                                 const tileY = newY + dy;
     
                                 tempParts.push(
-                                    new Area(area.type, tileX, tileY, 1, 1, area.name, 0)
+                                    new Area(area.type, tileX, tileY, 1, 1, area.name, 0,area.description ? area.description : "")
                                 );
     
                                 tempOccupied.add(`${tileX},${tileY}`);
@@ -203,7 +205,7 @@ function tryGeneration(level, lockArea){
         if (!snakePlaced) return null;
     }
     
-    placedSnakeAreaParts.push(new Area(LOCK,-AREA_GEN_DATA.areaSize[level][0]/2,-AREA_GEN_DATA.areaSize[level][1]/2,AREA_GEN_DATA.areaSize[level][0],AREA_GEN_DATA.areaSize[level][1],"",0));
+    placedSnakeAreaParts.push(new Area(LOCK,-AREA_GEN_DATA.areaSize[level][0]/2,-AREA_GEN_DATA.areaSize[level][1]/2,AREA_GEN_DATA.areaSize[level][0],AREA_GEN_DATA.areaSize[level][1],"",0,""));
 
     return placedAreas.concat(placedSnakeAreaParts);
 }
