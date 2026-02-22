@@ -8,16 +8,20 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
     hudContainer.interactiveChildren = true;
     app.stage.addChild(hudContainer);
 
-    // --- Top money bar ---
     const topBar = new PIXI.Container();
     hudContainer.addChild(topBar);
 
-    // --- Left rail bar ---
     const leftBar = new PIXI.Container();
     hudContainer.addChild(leftBar);
 
     let selectedIndex = 0;
     let onSelectCallback = null;
+
+    let hudDirty = true;
+    let lastMoney = null;
+    let lastPlacementMode = null;
+    let lastGridScale = null;
+
 
     const ICON_SIZE = 44;
     const PADDING = 6;
@@ -76,7 +80,7 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
             const iSize = ICON_SIZE / gridScale;
             const pad2 = 2 / gridScale;
 
-            // highlight selected
+            // highlight
             if (i === selectedIndex) {
                 const hl = new PIXI.Graphics();
                 hl.beginFill(0xffcc00, 0.55);
@@ -85,7 +89,7 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
                 leftBar.addChild(hl);
             }
 
-            // icon
+            //ikonky
             if (type.isDestroy) {
                 const g = new PIXI.Graphics();
                 g.beginFill(0xaa0000, 0.9);
@@ -119,7 +123,7 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
                 }
             }
 
-            // label
+            //label
             const label = new PIXI.Text(type.id.replace(/_/g, '\n'), {
                 fontFamily: "Arial",
                 fontSize: 7 / gridScale,
@@ -131,7 +135,7 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
             label.y = itemY + iSize - 2 / gridScale;
             leftBar.addChild(label);
 
-            // clickable hit area
+            //clickable
             const hit = new PIXI.Graphics();
             hit.beginFill(0xffffff, 0.001);
             hit.drawRect(itemX, itemY, iSize, iSize);
@@ -149,8 +153,27 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
     }
 
     function draw() {
+        const currentMoney = getMoney();
+        const currentPlacementMode = getPlacementMode();
+        const currentGridScale = getGridScale();
+
+        //pokud zmena
+        if (!hudDirty 
+            && currentMoney === lastMoney 
+            && currentPlacementMode === lastPlacementMode
+            && currentGridScale === lastGridScale) return;
+
+        lastMoney = currentMoney;
+        lastPlacementMode = currentPlacementMode;
+        lastGridScale = currentGridScale;
+        hudDirty = false;
+
         drawTopBar();
         drawLeftBar();
+    }
+
+    function markDirty() {
+        hudDirty = true;
     }
 
     function refresh() {

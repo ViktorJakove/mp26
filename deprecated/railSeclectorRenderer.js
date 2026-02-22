@@ -1,4 +1,4 @@
-import { RAIL_TYPES, DESTROY_ENTRY } from "../../enums/railTypes.js";
+import { RAIL_TYPES, DESTROY_ENTRY } from "../enums/railTypes.js";
 
 const TYPES_LIST = [...Object.values(RAIL_TYPES), DESTROY_ENTRY];
 
