@@ -28,7 +28,7 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         let wagons = [];
         let getPeepIndex = 0;
 
-        for (let i = 0; i < VAGONS_PER_PEEPS.length; i++) if (avgPeeps > VAGONS_PER_PEEPS[i]) getPeepIndex += i;
+        for (let i = 0; i < VAGONS_PER_PEEPS.length; i++) if (avgPeeps > VAGONS_PER_PEEPS[i]) getPeepIndex++;
         for (let w = 0; w < getPeepIndex; w++) { wagons.push ({ progress: -WAGON_OFFSET * (w + 1) }); }
 
         /*const wagons = [
@@ -105,7 +105,7 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
                 console.log(`Bison bonus: +${bisonBonus}`);
             }
         }
-        addMoney(Math.round(avgPeeps));
+        addMoney(Math.round(avgPeeps/2));
     }
 
     app.ticker.add(() => {

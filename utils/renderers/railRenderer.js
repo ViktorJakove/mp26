@@ -101,7 +101,7 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
 
         if (onRailPlaced) onRailPlaced();
 
-        subMoney(railType.cost);
+        //subMoney(railType.cost); TEMP
 
         return true;
     }

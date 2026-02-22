@@ -164,49 +164,5 @@ export const CITY_GEN_DATA=[
         defenseLevel: 5,
         cathouseLevel: 0,
         description: "Posvátné místo"
-    },
-    {
-        name: "1",
-        peepsMin: 90,
-        peepsMax: 250,
-        sizeX: 6,
-        sizeY: 5,
-        building: "church",
-        defenseLevel: 5,
-        cathouseLevel: 0,
-        description: "Posvátné místo"
-    },
-    {
-        name: "2",
-        peepsMin: 90,
-        peepsMax: 250,
-        sizeX: 6,
-        sizeY: 7,
-        building: "church",
-        defenseLevel: 5,
-        cathouseLevel: 0,
-        description: "Posvátné místo"
-    },
-    {
-        name: "3",
-        peepsMin: 90,
-        peepsMax: 250,
-        sizeX: 7,
-        sizeY: 8,
-        building: "church",
-        defenseLevel: 5,
-        cathouseLevel: 0,
-        description: "Posvátné místo"
-    },
-    {
-        name: "4",
-        peepsMin: 90,
-        peepsMax: 250,
-        sizeX: 4,
-        sizeY: 5,
-        building: "church",
-        defenseLevel: 5,
-        cathouseLevel: 0,
-        description: "Posvátné místo"
-    },
+    }
 ]
