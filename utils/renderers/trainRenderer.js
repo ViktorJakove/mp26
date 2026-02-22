@@ -51,6 +51,17 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         return trains.some(t => t.routeIndex === routeIndex);
     }
 
+    function resetTrainToStation(train){
+        const nearestEnd = train.progress < train.path.length / 2 ? 0 : train.path.length - 1;
+        train.progress = nearestEnd;
+        train.waiting = true;
+        train.waitTimer = 0;
+        const dih = nearestEnd === 0 ? 1 : -1;
+        train.direction = dih;
+        for (let w = 0; w < train.wagons.length; w++) train.wagons[w].progress = -WAGON_OFFSET * (w + 1);
+
+    }
+
     function clearTrains() {
         trains.length = 0;
     }
@@ -97,8 +108,13 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
                 train.waitTimer += app.ticker.deltaMS;
                 for (const wagon of train.wagons) {
                     const delta = train.speed / 1000 * app.ticker.deltaMS;
-                    if (wagon.progress < 0) wagon.progress = Math.min(0, wagon.progress + delta);
-                    else if (wagon.progress > 0) wagon.progress = Math.max(0, wagon.progress - delta);
+                    if (wagon.progress < 0) {
+                        wagon.progress = Math.min(0, wagon.progress + delta);
+                        anyMoved = true;
+                    } else if (wagon.progress > 0) {
+                        wagon.progress = Math.max(0, wagon.progress - delta);
+                        anyMoved = true;
+                    }
                 }
             
                 if (train.waitTimer >= STATION_WAIT_TIME) {
@@ -106,7 +122,7 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
                     train.waitTimer = 0;
                     train.direction *= -1;
                     // reset offset 
-                    for (let w = 0; w < train.wagons.length; w++) train.wagons[w].progress = WAGON_OFFSET * (w + 1);
+                    for (let w = 0; w < train.wagons.length; w++) train.wagons[w].progress = -WAGON_OFFSET * (w + 1);
                 } else continue;
             }
     
@@ -162,7 +178,6 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
     }
 
     function drawTrains() {
-        // Return all children to pool
         while (trainContainer.children.length > 0) {
             returnTrainGraphic(trainContainer.removeChildAt(0));
         }
@@ -183,6 +198,16 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
             g.beginFill(train.color, 1);
             g.drawRect(screenX + offset, screenY + offset, size, size);
             g.endFill();
+
+            //klikaci
+            g.interactive = true;
+            g.cursor = 'pointer';
+            g.removeAllListeners();
+            g.on('pointerdown', (e) => {
+            e.stopPropagation();
+            resetTrainToStation(train);
+            });
+
             trainContainer.addChild(g);
 
             for (const wagon of train.wagons) {
@@ -195,6 +220,16 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
                 wg.beginFill(train.color, 0.75);
                 wg.drawRect(wsx + offset, wsy + offset, size, size);
                 wg.endFill();
+
+                //klikaci
+                wg.interactive = true;
+                wg.cursor = 'pointer';
+                wg.removeAllListeners();
+                wg.on('pointerdown', (e) => {
+                    e.stopPropagation();
+                    resetTrainToStation(train);
+                });
+
                 trainContainer.addChild(wg);
             }
         }
