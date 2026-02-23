@@ -107,7 +107,6 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
         const totalCost = railType.cost + buildOverCost;
         
         if(!railType || getMoney() < totalCost) {
-            console.log(`Not enough money! Need $${totalCost} ($${railType.cost} + $${buildOverCost} terrain fee)`);
             return false;
         }
         if (isTileOccupied(tileX, tileY) || isTileBlocked(tileX,tileY) || isOutOfBounds(tileX,tileY) || !isCompatibleWithNeighbors(tileX,tileY,railType)) return false;
@@ -125,8 +124,6 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
         if (onRailPlaced) onRailPlaced();
 
         //subMoney(totalCost);
-        
-        console.log(`Placed rail for $${totalCost} ($${railType.cost} + $${buildOverCost} terrain fee)`);
 
         return true;
     }

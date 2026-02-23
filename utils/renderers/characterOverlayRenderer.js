@@ -7,7 +7,6 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
     overlayContainer.visible = false;
     
     overlayContainer.interactive = true;
-    // Nastavíme hitArea na celou obrazovku
     overlayContainer.hitArea = new PIXI.Rectangle(0, 0, app.screen.width, app.screen.height);
     
     app.stage.addChild(overlayContainer);
@@ -16,6 +15,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
     let onCloseCallback = null;
     let currentTextIndex = 0;
     let buildingDescText = null;
+    let characterSprite = null;
 
     /*function getCityConnections(cityArea) {
         const stations = stationRenderer.getStations();
@@ -44,11 +44,10 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         return cityStations;
     }*/
 
-    function getBuildingSpritePath(buildingData, index) {
-        if (!buildingData || !buildingData.sprite) return null;
-            
-        const spriteData = buildingData.sprite;
-        return `../../static/chars/${buildingName}/${buildingName} ${index}.png`;
+    function getBuildingSpritePath(buildingKey, index) {
+        const path  ="../../graphics/chars/"+buildingKey +"/" + buildingKey + BUILDING_TEXTS[buildingKey].sprite[index] + ".png";
+        console.log("Getting sprite path:", path);
+        return path;
     }
 
     function showCityInfo(cityArea) {
@@ -58,6 +57,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         
         overlayContainer.removeChildren();
         
+        // Poloprůhledné pozadí
         const overlay = new PIXI.Graphics();
         overlay.beginFill(0x000000, 0.7);
         overlay.drawRect(0, 0, app.screen.width, app.screen.height);
@@ -70,6 +70,27 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         });
         
         overlayContainer.addChild(overlay);
+        
+        try {
+            const buildingKey = cityArea.building || "none";
+            const buildingData = BUILDING_TEXTS[buildingKey] || DEFAULT_BUILDING_TEXT;
+            
+            const spritePath = getBuildingSpritePath(buildingKey, currentTextIndex);
+            
+            characterSprite = new PIXI.Sprite(PIXI.Texture.from(spritePath));
+            
+            characterSprite.anchor.set(0.5);
+            characterSprite.x = app.screen.width / 2;
+            characterSprite.y = app.screen.height / 2;
+            
+            const maxSize = Math.min(app.screen.width, app.screen.height) * 0.6;
+            characterSprite.width = maxSize;
+            characterSprite.height = maxSize;
+            
+            overlayContainer.addChild(characterSprite);
+        } catch (error) {
+            console.warn("Could not load character sprite:", error);
+        }
     
         const panel = new PIXI.Container();
         
@@ -108,7 +129,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             wordWrapWidth: panelWidth - 40
         });
         buildingDescText.x = 20;
-        buildingDescText.y = title.y*3;
+        buildingDescText.y = 60;
         panel.addChild(buildingDescText);
     
         const instructionText = new PIXI.Text("Klikni kamkoli...", {
@@ -147,14 +168,26 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             hideOverlay();
             return;
         }
+        
         currentTextIndex = (currentTextIndex + 1) % buildingTexts.length;
         buildingDescText.text = buildingTexts[currentTextIndex];
+        
+        // Aktualizujeme sprite při změně textu
+        if (characterSprite) {
+            try {
+                const spritePath = getBuildingSpritePath(buildingData, currentTextIndex);
+                characterSprite.texture = PIXI.Texture.from(spritePath);
+            } catch (error) {
+                console.warn("Could not update character sprite:", error);
+            }
+        }
     }
 
     function hideOverlay() {
         overlayContainer.visible = false;
         currentCity = null;
         buildingDescText = null;
+        characterSprite = null;
         currentTextIndex = 0;
         
         if (onCloseCallback) {

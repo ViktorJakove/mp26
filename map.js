@@ -48,7 +48,6 @@ const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer, trainR
 //const railSelector = createRailSelectorRenderer(app,getGridScale);
 
 const characterOverlay = createCharacterOverlay(app, getGridScale, railRenderer, stationRenderer);
-console.log("Character overlay created:", characterOverlay);
 
 //graphics
 const fgContainer = new PIXI.Container();
