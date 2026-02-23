@@ -44,8 +44,15 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         return cityStations;
     }*/
 
+    function getBuildingSpritePath(buildingData, index) {
+        if (!buildingData || !buildingData.sprite) return null;
+            
+        const spriteData = buildingData.sprite;
+        return `../../static/chars/${buildingName}/${buildingName} ${index}.png`;
+    }
+
     function showCityInfo(cityArea) {
-        
+        if (cityArea.building === "none") return;
         currentCity = cityArea;
         currentTextIndex = 0;
         

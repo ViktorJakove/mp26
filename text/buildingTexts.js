@@ -1,4 +1,3 @@
-//path + /building + /building + 0,1,S + .png
 export const BUILDING_TEXTS = {
     "hq": {
         text: [
@@ -30,7 +29,7 @@ export const BUILDING_TEXTS = {
             "Nápisy na náhrobcích vyprávějí příběhy",
             "Stromy šumí nad starými hroby"
         ],
-        sprite: [0, 1, 0]
+        sprite: [0, 1, 2]
     },
     "bisons": {
         text: [
@@ -90,9 +89,7 @@ export const BUILDING_TEXTS = {
     },
     "none": {
         text: [
-            "Obytná čtvrť bez zvláštního účelu",
-            "Přízemní domky se zahrádkami",
-            "Děti si hrají na prašných ulicích"
+            "error"
         ],
         sprite: [0, 1, 2]
     }

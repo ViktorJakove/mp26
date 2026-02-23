@@ -46,8 +46,6 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
             tileY >= area.y && tileY < area.y + area.sizeY
         );
 
-        console.log("Found city:", clickedCity);
-
         if (clickedCity) {
             const stations = stationRenderer.getStations();
             
