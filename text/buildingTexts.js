@@ -1,69 +1,109 @@
+//path + /building + /building + 0,1,S + .png
 export const BUILDING_TEXTS = {
-    "hq": [
-        "Sídlo společnosti Pacific Railroad",
-        "Zde se rozhoduje o osudu železnice",
-        "Kanceláře plné úředníků a plánů"
-    ],
-    "sheriff": [
-        "Místní vězení a úřad šerifa",
-        "Zdi pamatují nejednoho desperáta",
-        "Před budovou visí hledané listy"
-    ],
-    "bank": [
-        "Nejbezpečnější místo ve městě",
-        "Zde se ukládají peníze z vlaků",
-        "Těžké dubové dveře a ocelový trezor"
-    ],
-    "graveyard": [
-        "Poslední odpočinek místních obyvatel",
-        "Nápisy na náhrobcích vyprávějí příběhy",
-        "Stromy šumí nad starými hroby"
-    ],
-    "bisons": [
-        "Usedlost bývalého lovce bizonů",
-        "Stěny zdobí paroží a kůže",
-        "Vůně kouře a vydělané kůže"
-    ],
-    "gallery": [
-        "Místní galerie a kulturní centrum",
-        "Obrazy krajin a portréty významných občanů",
-        "Schází se zde umělci z širokého okolí"
-    ],
-    "hokynar": [
-        "Obchod se vším, co potřebujete",
-        "Sudy, bedny a regály plné zboží",
-        "Vůně koření a sušeného masa"
-    ],
-    "barber": [
-        "Holičství a kadeřnictví v jednom",
-        "Pánové zde probírají novinky z města",
-        "Výloha s hřebeny a mastičkami"
-    ],
-    "marco": [
-        "Obuvnictví mistra Marka",
-        "Regály plné bot všech velikostí",
-        "Vzorníky kůže na každém stole"
-    ],
-    "trains": [
-        "Depo a opravna vlaků",
-        "Sklad náhradních dílů a kol",
-        "Strojvedoucí zde probírají trasy"
-    ],
-    "church": [
-        "Místní kostel a duchovní centrum",
-        "Barevné vitráže a staré lavice",
-        "Zvony zvoní každou neděli"
-    ],
-    "none": [
-        "Obytná čtvrť bez zvláštního účelu",
-        "Přízemní domky se zahrádkami",
-        "Děti si hrají na prašných ulicích"
-    ]
+    "hq": {
+        text: [
+            "Sídlo společnosti Pacific Railroad",
+            "Zde se rozhoduje o osudu železnice",
+            "Zde se rozhoduje o osudu železnice"
+        ],
+        sprite: [0, 1, "S"]
+    },
+    "sheriff": {
+        text: [
+            "Místní vězení a úřad šerifa",
+            "Zdi pamatují nejednoho desperáta",
+            "Před budovou visí hledané listy"
+        ],
+        sprite: [0, 1, 2]
+    },
+    "bank": {
+        text: [
+            "Nejbezpečnější místo ve městě",
+            "Zde se ukládají peníze z vlaků",
+            "Těžké dubové dveře a ocelový trezor"
+        ],
+        sprite: [0, 1, 2]
+    },
+    "graveyard": {
+        text: [
+            "Poslední odpočinek místních obyvatel",
+            "Nápisy na náhrobcích vyprávějí příběhy",
+            "Stromy šumí nad starými hroby"
+        ],
+        sprite: [0, 1, 0]
+    },
+    "bisons": {
+        text: [
+            "Usedlost bývalého lovce bizonů",
+            "Stěny zdobí paroží a kůže",
+            "Vůně kouře a vydělané kůže"
+        ],
+        sprite: [0, 1, 2]
+    },
+    "gallery": {
+        text: [
+            "Místní galerie a kulturní centrum",
+            "Obrazy krajin a portréty významných občanů",
+            "Schází se zde umělci z širokého okolí"
+        ],
+        sprite: [0, 1, 2]
+    },
+    "hokynar": {
+        text: [
+            "Obchod se vším, co potřebujete",
+            "Sudy, bedny a regály plné zboží",
+            "Vůně koření a sušeného masa"
+        ],
+        sprite: [0, 1, 2]
+    },
+    "barber": {
+        text: [
+            "Holičství a kadeřnictví v jednom",
+            "Pánové zde probírají novinky z města",
+            "Výloha s hřebeny a mastičkami"
+        ],
+        sprite: [0, 1, 2]
+    },
+    "marco": {
+        text: [
+            "Obuvnictví mistra Marka",
+            "Regály plné bot všech velikostí",
+            "Vzorníky kůže na každém stole"
+        ],
+        sprite: [0, 1, 2]
+    },
+    "trains": {
+        text: [
+            "Depo a opravna vlaků",
+            "Sklad náhradních dílů a kol",
+            "Strojvedoucí zde probírají trasy"
+        ],
+        sprite: [0, 1, 2]
+    },
+    "church": {
+        text: [
+            "Místní kostel a duchovní centrum",
+            "Barevné vitráže a staré lavice",
+            "Zvony zvoní každou neděli"
+        ],
+        sprite: [0, 1, 2]
+    },
+    "none": {
+        text: [
+            "Obytná čtvrť bez zvláštního účelu",
+            "Přízemní domky se zahrádkami",
+            "Děti si hrají na prašných ulicích"
+        ],
+        sprite: [0, 1, 2]
+    }
 };
 
 // Default text if building type not found
-export const DEFAULT_BUILDING_TEXT = [
-    "Běžná městská zástavba",
-    "Žije zde pracovitý lid",
-    "Ulice plné života a obchodu"
-];
+export const DEFAULT_BUILDING_TEXT = {
+    text: [
+        "Běžná městská zástavba",
+        "Žije zde pracovitý lid",
+        "Ulice plné života a obchodu"
+    ],
+    sprite: [0, 1, 2]
+};

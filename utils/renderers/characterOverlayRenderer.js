@@ -89,7 +89,8 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         panel.addChild(title);
         
         const buildingKey = cityArea.building || "none";
-        const buildingTexts = BUILDING_TEXTS[buildingKey] || DEFAULT_BUILDING_TEXT;
+        const buildingData = BUILDING_TEXTS[buildingKey] || DEFAULT_BUILDING_TEXT;
+        const buildingTexts = buildingData.text;
         
         buildingDescText = new PIXI.Text(buildingTexts[0], {
             fontFamily: "Arial",
@@ -132,7 +133,8 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         if (!currentCity || !buildingDescText) return;
         
         const buildingKey = currentCity.building || "none";
-        const buildingTexts = BUILDING_TEXTS[buildingKey] || DEFAULT_BUILDING_TEXT;
+        const buildingData = BUILDING_TEXTS[buildingKey] || DEFAULT_BUILDING_TEXT;
+        const buildingTexts = buildingData.text;
         
         if (currentTextIndex === buildingTexts.length - 1) {
             hideOverlay();
