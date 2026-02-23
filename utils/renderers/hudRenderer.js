@@ -130,8 +130,6 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
                     if (type.connections[3]) { g.moveTo(cx, cy); g.lineTo(x, cy); }
                     leftBarContainer.addChild(g);
                 }
-
-                // Cost label (instead of name)
                 const costLabel = new PIXI.Text(`$${type.cost}`, {
                     fontFamily: "Arial",
                     fontSize: 12,
@@ -148,7 +146,7 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
             //hit area
             const hit = new PIXI.Graphics();
             hit.beginFill(0xffffff, 0.001);
-            hit.drawRect(x, y, ICON_SIZE, ICON_SIZE + 10); // Extend hit area to cover cost display
+            hit.drawRect(x, y, ICON_SIZE, ICON_SIZE + 10);
             hit.endFill();
             hit.interactive = true;
             hit.cursor = "pointer";

@@ -124,8 +124,7 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
 
         if (onRailPlaced) onRailPlaced();
 
-        // Subtract total cost (rail cost + terrain fees)
-        subMoney(totalCost);
+        //subMoney(totalCost);
         
         console.log(`Placed rail for $${totalCost} ($${railType.cost} + $${buildOverCost} terrain fee)`);
 
