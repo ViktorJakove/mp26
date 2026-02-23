@@ -1,3 +1,5 @@
+import { BUILDING_TEXTS, DEFAULT_BUILDING_TEXT } from "../../text/buildingTexts.js";
+
 export function createCharacterOverlay(app, getGridScale, railRenderer, stationRenderer) {
     
     const overlayContainer = new PIXI.Container();
@@ -5,13 +7,17 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
     overlayContainer.visible = false;
     
     overlayContainer.interactive = true;
+    // Nastavíme hitArea na celou obrazovku
+    overlayContainer.hitArea = new PIXI.Rectangle(0, 0, app.screen.width, app.screen.height);
     
     app.stage.addChild(overlayContainer);
     
     let currentCity = null;
     let onCloseCallback = null;
+    let currentTextIndex = 0;
+    let buildingDescText = null;
 
-    function getCityConnections(cityArea) {
+    /*function getCityConnections(cityArea) {
         const stations = stationRenderer.getStations();
         
         const cityStations = stations.filter(station => {
@@ -36,11 +42,12 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         });
 
         return cityStations;
-    }
+    }*/
 
     function showCityInfo(cityArea) {
-        console.log("showCityInfo called with:", cityArea.name);
+        
         currentCity = cityArea;
+        currentTextIndex = 0;
         
         overlayContainer.removeChildren();
         
@@ -52,19 +59,17 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         overlay.interactive = true;
         overlay.on('pointerdown', (e) => {
             e.stopPropagation();
+            handleOverlayClick();
         });
         
         overlayContainer.addChild(overlay);
-        console.log("Overlay added, size:", app.screen.width, "x", app.screen.height);
     
         const panel = new PIXI.Container();
         
         const panelWidth = app.screen.width * 0.8;
-        const panelHeight = app.screen.height * 0.3;
+        const panelHeight = app.screen.height * 0.4;
         const panelX = (app.screen.width - panelWidth) / 2;
         const panelY = app.screen.height - panelHeight - 20;
-    
-        console.log("Panel dimensions:", panelWidth, panelHeight, panelX, panelY);
     
         const panelBg = new PIXI.Graphics();
         panelBg.beginFill(0x2c3e50, 0.95);
@@ -72,32 +77,6 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         panelBg.drawRoundedRect(0, 0, panelWidth, panelHeight, 12);
         panelBg.endFill();
         panel.addChild(panelBg);
-    
-        const closeBtn = new PIXI.Graphics();
-        closeBtn.beginFill(0xe74c3c);
-        closeBtn.drawCircle(panelWidth - 25, 25, 15);
-        closeBtn.endFill();
-        
-        const closeText = new PIXI.Text("×", {
-            fontFamily: "Arial",
-            fontSize: 24,
-            fill: 0xffffff,
-            fontWeight: "bold"
-        });
-        closeText.anchor.set(0.5);
-        closeText.x = panelWidth - 25;
-        closeText.y = 25;
-        
-        closeBtn.interactive = true;
-        closeBtn.cursor = "pointer";
-        closeBtn.on("pointerdown", (e) => {
-            e.stopPropagation();
-            hideOverlay();
-            if (onCloseCallback) onCloseCallback();
-        });
-        
-        panel.addChild(closeBtn);
-        panel.addChild(closeText);
     
         const title = new PIXI.Text(`${cityArea.name}`, {
             fontFamily: "Arial",
@@ -108,77 +87,70 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         title.x = 20;
         title.y = 20;
         panel.addChild(title);
-    
-        if (cityArea.description) {
-            const desc = new PIXI.Text(cityArea.description, {
-                fontFamily: "Arial",
-                fontSize: 16,
-                fill: 0xecf0f1,
-                fontStyle: "italic"
-            });
-            desc.x = 20;
-            desc.y = 60;
-            panel.addChild(desc);
-        }
-    
-        const statsY = 100;
-        const stats = [
-            `Population: ${cityArea.peeps}`,
-            `Size: ${cityArea.sizeX}×${cityArea.sizeY} tiles`,
-            `Building: ${cityArea.building || "None"}`,
-            `Defense Level: ${cityArea.defenseLevel || 1}`
-        ];
-    
-        stats.forEach((stat, index) => {
-            const statText = new PIXI.Text(stat, {
-                fontFamily: "Arial",
-                fontSize: 18,
-                fill: 0xbdc3c7
-            });
-            statText.x = 20;
-            statText.y = statsY + index * 30;
-            panel.addChild(statText);
+        
+        const buildingKey = cityArea.building || "none";
+        const buildingTexts = BUILDING_TEXTS[buildingKey] || DEFAULT_BUILDING_TEXT;
+        
+        buildingDescText = new PIXI.Text(buildingTexts[0], {
+            fontFamily: "Arial",
+            fontSize: 16,
+            fill: 0xecf0f1,
+            fontStyle: "italic",
+            wordWrap: true,
+            wordWrapWidth: panelWidth - 40
         });
+        buildingDescText.x = 20;
+        buildingDescText.y = title.y*3;
+        panel.addChild(buildingDescText);
     
-        const connections = getCityConnections(cityArea);
-        const connectionStatus = new PIXI.Text(
-            connections.length > 0 ? "✓ Connected to railway network" : "✗ Not connected",
-            {
-                fontFamily: "Arial",
-                fontSize: 20,
-                fill: connections.length > 0 ? 0x2ecc71 : 0xe74c3c,
-                fontWeight: "bold"
-            }
-        );
-        connectionStatus.x = 20;
-        connectionStatus.y = statsY + stats.length * 30 + 20;
-        panel.addChild(connectionStatus);
-    
-        if (connections.length > 0) {
-            const routes = new PIXI.Text(`Active routes: ${connections.length}`, {
-                fontFamily: "Arial",
-                fontSize: 16,
-                fill: 0xecf0f1
-            });
-            routes.x = 20;
-            routes.y = statsY + stats.length * 30 + 50;
-            panel.addChild(routes);
-        }
+        const instructionText = new PIXI.Text("Klikni kamkoli...", {
+            fontFamily: "Arial",
+            fontSize: 14,
+            fill: 0x95a5a6,
+            fontStyle: "italic"
+        });
+        instructionText.x = panelWidth - 200;
+        instructionText.y = panelHeight - 30;
+        panel.addChild(instructionText);
     
         panel.x = panelX;
         panel.y = panelY;
         
-        panel.interactive = true;
+        panel.interactive = false;
+        panel.interactiveChildren = false;
         
         overlayContainer.addChild(panel);
         
         overlayContainer.visible = true;
+        
+        overlayContainer.hitArea = new PIXI.Rectangle(0, 0, app.screen.width, app.screen.height);
+        
         overlayContainer.updateTransform();
+    }
+
+    function handleOverlayClick() {
+        if (!currentCity || !buildingDescText) return;
+        
+        const buildingKey = currentCity.building || "none";
+        const buildingTexts = BUILDING_TEXTS[buildingKey] || DEFAULT_BUILDING_TEXT;
+        
+        if (currentTextIndex === buildingTexts.length - 1) {
+            hideOverlay();
+            return;
+        }
+        currentTextIndex = (currentTextIndex + 1) % buildingTexts.length;
+        buildingDescText.text = buildingTexts[currentTextIndex];
     }
 
     function hideOverlay() {
         overlayContainer.visible = false;
         currentCity = null;
+        buildingDescText = null;
+        currentTextIndex = 0;
+        
+        if (onCloseCallback) {
+            onCloseCallback();
+        }
     }
 
     function isVisible() {
@@ -197,6 +169,8 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             overlayContainer.removeChildren();
             overlayContainer.scale.set(1, 1);
             showCityInfo(cityToShow);
+        } else {
+            overlayContainer.hitArea = new PIXI.Rectangle(0, 0, app.screen.width, app.screen.height);
         }
     }
 
@@ -220,7 +194,6 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             app.screen.width,
             app.screen.height
         );
-
     }
 
     return {

@@ -1,4 +1,3 @@
-// mouseControls.js
 export function setupMouseControls(app, camera, getGridScale, cellSize, getPlacementMode, railRenderer, drawGraphics, getSelectedRailType, cityInfoOverlay, areas, stationRenderer) {
     let isDragging = false;
     let mouseInitialPos = { x: 0, y: 0 };
@@ -39,31 +38,23 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
     }
 
     function handleCityClick(tileX, tileY) {
-        // Don't handle clicks if overlay is already visible
         if (cityInfoOverlay.isVisible()) return false;
-
-        console.log("Checking city click at:", tileX, tileY); // Debug log
         
-        // Check if clicked on a city
         const clickedCity = areas.find(area => 
             area.type?.type === "city" &&
             tileX >= area.x && tileX < area.x + area.sizeX &&
             tileY >= area.y && tileY < area.y + area.sizeY
         );
 
-        console.log("Found city:", clickedCity); // Debug log
+        console.log("Found city:", clickedCity);
 
         if (clickedCity) {
-            // Check if city is connected to railway
             const stations = stationRenderer.getStations();
-            console.log("Stations:", stations); // Debug log
             
             const isConnected = stations.some(station => {
-                // Check if station is adjacent to city
                 for (let x = clickedCity.x - 1; x <= clickedCity.x + clickedCity.sizeX; x++) {
                     for (let y = clickedCity.y - 1; y <= clickedCity.y + clickedCity.sizeY; y++) {
                         if (station.x === x && station.y === y) {
-                            // Check if this station is connected to another station
                             const otherStation = stations.find(s => 
                                 s.index === station.index && 
                                 (s.x !== station.x || s.y !== station.y)
@@ -73,7 +64,6 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
                                     station.x, station.y,
                                     otherStation.x, otherStation.y
                                 );
-                                console.log("Station connected:", connected); // Debug log
                                 return connected;
                             }
                         }
@@ -81,8 +71,6 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
                 }
                 return false;
             });
-
-            console.log("City connected:", isConnected); // Debug log
 
             if (isConnected) {
                 cityInfoOverlay.showCityInfo(clickedCity);
@@ -96,31 +84,24 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
         try{
             const button = event.data.button;
             
-            // Get tile coordinates
             const tilePos = getTileFromMouse(event);
             if (!tilePos) return;
             
-            console.log("Pointer down at tile:", tilePos, "button:", button, "placementMode:", getPlacementMode()); // Debug log
             
-            // Check for city click first (left click only)
             if (button === 0 && !getPlacementMode()) {
-                console.log("Checking city click..."); // Debug log
                 const cityClicked = handleCityClick(tilePos.tileX, tilePos.tileY);
                 if (cityClicked) {
-                    console.log("City clicked, showing overlay"); // Debug log
-                    event.stopPropagation(); // Stop event from propagating
-                    return; // City click handled, don't start dragging
+                    event.stopPropagation();
+                    return;
                 }
             }
 
-            // Handle rail placement
             if (getPlacementMode() && button === 0) {
                 isPlacingRail = true;
                 handleRailAction(tilePos.tileX, tilePos.tileY);
                 return;
             }
 
-            // Handle dragging
             if (getPlacementMode() ? (button === 2) : (button === 0 || button === 2)) {
                 isDragging = true;
                 mouseInitialPos = { x: event.data.global.x, y: event.data.global.y };
