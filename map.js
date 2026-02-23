@@ -8,11 +8,12 @@ import { createDrawGraphics } from "./drawGraphics.js";
 import { setupMouseControls } from "./mouseControls.js";
 import { createStationManager } from "./stationManager.js";
 import { createRouteChecker } from "./utils/routeChecker.js";
+import { createCharacterOverlay } from "./utils/renderers/characterOverlayRenderer.js";
 //import { createRailSelectorRenderer } from "./utils/renderers/railSeclectorRenderer.js";
 
 //pixi setup
 const app = createApp();
-
+app.stage.sortableChildren = true;
 //camera
 const camera = createCamera();
 
@@ -46,6 +47,9 @@ const renderers = creatRenderers(app, camera, getGridScale, cellSize, getAreas, 
 const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer, trainRenderer, hudRenderer } = renderers;
 //const railSelector = createRailSelectorRenderer(app,getGridScale);
 
+const characterOverlay = createCharacterOverlay(app, getGridScale, railRenderer, stationRenderer);
+console.log("Character overlay created:", characterOverlay);
+
 //graphics
 const fgContainer = new PIXI.Container();
 fgContainer.zIndex = 10;
@@ -66,12 +70,27 @@ railRenderer.setOnRailPlaceCheckConn(()=>{
     if (allConnected) addStations();
 })
 
-
 //init draw
 drawGraphics();
+const { resetDrag } = setupMouseControls(
+    app, 
+    camera, 
+    getGridScale, 
+    cellSize, 
+    getPlacementMode, 
+    railRenderer, 
+    () => drawGraphics(), 
+    () => hudRenderer.getSelectedType(),
+    characterOverlay,
+    areas,
+    stationRenderer
+);
 
-//mouse controls
-const { resetDrag } = setupMouseControls(app, camera, getGridScale, cellSize, getPlacementMode, railRenderer, () => drawGraphics(), ()=>hudRenderer.getSelectedType());
+document.addEventListener("keydown", (event) => {
+    if (event.code === "Escape" && characterOverlay.isVisible()) {
+        characterOverlay.hideOverlay();
+    }
+});
 
 //zoom
 app.view.addEventListener("wheel", (event) => {
@@ -106,11 +125,20 @@ function mapZoom(zoomFactor, event){
 
     pointerTextRenderer.refresh(() => gridScale);
     hudRenderer.draw();
-
+    characterOverlay.refresh();
+    
     drawGraphics();
 }
 window.addEventListener("resize", () => {
     updateStageHitArea();
+    if (characterOverlay.isVisible && characterOverlay.isVisible()) {
+        const currentCity = characterOverlay.getCurrentCity ? characterOverlay.getCurrentCity() : null;
+        if (currentCity) {
+            characterOverlay.showCityInfo(currentCity);
+            overlayContainer.visible = true;
+            characterOverlay.refresh();
+        }
+    }
 });
 
 // init funkci!!!
