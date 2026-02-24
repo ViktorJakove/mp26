@@ -69,9 +69,13 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             characterSprite.x = app.screen.width / 2;
             characterSprite.y = app.screen.height / 2;
 
-            //neblokovat!!
-            characterSprite.interactive = false;
-            characterSprite.interactiveChildren = false;
+            if (characterSprite) {
+                characterSprite.interactive = true;
+                characterSprite.on('pointerdown', (e) => {
+                    e.stopPropagation();
+                    handleOverlayClick();
+                });
+            }
             
             const maxSize = Math.min(app.screen.width, app.screen.height) * 0.6;
             
