@@ -8,8 +8,9 @@ export class Area {
     @param {string} name - self explanatory
     @param {number} peeps - population
     @param {string} description - self explanatory
+    @param {string} building - which char is here
     */
-    constructor(type,x,y,sizeX,sizeY,name, peeps, description) {
+    constructor(type,x,y,sizeX,sizeY,name, peeps, description, building) {
         this.type = type;
         this.x = x;
         this.y = y;
@@ -18,5 +19,6 @@ export class Area {
         this.name = name;
         this.peeps = peeps;
         this.description = description;
+        this.building = building;
     }
 }

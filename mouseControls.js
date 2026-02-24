@@ -1,4 +1,4 @@
-export function setupMouseControls(app, camera, getGridScale, cellSize, getPlacementMode, railRenderer, drawGraphics, getSelectedRailType) {
+export function setupMouseControls(app, camera, getGridScale, cellSize, getPlacementMode, railRenderer, drawGraphics, getSelectedRailType, cityInfoOverlay, areas, stationRenderer) {
     let isDragging = false;
     let mouseInitialPos = { x: 0, y: 0 };
     let isPlacingRail = false;
@@ -9,15 +9,16 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
 
     function getTileFromMouse(event){
         try{
-        const gridScale = getGridScale();
-        const worldX = camera.x + (event.data.global.x / gridScale) - app.screen.width / 2 / gridScale;
-        const worldY = camera.y + (event.data.global.y / gridScale) - app.screen.height / 2 / gridScale;
-        return {tileX: Math.floor(worldX / cellSize), tileY: Math.floor(worldY / cellSize)};
+            const gridScale = getGridScale();
+            const worldX = camera.x + (event.data.global.x / gridScale) - app.screen.width / 2 / gridScale;
+            const worldY = camera.y + (event.data.global.y / gridScale) - app.screen.height / 2 / gridScale;
+            return {tileX: Math.floor(worldX / cellSize), tileY: Math.floor(worldY / cellSize)};
         }catch(error){
             console.error("Error v getTileFromMouse:", error);
-            return vull;
+            return null;
         }
     }
+
     function handleRailAction(tileX, tileY) {
         try{
             const selected = getSelectedRailType();
@@ -36,15 +37,69 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
         }
     }
 
+    function handleCityClick(tileX, tileY) {
+        if (cityInfoOverlay.isVisible()) return false;
+        
+        const clickedCity = areas.find(area => 
+            area.type?.type === "city" &&
+            tileX >= area.x && tileX < area.x + area.sizeX &&
+            tileY >= area.y && tileY < area.y + area.sizeY
+        );
+
+        if (clickedCity) {
+            const stations = stationRenderer.getStations();
+            
+            const isConnected = stations.some(station => {
+                for (let x = clickedCity.x - 1; x <= clickedCity.x + clickedCity.sizeX; x++) {
+                    for (let y = clickedCity.y - 1; y <= clickedCity.y + clickedCity.sizeY; y++) {
+                        if (station.x === x && station.y === y) {
+                            const otherStation = stations.find(s => 
+                                s.index === station.index && 
+                                (s.x !== station.x || s.y !== station.y)
+                            );
+                            if (otherStation) {
+                                const connected = railRenderer.areStationsConnected(
+                                    station.x, station.y,
+                                    otherStation.x, otherStation.y
+                                );
+                                return connected;
+                            }
+                        }
+                    }
+                }
+                return false;
+            });
+
+            if (isConnected) {
+                cityInfoOverlay.showCityInfo(clickedCity);
+                return true;
+            }
+        }
+        return false;
+    }
+
     app.stage.on('pointerdown', (event) => {
         try{
             const button = event.data.button;
+            
+            const tilePos = getTileFromMouse(event);
+            if (!tilePos) return;
+            
+            
+            if (button === 0 && !getPlacementMode()) {
+                const cityClicked = handleCityClick(tilePos.tileX, tilePos.tileY);
+                if (cityClicked) {
+                    event.stopPropagation();
+                    return;
+                }
+            }
+
             if (getPlacementMode() && button === 0) {
                 isPlacingRail = true;
-                const {tileX, tileY} = getTileFromMouse(event);
-                handleRailAction(tileX, tileY);
+                handleRailAction(tilePos.tileX, tilePos.tileY);
                 return;
             }
+
             if (getPlacementMode() ? (button === 2) : (button === 0 || button === 2)) {
                 isDragging = true;
                 mouseInitialPos = { x: event.data.global.x, y: event.data.global.y };
@@ -62,20 +117,25 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
         }
     });
 
-    app.stage.on('pointerupoutside', () => { isDragging = false; isPlacingRail = false; });
+    app.stage.on('pointerupoutside', () => { 
+        isDragging = false; 
+        isPlacingRail = false; 
+    });
 
     app.stage.on('pointermove', (event) => {
         try{
             if(getPlacementMode() && isPlacingRail){
-                const {tileX, tileY} = getTileFromMouse(event);
-                handleRailAction(tileX, tileY);
+                const tilePos = getTileFromMouse(event);
+                if (tilePos) {
+                    handleRailAction(tilePos.tileX, tilePos.tileY);
+                }
                 return;
             }
 
             if (isDragging) {
                 const gridScale = getGridScale();
                 const dx = (event.data.global.x - mouseInitialPos.x) / gridScale;
-               const dy = (event.data.global.y - mouseInitialPos.y) / gridScale;
+                const dy = (event.data.global.y - mouseInitialPos.y) / gridScale;
                 camera.x -= dx;
                 camera.y -= dy;
                 mouseInitialPos = { x: event.data.global.x, y: event.data.global.y };
@@ -86,10 +146,9 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
         }
     });
 
-    //blokace okynka
     app.view.addEventListener("contextmenu", (event) => {
-        //TEMP FIX DEBUG SMAZtA
-        //event.preventDefault();
+        // TEMP FIX DEBUG
+        // event.preventDefault();
     });
 
     return { resetDrag };

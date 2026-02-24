@@ -102,10 +102,12 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
             const bisonBonus = calcBisonProfitForPath(train.path);
             if (bisonBonus > 0) {
                 addMoney(bisonBonus);
-                console.log(`Bison bonus: +${bisonBonus}`);
             }
         }
-        addMoney(Math.round(avgPeeps/2));
+
+        let profit = avgPeeps > 50 ?  avgPeeps /4 : avgPeeps / 2;
+
+        addMoney(Math.round(profit));
     }
 
     app.ticker.add(() => {
