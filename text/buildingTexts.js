@@ -80,14 +80,23 @@ export const BUILDING_TEXTS = {
         sprite: [0, 1, 0],
         spritePos: ["C", "C", "C"]
     },
-    "trains": {
+    "bussiness": {
         text: [
             "Depo a opravna vlaků",
             "Sklad náhradních dílů a kol",
             "Strojvedoucí zde probírají trasy"
         ],
-        sprite: [0, 1, 2],
-        spritePos: ["L", "C", "P"]
+        sprite: [0, "S", 0],
+        spritePos: ["C", "C", "C"],
+        transaction: {
+            cost: 300,
+            successText: "Investice přijata! Město ti děkuje.",
+            failText: "Nemáš dostatek financí.",
+            questionSprite: "S",
+            questionSpritePos: "C",
+            successSprite: "S",
+            question: "Pořídit naprosto přírodní uhlí pro dvojnásobný výkon lokomotiv?"
+        }
     },
     "mech": {
         text: [
@@ -96,7 +105,16 @@ export const BUILDING_TEXTS = {
             "Strojvedoucí zde probírají trasy"
         ],
         sprite: [0, 1, "S"],
-        spritePos: ["L", "L", "C"]
+        spritePos: ["L", "L", "C"],
+        transaction: {
+            cost: 500,
+            successText: "Děkujeme za nákup! Nová lokomotiva brzy dorazí.",
+            failText: "Nemáš dost peněz, příteli.",
+            questionSprite: 0,
+            questionSpritePos: "C",
+            successSprite: "S",
+            question: "Pořídit naprosto přírodní uhlí pro dvojnásobný výkon lokomotiv?"
+        }
     },
     "church": {
         text: [
@@ -116,7 +134,6 @@ export const BUILDING_TEXTS = {
     }
 };
 
-// Default text if building type not found
 export const DEFAULT_BUILDING_TEXT = {
     text: [
         "Běžná městská zástavba",

@@ -1,6 +1,6 @@
 import { BUILDING_TEXTS, DEFAULT_BUILDING_TEXT } from "../../text/buildingTexts.js";
 
-export function createCharacterOverlay(app, getGridScale, railRenderer, stationRenderer) {
+export function createCharacterOverlay(app, getGridScale, railRenderer, stationRenderer, getMoney, subMoney) {
     
     const overlayContainer = new PIXI.Container();
     overlayContainer.zIndex = 100;
@@ -17,16 +17,21 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
     let buildingDescText = null;
     let characterSprite = null;
     let overlayBg = null;
+    let buttonContainer = null;
+    let transactionState = {
+        active: false,
+        buildingKey: null
+    };
+    let panel = null;
+    let instructionText = null;
 
     function getBuildingSpritePath(buildingKey, index) {
         if (!BUILDING_TEXTS[buildingKey]) {
-            console.warn(`Building key "${buildingKey}" not found in BUILDING_TEXTS`);
             return null;
         }
         
         const spriteArray = BUILDING_TEXTS[buildingKey].sprite;
         if (!spriteArray || spriteArray[index] === undefined) {
-            console.warn(`Sprite index ${index} not found for building "${buildingKey}"`);
             return null;
         }
         
@@ -44,21 +49,223 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
                 spritePos = app.screen.width * 0.5;
                 break;
             case "P":
+            case "R":
                 spritePos = app.screen.width * 0.66;
                 break;
-            case "R":
-                    spritePos = app.screen.width * 0.66;
-                    break;
             default:
                 spritePos = app.screen.width * 0.5;
         }
         return spritePos;
     }
 
+    function showTransactionStep() {
+        if (!currentCity || !transactionState.active) return;
+        
+        const buildingKey = currentCity.building || "none";
+        const buildingData = BUILDING_TEXTS[buildingKey];
+        
+        if (!buildingData || !buildingData.transaction) {
+            hideOverlay();
+            return;
+        }
+
+        if (buildingData.transaction.questionSprite !== undefined) {
+            try {
+                const spriteValue = buildingData.transaction.questionSprite;
+                const spritePath = "../../graphics/chars/" + buildingKey + "/" + buildingKey + spriteValue + ".png";
+                
+                const newTexture = PIXI.Texture.from(spritePath);
+                const maxSize = Math.min(app.screen.width, app.screen.height) * 0.6;
+                
+                const setNewTexture = () => {
+                    characterSprite.texture = newTexture;
+                    const scale = maxSize / Math.max(newTexture.width, newTexture.height);
+                    characterSprite.scale.set(scale);
+                };
+                
+                if (newTexture.valid) {
+                    setNewTexture();
+                } else {
+                    newTexture.once('update', setNewTexture);
+                }
+            } catch (error) {
+                console.warn("Could not load question sprite:", error);
+            }
+        }
+        
+        if (buildingData.transaction.questionSpritePos !== undefined) {
+            const spritePos = buildingData.transaction.questionSpritePos;
+            switch (spritePos){
+                case "L":
+                    characterSprite.x = app.screen.width * 0.33;
+                    break;
+                case "C":
+                    characterSprite.x = app.screen.width * 0.5;
+                    break;
+                case "P":
+                case "R":
+                    characterSprite.x = app.screen.width * 0.66;
+                    break;
+                default:
+                    characterSprite.x = app.screen.width * 0.5;
+            }
+        }
+
+        if (instructionText) {
+            instructionText.visible = false;
+        }
+
+        buildingDescText.text = `${buildingData.transaction.question}\n\nCena: $${buildingData.transaction.cost}`;
+        
+        createTransactionButtons();
+    }
+
+    function createTransactionButtons() {
+        if (buttonContainer) {
+            buttonContainer.destroy();
+            buttonContainer = null;
+        }
+    
+        buttonContainer = new PIXI.Container();
+        
+        const buttonWidth = 120;
+        const buttonHeight = 50;
+        const buttonSpacing = 30;
+        const totalWidth = buttonWidth * 2 + buttonSpacing;
+        
+        const startX = (panel.width - totalWidth) / 2;
+        const buttonY = (panel.height - buttonHeight) / 2 + 40;
+    
+        const yesButton = new PIXI.Graphics();
+        yesButton.beginFill(0x27ae60);
+        yesButton.lineStyle(2, 0x2ecc71);
+        yesButton.drawRoundedRect(0, 0, buttonWidth, buttonHeight, 8);
+        yesButton.endFill();
+        yesButton.interactive = true;
+        yesButton.cursor = "pointer";
+        
+        const yesText = new PIXI.Text("ANO", {
+            fontFamily: "Arial",
+            fontSize: 20,
+            fill: 0xffffff,
+            fontWeight: "bold"
+        });
+        yesText.anchor.set(0.5);
+        yesText.x = buttonWidth / 2;
+        yesText.y = buttonHeight / 2;
+        yesButton.addChild(yesText);
+        
+        yesButton.on('pointerdown', (e) => {
+            e.stopPropagation();
+            e.preventDefault();  // Přidáno
+            handleTransaction(true);
+        });
+        
+        yesButton.x = startX;
+        yesButton.y = buttonY;
+    
+        const noButton = new PIXI.Graphics();
+        noButton.beginFill(0xc0392b);
+        noButton.lineStyle(2, 0xe74c3c);
+        noButton.drawRoundedRect(0, 0, buttonWidth, buttonHeight, 8);
+        noButton.endFill();
+        noButton.interactive = true;
+        noButton.cursor = "pointer";
+        
+        const noText = new PIXI.Text("NE", {
+            fontFamily: "Arial",
+            fontSize: 20,
+            fill: 0xffffff,
+            fontWeight: "bold"
+        });
+        noText.anchor.set(0.5);
+        noText.x = buttonWidth / 2;
+        noText.y = buttonHeight / 2;
+        noButton.addChild(noText);
+        
+        noButton.on('pointerdown', (e) => {
+            e.stopPropagation();
+            e.preventDefault();  // Přidáno
+            hideOverlay();
+        });
+        
+        noButton.x = startX + buttonWidth + buttonSpacing;
+        noButton.y = buttonY;
+    
+        buttonContainer.addChild(yesButton);
+        buttonContainer.addChild(noButton);
+        
+        panel.addChild(buttonContainer);
+    }
+
+    function handleTransaction(accepted) {
+        if (!currentCity || !transactionState.active) return;
+        
+        const buildingKey = currentCity.building || "none";
+        const buildingData = BUILDING_TEXTS[buildingKey];
+        
+        if (!buildingData || !buildingData.transaction) {
+            hideOverlay();
+            return;
+        }
+
+        if (accepted) {
+            const cost = buildingData.transaction.cost;
+            if (getMoney() >= cost) {
+                subMoney(cost);
+                showTransactionResult(buildingData.transaction.successText, buildingData.transaction.successSprite);
+                if (railRenderer) railRenderer.markDirty();
+                if (stationRenderer) stationRenderer.markDirty();
+            } else {
+                showTransactionResult(buildingData.transaction.failText);
+            }
+        }
+    }
+
+    function showTransactionResult(message, successSprite) {
+        if (!buildingDescText) return;
+        
+        if (buttonContainer) {
+            buttonContainer.destroy();
+            buttonContainer = null;
+        }
+        
+        transactionState.active = false;
+        buildingDescText.text = message;
+        
+        if (successSprite && characterSprite) {
+            try {
+                const buildingKey = currentCity.building || "none";
+                const spritePath = "../../graphics/chars/" + buildingKey + "/" + buildingKey + successSprite + ".png";
+                const newTexture = PIXI.Texture.from(spritePath);
+                
+                const setNewTexture = () => {
+                    characterSprite.texture = newTexture;
+                };
+                
+                if (newTexture.valid) {
+                    setNewTexture();
+                } else {
+                    newTexture.once('update', setNewTexture);
+                }
+            } catch (error) {
+                console.warn("Could not load success sprite:", error);
+            }
+        }
+        
+        setTimeout(() => {
+            hideOverlay();
+        }, 2000);
+    }
+
     function showCityInfo(cityArea) {
         if (cityArea.building === "none") return;
+        
+        if (transactionState.active) return;
+        
         currentCity = cityArea;
         currentTextIndex = 0;
+        transactionState.active = false;
         
         overlayContainer.removeChildren();
         
@@ -83,7 +290,6 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             const spritePos = getBuildingSpritePos(buildingKey, currentTextIndex);
             
             if (!spritePath) {
-                console.warn(`No sprite path for ${buildingKey}`);
                 return;
             }
             
@@ -93,7 +299,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             characterSprite.anchor.set(0.5);
             characterSprite.x = spritePos;
             characterSprite.y = app.screen.height / 5 * 2;
-
+    
             characterSprite.interactive = true;
             characterSprite.on('pointerdown', (e) => {
                 e.stopPropagation();
@@ -120,7 +326,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             console.warn("Could not load character sprite:", error);
         }
     
-        const panel = new PIXI.Container();
+        panel = new PIXI.Container();
         
         const panelWidth = app.screen.width * 0.8;
         const panelHeight = app.screen.height * 0.4;
@@ -132,6 +338,11 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         panelBg.lineStyle(2, 0xf5c518);
         panelBg.drawRoundedRect(0, 0, panelWidth, panelHeight, 12);
         panelBg.endFill();
+        panelBg.interactive = true;  // Přidáno
+        panelBg.on('pointerdown', (e) => {
+            e.stopPropagation();
+            handleOverlayClick();
+        });
         panel.addChild(panelBg);
     
         const title = new PIXI.Text(`${cityArea.name}`, {
@@ -150,31 +361,42 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         
         buildingDescText = new PIXI.Text(buildingTexts[0], {
             fontFamily: "Arial",
-            fontSize: 16,
+            fontSize: 18,
             fill: 0xecf0f1,
             fontStyle: "italic",
             wordWrap: true,
-            wordWrapWidth: panelWidth - 40
+            wordWrapWidth: panelWidth - 40,
+            align: "center"
         });
         buildingDescText.x = 20;
-        buildingDescText.y = 60;
+        buildingDescText.y = 70;
+        buildingDescText.interactive = true;  // Přidáno
+        buildingDescText.on('pointerdown', (e) => {
+            e.stopPropagation();
+            handleOverlayClick();
+        });
         panel.addChild(buildingDescText);
     
-        const instructionText = new PIXI.Text("Klikni kamkoli...", {
+        instructionText = new PIXI.Text("Klikni kamkoli pro další text...", {
             fontFamily: "Arial",
             fontSize: 14,
             fill: 0x95a5a6,
             fontStyle: "italic"
         });
-        instructionText.x = panelWidth - 200;
+        instructionText.x = panelWidth - 220;
         instructionText.y = panelHeight - 30;
+        instructionText.interactive = true;  // Přidáno
+        instructionText.on('pointerdown', (e) => {
+            e.stopPropagation();
+            handleOverlayClick();
+        });
         panel.addChild(instructionText);
     
         panel.x = panelX;
         panel.y = panelY;
         
-        panel.interactive = false;
-        panel.interactiveChildren = false;
+        panel.interactive = true;  // Změněno z false na true
+        panel.interactiveChildren = true;  // Změněno z false na true
         
         overlayContainer.addChild(panel);
         
@@ -198,7 +420,6 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             
             const easeOutProgress = 1 - Math.pow(1 - progress, 3);
             
-            //target je 0.7
             overlayBg.alpha = easeOutProgress * 0.8;
             
             if (progress < 1) {
@@ -212,47 +433,58 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
     function handleOverlayClick() {
         if (!currentCity || !buildingDescText) return;
         
+        if (transactionState.active) return;
+        
         const buildingKey = currentCity.building || "none";
         const buildingData = BUILDING_TEXTS[buildingKey] || DEFAULT_BUILDING_TEXT;
         const buildingTexts = buildingData.text;
         
-        if (currentTextIndex === buildingTexts.length - 1) {
-            hideOverlay();
-            return;
-        }
-        
-        currentTextIndex = (currentTextIndex + 1) % buildingTexts.length;
-        buildingDescText.text = buildingTexts[currentTextIndex];
-        
-        if (characterSprite) {
-            try {
-                const spritePath = getBuildingSpritePath(buildingKey, currentTextIndex);
-                const spritePos = getBuildingSpritePos(buildingKey, currentTextIndex);
-                
-                if (!spritePath) {
-                    console.warn(`No sprite path for ${buildingKey} at index ${currentTextIndex}`);
-                    return;
+        if (currentTextIndex < buildingTexts.length - 1) {
+            currentTextIndex++;
+            buildingDescText.text = buildingTexts[currentTextIndex];
+            
+            if (characterSprite) {
+                try {
+                    const spritePath = getBuildingSpritePath(buildingKey, currentTextIndex);
+                    const spritePos = getBuildingSpritePos(buildingKey, currentTextIndex);
+                    
+                    if (!spritePath) {
+                        return;
+                    }
+                    
+                    const newTexture = PIXI.Texture.from(spritePath);
+                    const maxSize = Math.min(app.screen.width, app.screen.height) * 0.6;
+                    
+                    characterSprite.x = spritePos;
+                    
+                    const setNewTexture = () => {
+                        characterSprite.texture = newTexture;
+                        const scale = maxSize / Math.max(newTexture.width, newTexture.height);
+                        characterSprite.scale.set(scale);
+                    };
+                    
+                    if (newTexture.valid) {
+                        setNewTexture();
+                    } else {
+                        newTexture.once('update', setNewTexture);
+                    }
+                    
+                } catch (error) {
+                    console.warn("Could not update character sprite:", error);
                 }
-                
-                const newTexture = PIXI.Texture.from(spritePath);
-                const maxSize = Math.min(app.screen.width, app.screen.height) * 0.6;
-                
-                characterSprite.x = spritePos;
-                
-                const setNewTexture = () => {
-                    characterSprite.texture = newTexture;
-                    const scale = maxSize / Math.max(newTexture.width, newTexture.height);
-                    characterSprite.scale.set(scale);
-                };
-                
-                if (newTexture.valid) {
-                    setNewTexture();
-                } else {
-                    newTexture.once('update', setNewTexture);
-                }
-                
-            } catch (error) {
-                console.warn("Could not update character sprite:", error);
+            }
+
+            if (currentTextIndex === buildingTexts.length - 1) {
+                instructionText.text = "Toto byl poslední text...";
+            }
+        } else if (currentTextIndex === buildingTexts.length - 1) {
+            const buildingDataWithTransaction = BUILDING_TEXTS[buildingKey];
+            if (buildingDataWithTransaction && buildingDataWithTransaction.transaction) {
+                transactionState.active = true;
+                transactionState.buildingKey = buildingKey;
+                showTransactionStep();
+            } else {
+                hideOverlay();
             }
         }
     }
@@ -263,7 +495,15 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         buildingDescText = null;
         characterSprite = null;
         overlayBg = null;
+        panel = null;
+        instructionText = null;
         currentTextIndex = 0;
+        transactionState.active = false;
+        transactionState.buildingKey = null;
+        if (buttonContainer) {
+            buttonContainer.destroy();
+            buttonContainer = null;
+        }
         
         if (onCloseCallback) {
             onCloseCallback();
