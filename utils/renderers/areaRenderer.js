@@ -185,6 +185,7 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
                 areaText.y = textPosition.textY;
                 areaText.anchor.set(0.5);
                 areaText.scale.set(1 / gridScale, 1 / gridScale);
+                areaText.cursor = "help";
                 
                 areaTextContainer.addChild(areaText);
             }

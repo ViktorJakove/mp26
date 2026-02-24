@@ -107,6 +107,7 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
                     setShiftPressed(false);
                     if (stationRenderer)stationRenderer.setShiftPressed(false);
                     pointerTextRenderer.refresh(() => gridScale);
+                    pointerTextRenderer.clearText();
                     drawGraphics();
                     break;
             }
