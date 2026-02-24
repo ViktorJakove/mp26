@@ -106,7 +106,7 @@ export const BUILDING_TEXTS = {
         successSpritePos: "C",
         failSprite: 0,
         failSpritePos: "C",
-        question: "Pořídit naprosto přírodní uhlí pro dvojnásobný výkon lokomotiv?"
+        question: "Pořídit naprosto zdravotně nezávadné uhlí pro dvojnásobný výkon lokomotiv?"
     }
 },
     "mech": {

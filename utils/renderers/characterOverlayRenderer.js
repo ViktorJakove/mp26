@@ -1,634 +1,373 @@
 import { BUILDING_TEXTS, DEFAULT_BUILDING_TEXT } from "../../text/buildingTexts.js";
 
 export function createCharacterOverlay(app, getGridScale, railRenderer, stationRenderer, getMoney, subMoney) {
-    
-    const overlayContainer = new PIXI.Container();
-    overlayContainer.zIndex = 100;
-    overlayContainer.visible = false;
-    
-    overlayContainer.interactive = true;
-    overlayContainer.hitArea = new PIXI.Rectangle(0, 0, app.screen.width, app.screen.height);
-    
-    app.stage.addChild(overlayContainer);
-    
-    let currentCity = null;
-    let onCloseCallback = null;
-    let currentTextIndex = 0;
-    let buildingDescText = null;
-    let characterSprite = null;
-    let overlayBg = null;
-    let buttonContainer = null;
-    let transactionState = {
-        active: false,
-        buildingKey: null
+    const container = new PIXI.Container();
+    Object.assign(container, { zIndex: 100, visible: false, interactive: true });
+    container.hitArea = new PIXI.Rectangle(0, 0, app.screen.width, app.screen.height);
+    app.stage.addChild(container);
+
+    let city = null, onClose = null, textIdx = 0, desc = null, sprite = null, bg = null, panel = null, instr = null;
+    let btnContainer = null, trans = { active: false, key: null };
+    const buildingState = new Map();
+
+    const getPath = (key, idx, after) => {
+        const d = BUILDING_TEXTS[key];
+        if (!d) return null;
+        
+        const arr = after && d.afterTransaction?.sprite ? d.afterTransaction.sprite : d.sprite;
+        if (!arr || arr[idx] === undefined) return null;
+        
+        const spriteValue = arr[idx];
+        return `../../graphics/chars/${key}/${key}${spriteValue}.png`;
     };
-    let panel = null;
-    let instructionText = null;
-    
-    const buildingState = new Map(); // buildingKey -> { questionShown: boolean, completed: boolean }
 
-    function getBuildingSpritePath(buildingKey, index, isAfterTransaction = false) {
-        if (!BUILDING_TEXTS[buildingKey]) {
-            return null;
-        }
+    const getPos = (key, idx, after) => {
+        const d = BUILDING_TEXTS[key];
+        if (!d) return app.screen.width * 0.5;
         
-        let spriteArray;
-        if (isAfterTransaction && BUILDING_TEXTS[buildingKey].afterTransaction?.sprite) {
-            spriteArray = BUILDING_TEXTS[buildingKey].afterTransaction.sprite;
+        const pos = after && d.afterTransaction?.spritePos ? d.afterTransaction.spritePos[idx] : d.spritePos[idx];
+        const map = { L: 0.33, C: 0.5, P: 0.66, R: 0.66 };
+        return app.screen.width * (map[pos] || 0.5);
+    };
+
+    const getTexts = (key) => {
+        const d = BUILDING_TEXTS[key];
+        const s = buildingState.get(key);
+        return s?.completed && d?.afterTransaction?.text ? d.afterTransaction.text : d?.text || DEFAULT_BUILDING_TEXT.text;
+    };
+
+    const getStart = (key) => {
+        const s = buildingState.get(key);
+        const d = BUILDING_TEXTS[key];
+        return s?.questionShown && d?.transaction && !s?.completed ? getTexts(key).length - 1 : 0;
+    };
+
+    const updateSprite = (key, idx, after) => {
+        if (!sprite) return;
+        const path = getPath(key, idx, after);
+        if (!path) return;
+        
+        const tex = PIXI.Texture.from(path);
+        sprite.x = getPos(key, idx, after);
+        
+        const update = () => {
+            sprite.texture = tex;
+            const scale = Math.min(app.screen.width, app.screen.height) * 0.6 / Math.max(tex.width, tex.height);
+            sprite.scale.set(scale);
+        };
+        
+        if (tex.valid) {
+            update();
         } else {
-            spriteArray = BUILDING_TEXTS[buildingKey].sprite;
+            tex.once('update', update);
         }
-        
-        if (!spriteArray || spriteArray[index] === undefined) {
-            return null;
-        }
-        
-        const path = "../../graphics/chars/" + buildingKey + "/" + buildingKey + spriteArray[index] + ".png";
-        return path;
-    }
-    
-    function getBuildingSpritePos(buildingKey, index, isAfterTransaction = false) {
-        let spritePos;
-        if (isAfterTransaction && BUILDING_TEXTS[buildingKey].afterTransaction?.spritePos) {
-            spritePos = BUILDING_TEXTS[buildingKey].afterTransaction.spritePos[index];
-        } else {
-            spritePos = BUILDING_TEXTS[buildingKey].spritePos[index];
-        }
-        
-        switch (spritePos){
-            case "L":
-                spritePos = app.screen.width * 0.33;
-                break;
-            case "C":
-                spritePos = app.screen.width * 0.5;
-                break;
-            case "P":
-            case "R":
-                spritePos = app.screen.width * 0.66;
-                break;
-            default:
-                spritePos = app.screen.width * 0.5;
-        }
-        return spritePos;
-    }
+    };
 
-    function getBuildingTexts(buildingKey) {
-        const buildingData = BUILDING_TEXTS[buildingKey];
-        if (!buildingData) return DEFAULT_BUILDING_TEXT.text;
-        
-        const state = buildingState.get(buildingKey);
-        
-        if (state?.completed && buildingData.afterTransaction?.text) {
-            return buildingData.afterTransaction.text;
-        }
-        
-        return buildingData.text;
-    }
+    const showTrans = () => {
+        if (!city || !trans.active) return;
+        const key = city.building;
+        const d = BUILDING_TEXTS[key];
+        if (!d?.transaction) return hide();
 
-    function getStartIndex(buildingKey) {
-        const state = buildingState.get(buildingKey);
-        const buildingData = BUILDING_TEXTS[buildingKey];
-        
-        if (state?.questionShown && buildingData?.transaction && !state?.completed) {
-            const texts = getBuildingTexts(buildingKey);
-            return texts.length - 1;
-        }
-        
-        return 0;
-    }
-
-    function showTransactionStep() {
-        if (!currentCity || !transactionState.active) return;
-        
-        const buildingKey = currentCity.building || "none";
-        const buildingData = BUILDING_TEXTS[buildingKey];
-        
-        if (!buildingData || !buildingData.transaction) {
-            hideOverlay();
-            return;
-        }
-
-        if (buildingData.transaction.questionSprite !== undefined) {
-            try {
-                const spriteValue = buildingData.transaction.questionSprite;
-                const spritePath = "../../graphics/chars/" + buildingKey + "/" + buildingKey + spriteValue + ".png";
-                
-                const newTexture = PIXI.Texture.from(spritePath);
-                const maxSize = Math.min(app.screen.width, app.screen.height) * 0.6;
-                
-                const setNewTexture = () => {
-                    characterSprite.texture = newTexture;
-                    const scale = maxSize / Math.max(newTexture.width, newTexture.height);
-                    characterSprite.scale.set(scale);
-                };
-                
-                if (newTexture.valid) {
-                    setNewTexture();
-                } else {
-                    newTexture.once('update', setNewTexture);
-                }
-            } catch (error) {
-                console.warn("Could not load question sprite:", error);
+        if (d.transaction.questionSprite !== undefined) {
+            const path = `../../graphics/chars/${key}/${key}${d.transaction.questionSprite}.png`;
+            const tex = PIXI.Texture.from(path);
+            
+            const update = () => {
+                sprite.texture = tex;
+                const scale = Math.min(app.screen.width, app.screen.height) * 0.6 / Math.max(tex.width, tex.height);
+                sprite.scale.set(scale);
+            };
+            
+            if (tex.valid) {
+                update();
+            } else {
+                tex.once('update', update);
+            }
+            
+            if (d.transaction.questionSpritePos) {
+                const map = { L: 0.33, C: 0.5, P: 0.66, R: 0.66 };
+                sprite.x = app.screen.width * (map[d.transaction.questionSpritePos] || 0.5);
             }
         }
         
-        if (buildingData.transaction.questionSpritePos !== undefined) {
-            const spritePos = buildingData.transaction.questionSpritePos;
-            switch (spritePos){
-                case "L":
-                    characterSprite.x = app.screen.width * 0.33;
-                    break;
-                case "C":
-                    characterSprite.x = app.screen.width * 0.5;
-                    break;
-                case "P":
-                case "R":
-                    characterSprite.x = app.screen.width * 0.66;
-                    break;
-                default:
-                    characterSprite.x = app.screen.width * 0.5;
-            }
-        }
+        if (instr) instr.visible = false;
+        desc.text = `${d.transaction.question}\n\nCena: $${d.transaction.cost}`;
 
-        if (instructionText) {
-            instructionText.visible = false;
-        }
+        if (btnContainer) btnContainer.destroy();
+        btnContainer = new PIXI.Container();
 
-        buildingDescText.text = `${buildingData.transaction.question}\n\nCena: $${buildingData.transaction.cost}`;
-        
-        createTransactionButtons();
-    }
+        const makeBtn = (text, color, hover, fn) => {
+            const btn = new PIXI.Graphics().beginFill(color).lineStyle(2, hover).drawRoundedRect(0, 0, 120, 50, 8).endFill();
+            btn.interactive = true;
+            btn.cursor = "pointer";
+            const txt = new PIXI.Text(text, { fontFamily: "Arial", fontSize: 20, fill: 0xffffff, fontWeight: "bold" });
+            txt.anchor.set(0.5);
+            txt.x = 60;
+            txt.y = 25;
+            btn.addChild(txt);
+            btn.on('pointerdown', (e) => { e.stopPropagation(); e.preventDefault(); fn(); });
+            return btn;
+        };
 
-    function createTransactionButtons() {
-        if (buttonContainer) {
-            buttonContainer.destroy();
-            buttonContainer = null;
-        }
-    
-        buttonContainer = new PIXI.Container();
-        
-        const buttonWidth = 120;
-        const buttonHeight = 50;
-        const buttonSpacing = 30;
-        const totalWidth = buttonWidth * 2 + buttonSpacing;
-        
-        const startX = (panel.width - totalWidth) / 2;
-        const buttonY = (panel.height - buttonHeight) / 2 + 40;
-    
-        const yesButton = new PIXI.Graphics();
-        yesButton.beginFill(0x27ae60);
-        yesButton.lineStyle(2, 0x2ecc71);
-        yesButton.drawRoundedRect(0, 0, buttonWidth, buttonHeight, 8);
-        yesButton.endFill();
-        yesButton.interactive = true;
-        yesButton.cursor = "pointer";
-        
-        const yesText = new PIXI.Text("ANO", {
-            fontFamily: "Arial",
-            fontSize: 20,
-            fill: 0xffffff,
-            fontWeight: "bold"
-        });
-        yesText.anchor.set(0.5);
-        yesText.x = buttonWidth / 2;
-        yesText.y = buttonHeight / 2;
-        yesButton.addChild(yesText);
-        
-        yesButton.on('pointerdown', (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            handleTransaction(true);
-        });
-        
-        yesButton.x = startX;
-        yesButton.y = buttonY;
-    
-        const noButton = new PIXI.Graphics();
-        noButton.beginFill(0xc0392b);
-        noButton.lineStyle(2, 0xe74c3c);
-        noButton.drawRoundedRect(0, 0, buttonWidth, buttonHeight, 8);
-        noButton.endFill();
-        noButton.interactive = true;
-        noButton.cursor = "pointer";
-        
-        const noText = new PIXI.Text("NE", {
-            fontFamily: "Arial",
-            fontSize: 20,
-            fill: 0xffffff,
-            fontWeight: "bold"
-        });
-        noText.anchor.set(0.5);
-        noText.x = buttonWidth / 2;
-        noText.y = buttonHeight / 2;
-        noButton.addChild(noText);
-        
-        noButton.on('pointerdown', (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            hideOverlay();
-        });
-        
-        noButton.x = startX + buttonWidth + buttonSpacing;
-        noButton.y = buttonY;
-    
-        buttonContainer.addChild(yesButton);
-        buttonContainer.addChild(noButton);
-        
-        panel.addChild(buttonContainer);
-    }
-
-    function handleTransaction(accepted) {
-        if (!currentCity || !transactionState.active) return;
-        
-        const buildingKey = currentCity.building || "none";
-        const buildingData = BUILDING_TEXTS[buildingKey];
-        
-        if (!buildingData || !buildingData.transaction) {
-            hideOverlay();
-            return;
-        }
-
-        if (accepted) {
-            const cost = buildingData.transaction.cost;
+        const yes = makeBtn("ANO", 0x27ae60, 0x2ecc71, () => {
+            const cost = d.transaction.cost;
             if (getMoney() >= cost) {
                 subMoney(cost);
-                buildingState.set(buildingKey, { 
-                    completed: true,
-                    questionShown: true 
-                });
-                showTransactionResult(
-                    buildingData.transaction.successText, 
-                    buildingData.transaction.successSprite,
-                    buildingData.transaction.successSpritePos
-                );
+                buildingState.set(key, { completed: true, questionShown: true });
+                trans.active = false;
+                desc.text = d.transaction.successText;
+                
+                if (d.transaction.successSprite !== undefined) {
+                    const path = `../../graphics/chars/${key}/${key}${d.transaction.successSprite}.png`;
+                    const tex = PIXI.Texture.from(path);
+                    
+                    const update = () => {
+                        sprite.texture = tex;
+                        const scale = Math.min(app.screen.width, app.screen.height) * 0.6 / Math.max(tex.width, tex.height);
+                        sprite.scale.set(scale);
+                    };
+                    
+                    if (tex.valid) {
+                        update();
+                    } else {
+                        tex.once('update', update);
+                    }
+                    
+                    if (d.transaction.successSpritePos) {
+                        const map = { L: 0.33, C: 0.5, P: 0.66, R: 0.66 };
+                        sprite.x = app.screen.width * (map[d.transaction.successSpritePos] || 0.5);
+                    }
+                }
+                
+                if (btnContainer) btnContainer.destroy();
+                btnContainer = null;
+                if (instr) {
+                    instr.visible = true;
+                    instr.text = "Klikni kamkoli pro zavření...";
+                }
                 if (railRenderer) railRenderer.markDirty();
                 if (stationRenderer) stationRenderer.markDirty();
             } else {
-                showTransactionResult(
-                    buildingData.transaction.failText,
-                    buildingData.transaction.failSprite,
-                    buildingData.transaction.failSpritePos
-                );
-            }
-        }
-    }
-
-    function showTransactionResult(message, successSprite, successSpritePos) {
-        if (!buildingDescText) return;
-        
-        if (buttonContainer) {
-            buttonContainer.destroy();
-            buttonContainer = null;
-        }
-        
-        transactionState.active = false;
-        buildingDescText.text = message;
-        
-        if (successSprite && characterSprite) {
-            try {
-                const buildingKey = currentCity.building || "none";
-                const spritePath = "../../graphics/chars/" + buildingKey + "/" + buildingKey + successSprite + ".png";
-                const newTexture = PIXI.Texture.from(spritePath);
+                desc.text = d.transaction.failText;
                 
-                const setNewTexture = () => {
-                    characterSprite.texture = newTexture;
+                if (d.transaction.failSprite !== undefined) {
+                    const path = `../../graphics/chars/${key}/${key}${d.transaction.failSprite}.png`;
+                    const tex = PIXI.Texture.from(path);
                     
-                    if (successSpritePos) {
-                        switch (successSpritePos){
-                            case "L":
-                                characterSprite.x = app.screen.width * 0.33;
-                                break;
-                            case "C":
-                                characterSprite.x = app.screen.width * 0.5;
-                                break;
-                            case "P":
-                            case "R":
-                                characterSprite.x = app.screen.width * 0.66;
-                                break;
-                        }
+                    const update = () => {
+                        sprite.texture = tex;
+                        const scale = Math.min(app.screen.width, app.screen.height) * 0.6 / Math.max(tex.width, tex.height);
+                        sprite.scale.set(scale);
+                    };
+                    
+                    if (tex.valid) {
+                        update();
+                    } else {
+                        tex.once('update', update);
                     }
-                };
-                
-                if (newTexture.valid) {
-                    setNewTexture();
-                } else {
-                    newTexture.once('update', setNewTexture);
+                    
+                    if (d.transaction.failSpritePos) {
+                        const map = { L: 0.33, C: 0.5, P: 0.66, R: 0.66 };
+                        sprite.x = app.screen.width * (map[d.transaction.failSpritePos] || 0.5);
+                    }
                 }
-            } catch (error) {
-                console.warn("Could not load success sprite:", error);
+                
+                if (btnContainer) btnContainer.destroy();
+                btnContainer = null;
+                trans.active = false;
+                if (instr) {
+                    instr.visible = true;
+                    instr.text = "Klikni kamkoli pro zavření...";
+                }
             }
-        }
-        if (instructionText) {
-            instructionText.visible = true;
-            instructionText.text = "Klikni kamkoli pro zavření...";
-        }
-    }
-
-    function showCityInfo(cityArea) {
-        if (cityArea.building === "none") return;
-        
-        if (transactionState.active) return;
-        
-        currentCity = cityArea;
-        const buildingKey = cityArea.building || "none";
-        
-        currentTextIndex = getStartIndex(buildingKey);
-        transactionState.active = false;
-        
-        overlayContainer.removeChildren();
-        
-        overlayBg = new PIXI.Graphics();
-        overlayBg.beginFill(0x000000, 0.7);
-        overlayBg.drawRect(0, 0, app.screen.width, app.screen.height);
-        overlayBg.endFill();
-        
-        overlayBg.interactive = true;
-        overlayBg.on('pointerdown', (e) => {
-            e.stopPropagation();
-            handleOverlayClick();
         });
-        
-        overlayBg.alpha = 0;
-        
-        overlayContainer.addChild(overlayBg);
-        
-        try {
-            const state = buildingState.get(buildingKey);
-            const isAfterTransaction = state?.completed || false;
-            
-            const spritePath = getBuildingSpritePath(buildingKey, currentTextIndex, isAfterTransaction);
-            const spritePos = getBuildingSpritePos(buildingKey, currentTextIndex, isAfterTransaction);
-            
-            if (!spritePath) {
-                return;
+
+        const no = makeBtn("NE", 0xc0392b, 0xe74c3c, hide);
+
+        const total = 120 * 2 + 30;
+        yes.x = (panel.width - total) / 2;
+        no.x = yes.x + 150;
+        yes.y = no.y = (panel.height - 50) / 2 + 40;
+
+        btnContainer.addChild(yes, no);
+        panel.addChild(btnContainer);
+    };
+
+    const fadeIn = () => {
+        if (!bg) return;
+        const start = Date.now();
+        const anim = () => {
+            const prog = Math.min((Date.now() - start) / 600, 1);
+            bg.alpha = (1 - Math.pow(1 - prog, 3)) * 0.8;
+            if (prog < 1) requestAnimationFrame(anim);
+        };
+        anim();
+    };
+
+    const handleClick = () => {
+        if (!city || !desc || trans.active) return;
+        const key = city.building;
+        const texts = getTexts(key);
+        const d = BUILDING_TEXTS[key];
+        const s = buildingState.get(key) || { questionShown: false, completed: false };
+
+        if (textIdx < texts.length - 1) {
+            textIdx++;
+            desc.text = texts[textIdx];
+            updateSprite(key, textIdx, s.completed);
+            if (textIdx === texts.length - 1) {
+                instr.text = "Toto byl poslední text...";
+                if (d?.transaction && !s.completed) buildingState.set(key, { ...s, questionShown: true });
             }
+        } else if (textIdx === texts.length - 1) {
+            if (d?.transaction && !s.completed) {
+                trans.active = true;
+                trans.key = key;
+                showTrans();
+            } else hide();
+        }
+    };
+
+    const hide = () => {
+        container.visible = false;
+        city = null;
+        desc = null;
+        sprite = null;
+        bg = null;
+        panel = null;
+        instr = null;
+        textIdx = 0;
+        trans.active = false;
+        if (btnContainer) {
+            btnContainer.destroy();
+            btnContainer = null;
+        }
+        if (onClose) onClose();
+    };
+
+    container.showCityInfo = (c) => {
+        if (c.building === "none" || trans.active) return;
+        city = c;
+        const key = c.building;
+        textIdx = getStart(key);
+        trans.active = false;
+        container.removeChildren();
+
+        bg = new PIXI.Graphics().beginFill(0x000000, 0.7).drawRect(0, 0, app.screen.width, app.screen.height).endFill();
+        bg.alpha = 0;
+        bg.interactive = true;
+        bg.on('pointerdown', (e) => { e.stopPropagation(); handleClick(); });
+        container.addChild(bg);
+
+        const s = buildingState.get(key);
+        const path = getPath(key, textIdx, s?.completed);
+        
+        if (path) {
+            const tex = PIXI.Texture.from(path);
+            sprite = new PIXI.Sprite(tex);
+            sprite.anchor.set(0.5);
+            sprite.x = getPos(key, textIdx, s?.completed);
+            sprite.y = app.screen.height / 5 * 2;
             
-            const texture = PIXI.Texture.from(spritePath);
-            characterSprite = new PIXI.Sprite(texture);
-            
-            characterSprite.anchor.set(0.5);
-            characterSprite.x = spritePos;
-            characterSprite.y = app.screen.height / 5 * 2;
-    
-            characterSprite.interactive = true;
-            characterSprite.on('pointerdown', (e) => {
-                e.stopPropagation();
-                handleOverlayClick();
-            });
-            
-            const maxSize = Math.min(app.screen.width, app.screen.height) * 0.6;
-            
-            const setSpriteScale = () => {
-                if (characterSprite.texture && characterSprite.texture.valid) {
-                    const scale = maxSize / Math.max(characterSprite.texture.width, characterSprite.texture.height);
-                    characterSprite.scale.set(scale);
+            const setScale = () => {
+                if (sprite.texture && sprite.texture.valid) {
+                    const scale = Math.min(app.screen.width, app.screen.height) * 0.6 / Math.max(sprite.texture.width, sprite.texture.height);
+                    sprite.scale.set(scale);
                 }
             };
             
-            if (texture.valid) {
-                setSpriteScale();
+            if (tex.valid) {
+                setScale();
             } else {
-                texture.once('update', setSpriteScale);
+                tex.once('update', setScale);
             }
-            
-            overlayContainer.addChild(characterSprite);
-        } catch (error) {
-            console.warn("Could not load character sprite:", error);
+        } else {
+            sprite = new PIXI.Sprite(PIXI.Texture.WHITE);
+            sprite.anchor.set(0.5);
+            sprite.x = app.screen.width * 0.5;
+            sprite.y = app.screen.height / 5 * 2;
+            sprite.scale.set(100, 100);
+            sprite.tint = 0xff00ff;
         }
-    
-        panel = new PIXI.Container();
         
-        const panelWidth = app.screen.width * 0.8;
-        const panelHeight = app.screen.height * 0.4;
-        const panelX = (app.screen.width - panelWidth) / 2;
-        const panelY = app.screen.height - panelHeight - 20;
-    
-        const panelBg = new PIXI.Graphics();
-        panelBg.beginFill(0x2c3e50, 0.95);
-        panelBg.lineStyle(2, 0xf5c518);
-        panelBg.drawRoundedRect(0, 0, panelWidth, panelHeight, 12);
-        panelBg.endFill();
+        sprite.interactive = true;
+        sprite.on('pointerdown', (e) => { e.stopPropagation(); handleClick(); });
+        container.addChild(sprite);
+
+        panel = new PIXI.Container();
+        const w = app.screen.width * 0.8;
+        const h = app.screen.height * 0.4;
+        
+        const panelBg = new PIXI.Graphics().beginFill(0x2c3e50, 0.95).lineStyle(2, 0xf5c518).drawRoundedRect(0, 0, w, h, 12).endFill();
         panelBg.interactive = true;
-        panelBg.on('pointerdown', (e) => {
-            e.stopPropagation();
-            handleOverlayClick();
-        });
+        panelBg.on('pointerdown', (e) => { e.stopPropagation(); handleClick(); });
         panel.addChild(panelBg);
-    
-        const title = new PIXI.Text(`${cityArea.name}`, {
-            fontFamily: "Arial",
-            fontSize: 28,
-            fill: 0xf5c518,
-            fontWeight: "bold"
-        });
+
+        const title = new PIXI.Text(c.name, { fontFamily: "Arial", fontSize: 28, fill: 0xf5c518, fontWeight: "bold" });
         title.x = 20;
         title.y = 20;
         panel.addChild(title);
-        
-        const buildingTexts = getBuildingTexts(buildingKey);
-        
-        buildingDescText = new PIXI.Text(buildingTexts[currentTextIndex], {
-            fontFamily: "Arial",
-            fontSize: 18,
-            fill: 0xecf0f1,
-            fontStyle: "italic",
-            wordWrap: true,
-            wordWrapWidth: panelWidth - 40,
-            align: "center"
+
+        desc = new PIXI.Text(getTexts(key)[textIdx], { 
+            fontFamily: "Arial", 
+            fontSize: 18, 
+            fill: 0xecf0f1, 
+            fontStyle: "italic", 
+            wordWrap: true, 
+            wordWrapWidth: w - 40, 
+            align: "center" 
         });
-        buildingDescText.x = 20;
-        buildingDescText.y = 70;
-        buildingDescText.interactive = true;
-        buildingDescText.on('pointerdown', (e) => {
-            e.stopPropagation();
-            handleOverlayClick();
+        desc.x = 20;
+        desc.y = 70;
+        desc.interactive = true;
+        desc.on('pointerdown', (e) => { e.stopPropagation(); handleClick(); });
+        panel.addChild(desc);
+
+        instr = new PIXI.Text("Klikni kamkoli pro další text...", { 
+            fontFamily: "Arial", 
+            fontSize: 14, 
+            fill: 0x95a5a6, 
+            fontStyle: "italic" 
         });
-        panel.addChild(buildingDescText);
-    
-        instructionText = new PIXI.Text("Klikni kamkoli pro další text...", {
-            fontFamily: "Arial",
-            fontSize: 14,
-            fill: 0x95a5a6,
-            fontStyle: "italic"
-        });
-        instructionText.x = panelWidth - 220;
-        instructionText.y = panelHeight - 30;
-        instructionText.interactive = true;
-        instructionText.on('pointerdown', (e) => {
-            e.stopPropagation();
-            handleOverlayClick();
-        });
-        panel.addChild(instructionText);
-    
-        panel.x = panelX;
-        panel.y = panelY;
-        
+        instr.x = w - 220;
+        instr.y = h - 30;
+        instr.interactive = true;
+        instr.on('pointerdown', (e) => { e.stopPropagation(); handleClick(); });
+        panel.addChild(instr);
+
+        panel.x = (app.screen.width - w) / 2;
+        panel.y = app.screen.height - h - 20;
         panel.interactive = true;
         panel.interactiveChildren = true;
-        
-        overlayContainer.addChild(panel);
-        
-        overlayContainer.visible = true;
-        overlayContainer.hitArea = new PIXI.Rectangle(0, 0, app.screen.width, app.screen.height);
-        
-        fadeInBackground();
-    }
+        container.addChild(panel);
 
-    function fadeInBackground() {
-        if (!overlayBg) return;
-        
-        let elapsed = 0;
-        const duration = 600;
-        const startTime = Date.now();
-        
-        function animate() {
-            const now = Date.now();
-            elapsed = now - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            
-            const easeOutProgress = 1 - Math.pow(1 - progress, 3);
-            
-            overlayBg.alpha = easeOutProgress * 0.8;
-            
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            }
-        }
-        
-        animate();
-    }
+        container.visible = true;
+        fadeIn();
+    };
 
-    function handleOverlayClick() {
-        if (!currentCity || !buildingDescText) return;
-        
-        if (transactionState.active) return;
-        
-        const buildingKey = currentCity.building || "none";
-        const buildingTexts = getBuildingTexts(buildingKey);
-        const buildingData = BUILDING_TEXTS[buildingKey];
-        const state = buildingState.get(buildingKey) || { questionShown: false, completed: false };
-        
-        if (currentTextIndex < buildingTexts.length - 1) {
-            currentTextIndex++;
-            buildingDescText.text = buildingTexts[currentTextIndex];
-            
-            if (characterSprite) {
-                try {
-                    const isAfterTransaction = state?.completed || false;
-                    const spritePath = getBuildingSpritePath(buildingKey, currentTextIndex, isAfterTransaction);
-                    const spritePos = getBuildingSpritePos(buildingKey, currentTextIndex, isAfterTransaction);
-                    
-                    if (!spritePath) {
-                        return;
-                    }
-                    
-                    const newTexture = PIXI.Texture.from(spritePath);
-                    const maxSize = Math.min(app.screen.width, app.screen.height) * 0.6;
-                    
-                    characterSprite.x = spritePos;
-                    
-                    const setNewTexture = () => {
-                        characterSprite.texture = newTexture;
-                        const scale = maxSize / Math.max(newTexture.width, newTexture.height);
-                        characterSprite.scale.set(scale);
-                    };
-                    
-                    if (newTexture.valid) {
-                        setNewTexture();
-                    } else {
-                        newTexture.once('update', setNewTexture);
-                    }
-                    
-                } catch (error) {
-                    console.warn("Could not update character sprite:", error);
-                }
-            }
-    
-            if (currentTextIndex === buildingTexts.length - 1) {
-                instructionText.text = "Toto byl poslední text...";
-                
-                if (buildingData?.transaction && !state.completed) {
-                    buildingState.set(buildingKey, {
-                        ...state,
-                        questionShown: true
-                    });
-                }
-            }
-        } else if (currentTextIndex === buildingTexts.length - 1) {
-            if (buildingData && 
-                buildingData.transaction && 
-                !state.completed) {
-                transactionState.active = true;
-                transactionState.buildingKey = buildingKey;
-                showTransactionStep();
-            } else {
-                hideOverlay();
-            }
-        }
-    }
+    container.hideOverlay = hide;
+    container.isVisible = () => container.visible;
+    container.setOnClose = (cb) => onClose = cb;
+    container.getCurrentCity = () => city;
+    container.destroy = () => window.removeEventListener("resize", handleResize);
+    container.refresh = () => {
+        container.scale.set(1 / getGridScale());
+        container.x = container.y = 0;
+        container.hitArea = new PIXI.Rectangle(0, 0, app.screen.width, app.screen.height);
+    };
 
-    function hideOverlay() {
-        overlayContainer.visible = false;
-        currentCity = null;
-        buildingDescText = null;
-        characterSprite = null;
-        overlayBg = null;
-        panel = null;
-        instructionText = null;
-        currentTextIndex = 0;
-        transactionState.active = false;
-        transactionState.buildingKey = null;
-        if (buttonContainer) {
-            buttonContainer.destroy();
-            buttonContainer = null;
-        }
-        
-        if (onCloseCallback) {
-            onCloseCallback();
-        }
-    }
-
-    function isVisible() {
-        return overlayContainer.visible;
-    }
-
-    function setOnClose(callback) {
-        onCloseCallback = callback;
-    }
-
-    function handleResize() {
-        if (currentCity && overlayContainer.visible) {
-            const cityToShow = currentCity;
-            overlayContainer.removeChildren();
-            overlayContainer.scale.set(1, 1);
-            showCityInfo(cityToShow);
+    const handleResize = () => {
+        if (city && container.visible) {
+            const c = city;
+            container.removeChildren();
+            container.scale.set(1);
+            container.showCityInfo(c);
         } else {
-            overlayContainer.hitArea = new PIXI.Rectangle(0, 0, app.screen.width, app.screen.height);
+            container.hitArea = new PIXI.Rectangle(0, 0, app.screen.width, app.screen.height);
         }
-    }
+    };
 
     window.addEventListener("resize", handleResize);
-
-    function destroy() {
-        window.removeEventListener("resize", handleResize);
-    }
-
-    function refresh() {
-        const gridScale = getGridScale();
-        overlayContainer.scale.set(1 / gridScale);
-        overlayContainer.x = 0;
-        overlayContainer.y = 0;
-        overlayContainer.hitArea = new PIXI.Rectangle(0, 0, app.screen.width, app.screen.height);
-    }
-
-    return {
-        showCityInfo,
-        hideOverlay,
-        isVisible,
-        setOnClose,
-        overlayContainer,
-        getCurrentCity: () => currentCity,
-        destroy,
-        refresh
-    };
+    return container;
 }
