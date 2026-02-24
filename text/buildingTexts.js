@@ -23,8 +23,8 @@ export const BUILDING_TEXTS = {
             "Zde se ukládají peníze z vlaků",
             "Těžké dubové dveře a ocelový trezor"
         ],
-        sprite: [0, 1, 0],
-        spritePos: ["L", "C", "P"]
+        sprite: [0, 1, "S"],
+        spritePos: ["P", "P", "C"]
     },
     "graveyard": {
         text: [
@@ -35,14 +35,14 @@ export const BUILDING_TEXTS = {
         sprite: [0, 1, 0],
         spritePos: ["P", "C", "P"]
     },
-    "bisons": {
+    "olda": {
         text: [
             "Usedlost bývalého lovce bizonů",
             "Stěny zdobí paroží a kůže",
             "Vůně kouře a vydělané kůže"
         ],
-        sprite: [0, 1, 2],
-        spritePos: ["L", "C", "P"]
+        sprite: [0, 0, 1],
+        spritePos: ["L", "L", "C"]
     },
     "gallery": {
         text: [
@@ -50,17 +50,17 @@ export const BUILDING_TEXTS = {
             "Obrazy krajin a portréty významných občanů",
             "Schází se zde umělci z širokého okolí"
         ],
-        sprite: [0, 1, 2],
-        spritePos: ["L", "C", "P"]
+        sprite: [0, 0, "S"],
+        spritePos: ["P", "P", "C"]
     },
-    "hokynar": {
+    "shop": {
         text: [
             "Obchod se vším, co potřebujete",
             "Sudy, bedny a regály plné zboží",
             "Vůně koření a sušeného masa"
         ],
-        sprite: [0, 1, 2],
-        spritePos: ["L", "C", "P"]
+        sprite: [0, 0, 0],
+        spritePos: ["L", "L", "P"]
     },
     "barber": {
         text: [
@@ -69,7 +69,7 @@ export const BUILDING_TEXTS = {
             "Výloha s hřebeny a mastičkami"
         ],
         sprite: [0, 1, 2],
-        spritePos: ["L", "C", "P"]
+        spritePos: ["C", "C", "P"]
     },
     "marco": {
         text: [
@@ -77,8 +77,8 @@ export const BUILDING_TEXTS = {
             "Regály plné bot všech velikostí",
             "Vzorníky kůže na každém stole"
         ],
-        sprite: [0, 1, 2],
-        spritePos: ["L", "C", "P"]
+        sprite: [0, 1, 0],
+        spritePos: ["C", "C", "C"]
     },
     "trains": {
         text: [
@@ -89,14 +89,23 @@ export const BUILDING_TEXTS = {
         sprite: [0, 1, 2],
         spritePos: ["L", "C", "P"]
     },
+    "mech": {
+        text: [
+            "Depo a opravna vlaků",
+            "Sklad náhradních dílů a kol",
+            "Strojvedoucí zde probírají trasy"
+        ],
+        sprite: [0, 1, "S"],
+        spritePos: ["L", "L", "C"]
+    },
     "church": {
         text: [
             "Místní kostel a duchovní centrum",
             "Barevné vitráže a staré lavice",
             "Zvony zvoní každou neděli"
         ],
-        sprite: [0, 1, 2],
-        spritePos: ["L", "C", "P"]
+        sprite: [0, 0, 0],
+        spritePos: ["C", "C", "C"]
     },
     "none": {
         text: [

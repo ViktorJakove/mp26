@@ -16,6 +16,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
     let currentTextIndex = 0;
     let buildingDescText = null;
     let characterSprite = null;
+    let overlayBg = null;
 
     function getBuildingSpritePath(buildingKey, index) {
         if (!BUILDING_TEXTS[buildingKey]) {
@@ -37,16 +38,16 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         let spritePos = BUILDING_TEXTS[buildingKey].spritePos[index];
         switch (spritePos){
             case "L":
-                spritePos = app.screen.width * 0.25;
+                spritePos = app.screen.width * 0.33;
                 break;
             case "C":
                 spritePos = app.screen.width * 0.5;
                 break;
             case "P":
-                spritePos = app.screen.width * 0.75;
+                spritePos = app.screen.width * 0.66;
                 break;
             case "R":
-                    spritePos = app.screen.width * 0.75;
+                    spritePos = app.screen.width * 0.66;
                     break;
             default:
                 spritePos = app.screen.width * 0.5;
@@ -61,18 +62,22 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         
         overlayContainer.removeChildren();
         
-        const overlay = new PIXI.Graphics();
-        overlay.beginFill(0x000000, 0.7);
-        overlay.drawRect(0, 0, app.screen.width, app.screen.height);
-        overlay.endFill();
+        // Create the semi-transparent background
+        overlayBg = new PIXI.Graphics();
+        overlayBg.beginFill(0x000000, 0.7);
+        overlayBg.drawRect(0, 0, app.screen.width, app.screen.height);
+        overlayBg.endFill();
         
-        overlay.interactive = true;
-        overlay.on('pointerdown', (e) => {
+        overlayBg.interactive = true;
+        overlayBg.on('pointerdown', (e) => {
             e.stopPropagation();
             handleOverlayClick();
         });
         
-        overlayContainer.addChild(overlay);
+        // Set initial alpha to 0 for fade-in
+        overlayBg.alpha = 0;
+        
+        overlayContainer.addChild(overlayBg);
         
         try {
             const buildingKey = cityArea.building || "none";
@@ -177,6 +182,34 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         
         overlayContainer.visible = true;
         overlayContainer.hitArea = new PIXI.Rectangle(0, 0, app.screen.width, app.screen.height);
+        
+        // Start fade-in animation
+        fadeInBackground();
+    }
+
+    function fadeInBackground() {
+        if (!overlayBg) return;
+        
+        let elapsed = 0;
+        const duration = 300; // 300ms fade duration
+        const startTime = Date.now();
+        
+        function animate() {
+            const now = Date.now();
+            elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // Ease-out cubic for smooth deceleration
+            const easeOutProgress = 1 - Math.pow(1 - progress, 3);
+            
+            overlayBg.alpha = easeOutProgress * 0.7; // Target alpha 0.7
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            }
+        }
+        
+        animate();
     }
 
     function handleOverlayClick() {
@@ -232,6 +265,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         currentCity = null;
         buildingDescText = null;
         characterSprite = null;
+        overlayBg = null;
         currentTextIndex = 0;
         
         if (onCloseCallback) {
