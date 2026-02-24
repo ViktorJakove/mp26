@@ -62,7 +62,6 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         
         overlayContainer.removeChildren();
         
-        // Create the semi-transparent background
         overlayBg = new PIXI.Graphics();
         overlayBg.beginFill(0x000000, 0.7);
         overlayBg.drawRect(0, 0, app.screen.width, app.screen.height);
@@ -74,7 +73,6 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             handleOverlayClick();
         });
         
-        // Set initial alpha to 0 for fade-in
         overlayBg.alpha = 0;
         
         overlayContainer.addChild(overlayBg);
@@ -183,7 +181,6 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         overlayContainer.visible = true;
         overlayContainer.hitArea = new PIXI.Rectangle(0, 0, app.screen.width, app.screen.height);
         
-        // Start fade-in animation
         fadeInBackground();
     }
 
@@ -191,7 +188,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         if (!overlayBg) return;
         
         let elapsed = 0;
-        const duration = 300; // 300ms fade duration
+        const duration = 600;
         const startTime = Date.now();
         
         function animate() {
@@ -199,10 +196,10 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             elapsed = now - startTime;
             const progress = Math.min(elapsed / duration, 1);
             
-            // Ease-out cubic for smooth deceleration
             const easeOutProgress = 1 - Math.pow(1 - progress, 3);
             
-            overlayBg.alpha = easeOutProgress * 0.7; // Target alpha 0.7
+            //target je 0.7
+            overlayBg.alpha = easeOutProgress * 0.8;
             
             if (progress < 1) {
                 requestAnimationFrame(animate);
