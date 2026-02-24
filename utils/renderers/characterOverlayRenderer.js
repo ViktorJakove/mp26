@@ -45,6 +45,9 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             case "P":
                 spritePos = app.screen.width * 0.75;
                 break;
+            case "R":
+                    spritePos = app.screen.width * 0.75;
+                    break;
             default:
                 spritePos = app.screen.width * 0.5;
         }

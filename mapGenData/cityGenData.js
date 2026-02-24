@@ -72,7 +72,7 @@ export const CITY_GEN_DATA=[
         peepsMax: 10,
         sizeX: 2,
         sizeY: 1,
-        building: "bisons",
+        building: "olda",
         defenseLevel: 5,
         cathouseLevel: 0,
         description: "Odpadlíkův úkryt..."
@@ -105,7 +105,7 @@ export const CITY_GEN_DATA=[
         peepsMax: 200,
         sizeX: 10,
         sizeY: 10,
-        building: "hokynar",
+        building: "shop",
         defenseLevel: 5,
         cathouseLevel: 0,
         description: "Město vetešníků"
@@ -133,6 +133,17 @@ export const CITY_GEN_DATA=[
         description: "Zde sídlí švec. Říká si Marek."
     },
     {
+        name: "Techsas",
+        peepsMin: 10,
+        peepsMax: 25,
+        sizeX: 2,
+        sizeY: 2,
+        building: "mech",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "Dílna kolejáře."
+    },
+    {
         name: "Over the R",
         peepsMin: 50,
         peepsMax: 100,
@@ -149,7 +160,7 @@ export const CITY_GEN_DATA=[
         peepsMax: 200,
         sizeX: 6,
         sizeY: 7,
-        building: "trains",
+        building: "bussiness",
         defenseLevel: 5,
         cathouseLevel: 0,
         description: "Město strojů a techniky"

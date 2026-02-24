@@ -18,11 +18,12 @@ export const ROUTES_DATA =[
     [10,11], /*svec*/
     [9,11],
     [9,11],
-    [4,12],
-    [6,12],
-    [9,12],
-    [7,13], //koleje
-    [14,10]
+    [10,12],//kolejar
+    [4,13],
+    [6,13],
+    [9,13],
+    [7,14], //koleje
+    [15,10]
     
 ]
 export const ROUTE_COUNT_DATA =[
@@ -39,6 +40,7 @@ export const ROUTE_COUNT_DATA =[
     1, /*hoky*/
     1,/*svec*/
     2,
+    1,//kolejar
     3, //saloon
     1,//koleje
     1,//kostel
