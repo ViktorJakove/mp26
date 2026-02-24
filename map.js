@@ -151,6 +151,9 @@ window.addEventListener("resize", () => {
     if (characterOverlay.isVisible && characterOverlay.isVisible()) {
         const currentCity = characterOverlay.getCurrentCity ? characterOverlay.getCurrentCity() : null;
         if (currentCity) {
+            characterOverlay.overlayContainer.scale.set(1);
+            characterOverlay.overlayContainer.x = 0;
+            characterOverlay.overlayContainer.y = 0;
             characterOverlay.showCityInfo(currentCity);
             characterOverlay.refresh();
         }
