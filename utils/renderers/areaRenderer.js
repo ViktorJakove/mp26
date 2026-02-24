@@ -171,7 +171,7 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             
             if (textPosition) {
                 const textContent = ((area.type === BISONS) ? "bizoni" : area.name) + 
-                                  ((area.type === CITY || area.type === BISONS) ? '\n' + "populace : " + area.peeps : "");
+                                  ((area.type === CITY /*|| area.type === BISONS*/) ? '\n' + "populace : " + area.peeps : "");
                 
                 const areaText = getPooledText();
                 areaText.text = textContent;
