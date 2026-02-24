@@ -79,25 +79,36 @@ export const BUILDING_TEXTS = {
         ],
         sprite: [0, 1, 0],
         spritePos: ["C", "C", "C"]
-    },
-    "bussiness": {
+    },"bussiness": {
+    text: [
+        "Depo a opravna vlaků",
+        "Sklad náhradních dílů a kol",
+        "Strojvedoucí zde probírají trasy"
+    ],
+    afterTransaction: {
         text: [
-            "Depo a opravna vlaků",
-            "Sklad náhradních dílů a kol",
-            "Strojvedoucí zde probírají trasy"
+            "Děkujeme za investici!",
+            "Díky tvé pomoci můžeme modernizovat vybavení.",
+            "Přijď se podívat na novou lokomotivu!"
         ],
         sprite: [0, "S", 0],
-        spritePos: ["C", "C", "C"],
-        transaction: {
-            cost: 300,
-            successText: "Investice přijata! Město ti děkuje.",
-            failText: "Nemáš dostatek financí.",
-            questionSprite: "S",
-            questionSpritePos: "C",
-            successSprite: "S",
-            question: "Pořídit naprosto přírodní uhlí pro dvojnásobný výkon lokomotiv?"
-        }
+        spritePos: ["C", "C", "C"]
     },
+    sprite: [0, "S", 0],
+    spritePos: ["C", "C", "C"],
+    transaction: {
+        cost: 300,
+        successText: "Investice přijata! Město ti děkuje.",
+        failText: "Nemáš dostatek financí.",
+        questionSprite: "S",
+        questionSpritePos: "C",
+        successSprite: "S",
+        successSpritePos: "C",
+        failSprite: 0,
+        failSpritePos: "C",
+        question: "Pořídit naprosto přírodní uhlí pro dvojnásobný výkon lokomotiv?"
+    }
+},
     "mech": {
         text: [
             "Depo a opravna vlaků",

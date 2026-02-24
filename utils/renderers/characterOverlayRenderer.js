@@ -24,13 +24,21 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
     };
     let panel = null;
     let instructionText = null;
+    
+    const buildingState = new Map(); // buildingKey -> { questionShown: boolean, completed: boolean }
 
-    function getBuildingSpritePath(buildingKey, index) {
+    function getBuildingSpritePath(buildingKey, index, isAfterTransaction = false) {
         if (!BUILDING_TEXTS[buildingKey]) {
             return null;
         }
         
-        const spriteArray = BUILDING_TEXTS[buildingKey].sprite;
+        let spriteArray;
+        if (isAfterTransaction && BUILDING_TEXTS[buildingKey].afterTransaction?.sprite) {
+            spriteArray = BUILDING_TEXTS[buildingKey].afterTransaction.sprite;
+        } else {
+            spriteArray = BUILDING_TEXTS[buildingKey].sprite;
+        }
+        
         if (!spriteArray || spriteArray[index] === undefined) {
             return null;
         }
@@ -39,8 +47,14 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         return path;
     }
     
-    function getBuildingSpritePos(buildingKey, index) {
-        let spritePos = BUILDING_TEXTS[buildingKey].spritePos[index];
+    function getBuildingSpritePos(buildingKey, index, isAfterTransaction = false) {
+        let spritePos;
+        if (isAfterTransaction && BUILDING_TEXTS[buildingKey].afterTransaction?.spritePos) {
+            spritePos = BUILDING_TEXTS[buildingKey].afterTransaction.spritePos[index];
+        } else {
+            spritePos = BUILDING_TEXTS[buildingKey].spritePos[index];
+        }
+        
         switch (spritePos){
             case "L":
                 spritePos = app.screen.width * 0.33;
@@ -56,6 +70,31 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
                 spritePos = app.screen.width * 0.5;
         }
         return spritePos;
+    }
+
+    function getBuildingTexts(buildingKey) {
+        const buildingData = BUILDING_TEXTS[buildingKey];
+        if (!buildingData) return DEFAULT_BUILDING_TEXT.text;
+        
+        const state = buildingState.get(buildingKey);
+        
+        if (state?.completed && buildingData.afterTransaction?.text) {
+            return buildingData.afterTransaction.text;
+        }
+        
+        return buildingData.text;
+    }
+
+    function getStartIndex(buildingKey) {
+        const state = buildingState.get(buildingKey);
+        const buildingData = BUILDING_TEXTS[buildingKey];
+        
+        if (state?.questionShown && buildingData?.transaction && !state?.completed) {
+            const texts = getBuildingTexts(buildingKey);
+            return texts.length - 1;
+        }
+        
+        return 0;
     }
 
     function showTransactionStep() {
@@ -213,16 +252,28 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             const cost = buildingData.transaction.cost;
             if (getMoney() >= cost) {
                 subMoney(cost);
-                showTransactionResult(buildingData.transaction.successText, buildingData.transaction.successSprite);
+                buildingState.set(buildingKey, { 
+                    completed: true,
+                    questionShown: true 
+                });
+                showTransactionResult(
+                    buildingData.transaction.successText, 
+                    buildingData.transaction.successSprite,
+                    buildingData.transaction.successSpritePos
+                );
                 if (railRenderer) railRenderer.markDirty();
                 if (stationRenderer) stationRenderer.markDirty();
             } else {
-                showTransactionResult(buildingData.transaction.failText);
+                showTransactionResult(
+                    buildingData.transaction.failText,
+                    buildingData.transaction.failSprite,
+                    buildingData.transaction.failSpritePos
+                );
             }
         }
     }
 
-    function showTransactionResult(message, successSprite) {
+    function showTransactionResult(message, successSprite, successSpritePos) {
         if (!buildingDescText) return;
         
         if (buttonContainer) {
@@ -241,6 +292,21 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
                 
                 const setNewTexture = () => {
                     characterSprite.texture = newTexture;
+                    
+                    if (successSpritePos) {
+                        switch (successSpritePos){
+                            case "L":
+                                characterSprite.x = app.screen.width * 0.33;
+                                break;
+                            case "C":
+                                characterSprite.x = app.screen.width * 0.5;
+                                break;
+                            case "P":
+                            case "R":
+                                characterSprite.x = app.screen.width * 0.66;
+                                break;
+                        }
+                    }
                 };
                 
                 if (newTexture.valid) {
@@ -252,10 +318,10 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
                 console.warn("Could not load success sprite:", error);
             }
         }
-        
-        setTimeout(() => {
-            hideOverlay();
-        }, 2000);
+        if (instructionText) {
+            instructionText.visible = true;
+            instructionText.text = "Klikni kamkoli pro zavření...";
+        }
     }
 
     function showCityInfo(cityArea) {
@@ -264,7 +330,9 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         if (transactionState.active) return;
         
         currentCity = cityArea;
-        currentTextIndex = 0;
+        const buildingKey = cityArea.building || "none";
+        
+        currentTextIndex = getStartIndex(buildingKey);
         transactionState.active = false;
         
         overlayContainer.removeChildren();
@@ -285,9 +353,11 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         overlayContainer.addChild(overlayBg);
         
         try {
-            const buildingKey = cityArea.building || "none";
-            const spritePath = getBuildingSpritePath(buildingKey, currentTextIndex);
-            const spritePos = getBuildingSpritePos(buildingKey, currentTextIndex);
+            const state = buildingState.get(buildingKey);
+            const isAfterTransaction = state?.completed || false;
+            
+            const spritePath = getBuildingSpritePath(buildingKey, currentTextIndex, isAfterTransaction);
+            const spritePos = getBuildingSpritePos(buildingKey, currentTextIndex, isAfterTransaction);
             
             if (!spritePath) {
                 return;
@@ -355,11 +425,9 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         title.y = 20;
         panel.addChild(title);
         
-        const buildingKey = cityArea.building || "none";
-        const buildingData = BUILDING_TEXTS[buildingKey] || DEFAULT_BUILDING_TEXT;
-        const buildingTexts = buildingData.text;
+        const buildingTexts = getBuildingTexts(buildingKey);
         
-        buildingDescText = new PIXI.Text(buildingTexts[0], {
+        buildingDescText = new PIXI.Text(buildingTexts[currentTextIndex], {
             fontFamily: "Arial",
             fontSize: 18,
             fill: 0xecf0f1,
@@ -436,8 +504,9 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         if (transactionState.active) return;
         
         const buildingKey = currentCity.building || "none";
-        const buildingData = BUILDING_TEXTS[buildingKey] || DEFAULT_BUILDING_TEXT;
-        const buildingTexts = buildingData.text;
+        const buildingTexts = getBuildingTexts(buildingKey);
+        const buildingData = BUILDING_TEXTS[buildingKey];
+        const state = buildingState.get(buildingKey) || { questionShown: false, completed: false };
         
         if (currentTextIndex < buildingTexts.length - 1) {
             currentTextIndex++;
@@ -445,8 +514,9 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             
             if (characterSprite) {
                 try {
-                    const spritePath = getBuildingSpritePath(buildingKey, currentTextIndex);
-                    const spritePos = getBuildingSpritePos(buildingKey, currentTextIndex);
+                    const isAfterTransaction = state?.completed || false;
+                    const spritePath = getBuildingSpritePath(buildingKey, currentTextIndex, isAfterTransaction);
+                    const spritePos = getBuildingSpritePos(buildingKey, currentTextIndex, isAfterTransaction);
                     
                     if (!spritePath) {
                         return;
@@ -476,13 +546,18 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
     
             if (currentTextIndex === buildingTexts.length - 1) {
                 instructionText.text = "Toto byl poslední text...";
+                
+                if (buildingData?.transaction && !state.completed) {
+                    buildingState.set(buildingKey, {
+                        ...state,
+                        questionShown: true
+                    });
+                }
             }
         } else if (currentTextIndex === buildingTexts.length - 1) {
-            const buildingDataWithTransaction = BUILDING_TEXTS[buildingKey];
-            if (buildingDataWithTransaction && 
-                buildingDataWithTransaction.transaction && 
-                !transactionState.active && 
-                transactionState.buildingKey !== buildingKey) {
+            if (buildingData && 
+                buildingData.transaction && 
+                !state.completed) {
                 transactionState.active = true;
                 transactionState.buildingKey = buildingKey;
                 showTransactionStep();
