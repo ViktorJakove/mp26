@@ -17,35 +17,19 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
     let buildingDescText = null;
     let characterSprite = null;
 
-    /*function getCityConnections(cityArea) {
-        const stations = stationRenderer.getStations();
-        
-        const cityStations = stations.filter(station => {
-            for (let x = cityArea.x - 1; x <= cityArea.x + cityArea.sizeX; x++) {
-                for (let y = cityArea.y - 1; y <= cityArea.y + cityArea.sizeY; y++) {
-                    if (station.x === x && station.y === y) {
-                        const otherStation = stations.find(s => 
-                            s.index === station.index && 
-                            (s.x !== station.x || s.y !== station.y)
-                        );
-                        if (otherStation) {
-                            const connected = railRenderer.areStationsConnected(
-                                station.x, station.y,
-                                otherStation.x, otherStation.y
-                            );
-                            return connected;
-                        }
-                    }
-                }
-            }
-            return false;
-        });
-
-        return cityStations;
-    }*/
-
     function getBuildingSpritePath(buildingKey, index) {
-        const path  ="../../graphics/chars/"+buildingKey +"/" + buildingKey + BUILDING_TEXTS[buildingKey].sprite[index] + ".png";
+        if (!BUILDING_TEXTS[buildingKey]) {
+            console.warn(`Building key "${buildingKey}" not found in BUILDING_TEXTS`);
+            return null;
+        }
+        
+        const spriteArray = BUILDING_TEXTS[buildingKey].sprite;
+        if (!spriteArray || spriteArray[index] === undefined) {
+            console.warn(`Sprite index ${index} not found for building "${buildingKey}"`);
+            return null;
+        }
+        
+        const path = "../../graphics/chars/" + buildingKey + "/" + buildingKey + spriteArray[index] + ".png";
         console.log("Getting sprite path:", path);
         return path;
     }
@@ -57,7 +41,6 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         
         overlayContainer.removeChildren();
         
-        // Poloprůhledné pozadí
         const overlay = new PIXI.Graphics();
         overlay.beginFill(0x000000, 0.7);
         overlay.drawRect(0, 0, app.screen.width, app.screen.height);
@@ -73,19 +56,35 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         
         try {
             const buildingKey = cityArea.building || "none";
-            const buildingData = BUILDING_TEXTS[buildingKey] || DEFAULT_BUILDING_TEXT;
-            
             const spritePath = getBuildingSpritePath(buildingKey, currentTextIndex);
+            
+            if (!spritePath) {
+                console.warn(`No sprite path for ${buildingKey}`);
+                return;
+            }
             
             characterSprite = new PIXI.Sprite(PIXI.Texture.from(spritePath));
             
             characterSprite.anchor.set(0.5);
             characterSprite.x = app.screen.width / 2;
             characterSprite.y = app.screen.height / 2;
+
+            //neblokovat!!
+            characterSprite.interactive = false;
+            characterSprite.interactiveChildren = false;
             
             const maxSize = Math.min(app.screen.width, app.screen.height) * 0.6;
-            characterSprite.width = maxSize;
-            characterSprite.height = maxSize;
+            
+            //az po nacteni!!
+            if (characterSprite.texture.valid) {
+                const scale = maxSize / Math.max(characterSprite.width, characterSprite.height);
+                characterSprite.scale.set(scale);
+            } else {
+                characterSprite.texture.on('update', () => {
+                    const scale = maxSize / Math.max(characterSprite.width, characterSprite.height);
+                    characterSprite.scale.set(scale);
+                });
+            }
             
             overlayContainer.addChild(characterSprite);
         } catch (error) {
@@ -157,6 +156,11 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         overlayContainer.updateTransform();
     }
 
+    function scaleSprite(sprite, maxSize) {
+        const scale = maxSize / Math.max(sprite.width, sprite.height);
+        sprite.scale.set(scale);
+    }
+
     function handleOverlayClick() {
         if (!currentCity || !buildingDescText) return;
         
@@ -172,11 +176,30 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         currentTextIndex = (currentTextIndex + 1) % buildingTexts.length;
         buildingDescText.text = buildingTexts[currentTextIndex];
         
-        // Aktualizujeme sprite při změně textu
         if (characterSprite) {
             try {
-                const spritePath = getBuildingSpritePath(buildingData, currentTextIndex);
-                characterSprite.texture = PIXI.Texture.from(spritePath);
+                const spritePath = getBuildingSpritePath(buildingKey, currentTextIndex);
+                
+                if (!spritePath) {
+                    console.warn(`No sprite path for ${buildingKey} at index ${currentTextIndex}`);
+                    return;
+                }
+                
+                const newTexture = PIXI.Texture.from(spritePath);
+                
+                if (newTexture.valid) {
+                    characterSprite.texture = newTexture;
+                    const maxSize = Math.min(app.screen.width, app.screen.height) * 0.6;
+                    const scale = maxSize / Math.max(characterSprite.width, characterSprite.height);
+                    characterSprite.scale.set(scale);
+                } else {
+                    newTexture.on('update', () => {
+                        characterSprite.texture = newTexture;
+                        const maxSize = Math.min(app.screen.width, app.screen.height) * 0.6;
+                        const scale = maxSize / Math.max(characterSprite.width, characterSprite.height);
+                        characterSprite.scale.set(scale);
+                    });
+                }
             } catch (error) {
                 console.warn("Could not update character sprite:", error);
             }

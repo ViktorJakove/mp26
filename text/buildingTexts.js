@@ -23,7 +23,7 @@ export const BUILDING_TEXTS = {
             "Zde se ukládají peníze z vlaků",
             "Těžké dubové dveře a ocelový trezor"
         ],
-        sprite: [0, 1, 2],
+        sprite: [0, 1, 0],
         spritePos: ["L", "C", "P"]
     },
     "graveyard": {
@@ -32,7 +32,7 @@ export const BUILDING_TEXTS = {
             "Nápisy na náhrobcích vyprávějí příběhy",
             "Stromy šumí nad starými hroby"
         ],
-        sprite: [0, 1, 2],
+        sprite: [0, 1, 0],
         spritePos: ["L", "C", "P"]
     },
     "bisons": {
