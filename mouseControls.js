@@ -7,6 +7,10 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
         isDragging = false;
     }
 
+    function isOverlayVisible() {
+        return cityInfoOverlay && cityInfoOverlay.isVisible && cityInfoOverlay.isVisible();
+    }
+
     function getTileFromMouse(event){
         try{
             const gridScale = getGridScale();
@@ -38,7 +42,7 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
     }
 
     function handleCityClick(tileX, tileY) {
-        if (cityInfoOverlay.isVisible()) return false;
+        if (isOverlayVisible()) return false;
         
         const clickedCity = areas.find(area => 
             area.type?.type === "city" &&
@@ -80,11 +84,15 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
 
     app.stage.on('pointerdown', (event) => {
         try{
+            if (isOverlayVisible()) {
+                event.stopPropagation();
+                return;
+            }
+
             const button = event.data.button;
             
             const tilePos = getTileFromMouse(event);
             if (!tilePos) return;
-            
             
             if (button === 0 && !getPlacementMode()) {
                 const cityClicked = handleCityClick(tilePos.tileX, tilePos.tileY);
@@ -110,6 +118,8 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
     });
 
     app.stage.on('pointerup', (event) => {
+        if (isOverlayVisible()) return;
+
         const button = event.data.button;
         if (button === 0) isPlacingRail = false;
         if (getPlacementMode() ? (button === 2) : (button === 0 || button === 2)) {
@@ -124,6 +134,8 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
 
     app.stage.on('pointermove', (event) => {
         try{
+            if (isOverlayVisible()) return;
+
             if(getPlacementMode() && isPlacingRail){
                 const tilePos = getTileFromMouse(event);
                 if (tilePos) {
@@ -147,8 +159,9 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
     });
 
     app.view.addEventListener("contextmenu", (event) => {
-        // TEMP FIX DEBUG
-        // event.preventDefault();
+        if (isOverlayVisible()) {
+            event.preventDefault();
+        }
     });
 
     return { resetDrag };

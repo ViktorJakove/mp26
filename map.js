@@ -93,6 +93,11 @@ document.addEventListener("keydown", (event) => {
 
 //zoom
 app.view.addEventListener("wheel", (event) => {
+    if (characterOverlay.isVisible && characterOverlay.isVisible()) {
+        event.preventDefault();
+        return;
+    }
+    
     event.preventDefault();
     const zoomFactor = event.deltaY > 0 ? 1 - zoomSpeed : 1 + zoomSpeed;
     mapZoom(zoomFactor, event);
@@ -141,8 +146,7 @@ window.addEventListener("resize", () => {
 });
 
 // init funkci!!!
-const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, addStations, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } }, areaRenderer, pointerTextRenderer, resetDrag, stationRenderer,hudRenderer);
-
+const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics,addLevel, addStations, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } }, areaRenderer, pointerTextRenderer, resetDrag, stationRenderer, hudRenderer,characterOverlay);
 app.ticker.add(() => {
     keyboardMapMovement();
 });
