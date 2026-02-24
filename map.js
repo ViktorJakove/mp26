@@ -42,6 +42,9 @@ const addMoney = (amount) => money += amount;
 const renderers = creatRenderers(app, camera, getGridScale, cellSize, getAreas, getLevel, addMoney, subMoney, getMoney, getPlacementMode, getRelations, setRelations);
 const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer, trainRenderer, hudRenderer } = renderers;
 
+window.trainRenderer = trainRenderer;
+window.hudRenderer = hudRenderer;
+
 const characterOverlay = createCharacterOverlay(app, getGridScale, railRenderer, stationRenderer, getMoney, subMoney);
 
 const fgContainer = new PIXI.Container();

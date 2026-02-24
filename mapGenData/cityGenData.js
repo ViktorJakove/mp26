@@ -5,7 +5,7 @@ export const CITY_GEN_DATA=[
         peepsMax: 25,
         sizeX: 2,
         sizeY: 2,
-        building: "hq",
+        building: "none",
         defenseLevel: 1,
         cathouseLevel: 0,
         description: "Domov úžasného myslitele. (tebe!)"

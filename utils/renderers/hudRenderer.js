@@ -1,5 +1,14 @@
 import { RAIL_TYPES, DESTROY_ENTRY } from "../../enums/railTypes.js";
 
+const LOCKED_RAIL_TYPES = new Set(["CROSS"]);
+    
+    // Function to unlock a rail type
+    function unlockRailType(typeId) {
+        LOCKED_RAIL_TYPES.delete(typeId);
+        hudDirty = true;
+        draw();
+    }
+
 const TYPES_LIST = [...Object.values(RAIL_TYPES), DESTROY_ENTRY];
 
 export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode) {
@@ -57,7 +66,11 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
     let lastGridScale = null;
 
     function getSelectedType() {
-        return TYPES_LIST[selectedIndex];
+        const availableTypes = TYPES_LIST.filter(type => {
+            if (type.isDestroy) return true;
+            return !LOCKED_RAIL_TYPES.has(type.id);
+        });
+        return availableTypes[selectedIndex];
     }
 
     function setOnSelect(cb) {
@@ -75,6 +88,13 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
         }
 
         const gridScale = getGridScale();
+
+        const availableTypes = TYPES_LIST.filter(type => {
+            // Always show destroy entry
+            if (type.isDestroy) return true;
+            // Hide locked rail types
+            return !LOCKED_RAIL_TYPES.has(type.id);
+        });
 
         const PANEL_W = ICON_SIZE + PADDING * 2;
         const PANEL_H = TYPES_LIST.length * (ICON_SIZE + PADDING + 10) + PADDING; // Extra height for cost
@@ -209,5 +229,6 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
         markDirty,
         getSelectedType,
         setOnSelect,
+        unlockRailType
     };
 }

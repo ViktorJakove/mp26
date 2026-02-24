@@ -8,40 +8,44 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
 
     const trains = [];
 
-    const TRAIN_SPEED = 15; /*3*/ 
+    let trainSpeedMultiplier = 1.0;
+    
+    function setTrainSpeedMultiplier(multiplier) {
+        trainSpeedMultiplier = multiplier;
+        for (const train of trains) {
+            train.speed = TRAIN_SPEED * trainSpeedMultiplier;
+        }
+    }
+
+    const TRAIN_SPEED = 3; /*3*/ 
     const TRAIN_SIZE = 0.6;
     const STATION_WAIT_TIME = 3500; //ms
     const WAGON_OFFSET = 0.75;
 
     let avgPeeps = 0;
 
-    /**
-     * @param {Array<{x,y}>} path
-     * @param {number} color
-     */
     function addTrain(path, color, routeIndex, routeCities = []) {
         if (!path) return;
-
         
         avgPeeps = ((routeCities[0] ?? 0) + (routeCities[1] ?? 0)) / 2;
-
+        
         let wagons = [];
         let getPeepIndex = 0;
-
-        for (let i = 0; i < VAGONS_PER_PEEPS.length; i++) if (avgPeeps > VAGONS_PER_PEEPS[i]) getPeepIndex++;
-        for (let w = 0; w < getPeepIndex; w++) { wagons.push ({ progress: -WAGON_OFFSET * (w + 1) }); }
-
-        /*const wagons = [
-            { progress: -WAGON_OFFSET },
-            { progress: -WAGON_OFFSET * 2 },
-        ];*/
+        
+        for (let i = 0; i < VAGONS_PER_PEEPS.length; i++) {
+            if (avgPeeps > VAGONS_PER_PEEPS[i]) getPeepIndex++;
+        }
+        for (let w = 0; w < getPeepIndex; w++) { 
+            wagons.push({ progress: -WAGON_OFFSET * (w + 1) }); 
+        }
+        
         trains.push({
             path,
             progress: 0,
-            direction: 1,      // 1 = dopredu, -1 = dozadu
+            direction: 1,
             color,
             routeIndex,
-            speed: TRAIN_SPEED,
+            speed: TRAIN_SPEED * trainSpeedMultiplier,
             waitTimer: 0,
             waiting: false,
             wagons,
@@ -271,5 +275,5 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         drawTrains();
     }
 
-    return { addTrain, clearTrains, markDirty, hasTrainForRoute, removeTrainForRoute, drawTrains};
+    return { addTrain, clearTrains, markDirty, hasTrainForRoute, removeTrainForRoute, drawTrains, setTrainSpeedMultiplier};
 }

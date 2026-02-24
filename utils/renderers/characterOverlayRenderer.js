@@ -90,6 +90,18 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
                 sprite.x = app.screen.width * (map[d.transaction.questionSpritePos] || 0.5);
             }
         }
+
+        if (key === "bussiness" && d.transaction.cost === 300) {
+            //double speed
+            if (window.trainRenderer) {
+                window.trainRenderer.setTrainSpeedMultiplier(3);
+            }
+        } else if (key === "mech" && d.transaction.cost === 500) {
+            //Mech ounlock
+            if (window.hudRenderer) {
+                window.hudRenderer.unlockRailType("CROSS");
+            }
+        }
         
         if (instr) instr.visible = false;
         desc.text = `${d.transaction.question}\n\nCena: $${d.transaction.cost}`;
