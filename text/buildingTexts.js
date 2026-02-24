@@ -33,7 +33,7 @@ export const BUILDING_TEXTS = {
             "Stromy šumí nad starými hroby"
         ],
         sprite: [0, 1, 0],
-        spritePos: ["L", "C", "L"]
+        spritePos: ["P", "C", "P"]
     },
     "bisons": {
         text: [

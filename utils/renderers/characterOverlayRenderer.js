@@ -30,11 +30,10 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         }
         
         const path = "../../graphics/chars/" + buildingKey + "/" + buildingKey + spriteArray[index] + ".png";
-        console.log("Getting sprite path:", path);
         return path;
     }
+    
     function getBuildingSpritePos(buildingKey, index) {
-        
         let spritePos = BUILDING_TEXTS[buildingKey].spritePos[index];
         switch (spritePos){
             case "L":
@@ -43,15 +42,12 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             case "C":
                 spritePos = app.screen.width * 0.5;
                 break;
-            case "R":
+            case "P":
                 spritePos = app.screen.width * 0.75;
                 break;
             default:
                 spritePos = app.screen.width * 0.5;
-                console.warn("nezadal jsi pozici pro " + buildingKey + ", index: "+index+ " tlammo");
         }
-
-
         return spritePos;
     }
 
@@ -85,31 +81,32 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
                 return;
             }
             
-            characterSprite = new PIXI.Sprite(PIXI.Texture.from(spritePath));
+            const texture = PIXI.Texture.from(spritePath);
+            characterSprite = new PIXI.Sprite(texture);
             
             characterSprite.anchor.set(0.5);
             characterSprite.x = spritePos;
-            characterSprite.y = app.screen.height / 2;
+            characterSprite.y = app.screen.height / 5 * 2;
 
-            if (characterSprite) {
-                characterSprite.interactive = true;
-                characterSprite.on('pointerdown', (e) => {
-                    e.stopPropagation();
-                    handleOverlayClick();
-                });
-            }
+            characterSprite.interactive = true;
+            characterSprite.on('pointerdown', (e) => {
+                e.stopPropagation();
+                handleOverlayClick();
+            });
             
             const maxSize = Math.min(app.screen.width, app.screen.height) * 0.6;
             
-            //az po nacteni!!
-            if (characterSprite.texture.valid) {
-                const scale = maxSize / Math.max(characterSprite.width, characterSprite.height);
-                characterSprite.scale.set(scale);
-            } else {
-                characterSprite.texture.on('update', () => {
-                    const scale = maxSize / Math.max(characterSprite.width, characterSprite.height);
+            const setSpriteScale = () => {
+                if (characterSprite.texture && characterSprite.texture.valid) {
+                    const scale = maxSize / Math.max(characterSprite.texture.width, characterSprite.texture.height);
                     characterSprite.scale.set(scale);
-                });
+                }
+            };
+            
+            if (texture.valid) {
+                setSpriteScale();
+            } else {
+                texture.once('update', setSpriteScale);
             }
             
             overlayContainer.addChild(characterSprite);
@@ -176,15 +173,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         overlayContainer.addChild(panel);
         
         overlayContainer.visible = true;
-        
         overlayContainer.hitArea = new PIXI.Rectangle(0, 0, app.screen.width, app.screen.height);
-        
-        overlayContainer.updateTransform();
-    }
-
-    function scaleSprite(sprite, maxSize) {
-        const scale = maxSize / Math.max(sprite.width, sprite.height);
-        sprite.scale.set(scale);
     }
 
     function handleOverlayClick() {
@@ -205,6 +194,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         if (characterSprite) {
             try {
                 const spritePath = getBuildingSpritePath(buildingKey, currentTextIndex);
+                const spritePos = getBuildingSpritePos(buildingKey, currentTextIndex);
                 
                 if (!spritePath) {
                     console.warn(`No sprite path for ${buildingKey} at index ${currentTextIndex}`);
@@ -212,20 +202,22 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
                 }
                 
                 const newTexture = PIXI.Texture.from(spritePath);
+                const maxSize = Math.min(app.screen.width, app.screen.height) * 0.6;
+                
+                characterSprite.x = spritePos;
+                
+                const setNewTexture = () => {
+                    characterSprite.texture = newTexture;
+                    const scale = maxSize / Math.max(newTexture.width, newTexture.height);
+                    characterSprite.scale.set(scale);
+                };
                 
                 if (newTexture.valid) {
-                    characterSprite.texture = newTexture;
-                    const maxSize = Math.min(app.screen.width, app.screen.height) * 0.6;
-                    const scale = maxSize / Math.max(characterSprite.width, characterSprite.height);
-                    characterSprite.scale.set(scale);
+                    setNewTexture();
                 } else {
-                    newTexture.on('update', () => {
-                        characterSprite.texture = newTexture;
-                        const maxSize = Math.min(app.screen.width, app.screen.height) * 0.6;
-                        const scale = maxSize / Math.max(characterSprite.width, characterSprite.height);
-                        characterSprite.scale.set(scale);
-                    });
+                    newTexture.once('update', setNewTexture);
                 }
+                
             } catch (error) {
                 console.warn("Could not update character sprite:", error);
             }
@@ -255,8 +247,6 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
     function handleResize() {
         if (currentCity && overlayContainer.visible) {
             const cityToShow = currentCity;
-            const gridScale = getGridScale();
-        
             overlayContainer.removeChildren();
             overlayContainer.scale.set(1, 1);
             showCityInfo(cityToShow);
@@ -273,18 +263,10 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
 
     function refresh() {
         const gridScale = getGridScale();
-    
         overlayContainer.scale.set(1 / gridScale);
-    
         overlayContainer.x = 0;
         overlayContainer.y = 0;
-
-        overlayContainer.hitArea = new PIXI.Rectangle(
-            0,
-            0,
-            app.screen.width,
-            app.screen.height
-        );
+        overlayContainer.hitArea = new PIXI.Rectangle(0, 0, app.screen.width, app.screen.height);
     }
 
     return {
