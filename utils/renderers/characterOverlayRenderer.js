@@ -157,7 +157,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         
         yesButton.on('pointerdown', (e) => {
             e.stopPropagation();
-            e.preventDefault();  // Přidáno
+            e.preventDefault();
             handleTransaction(true);
         });
         
@@ -185,7 +185,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         
         noButton.on('pointerdown', (e) => {
             e.stopPropagation();
-            e.preventDefault();  // Přidáno
+            e.preventDefault();
             hideOverlay();
         });
         
@@ -338,7 +338,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         panelBg.lineStyle(2, 0xf5c518);
         panelBg.drawRoundedRect(0, 0, panelWidth, panelHeight, 12);
         panelBg.endFill();
-        panelBg.interactive = true;  // Přidáno
+        panelBg.interactive = true;
         panelBg.on('pointerdown', (e) => {
             e.stopPropagation();
             handleOverlayClick();
@@ -370,7 +370,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         });
         buildingDescText.x = 20;
         buildingDescText.y = 70;
-        buildingDescText.interactive = true;  // Přidáno
+        buildingDescText.interactive = true;
         buildingDescText.on('pointerdown', (e) => {
             e.stopPropagation();
             handleOverlayClick();
@@ -385,7 +385,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         });
         instructionText.x = panelWidth - 220;
         instructionText.y = panelHeight - 30;
-        instructionText.interactive = true;  // Přidáno
+        instructionText.interactive = true;
         instructionText.on('pointerdown', (e) => {
             e.stopPropagation();
             handleOverlayClick();
@@ -395,8 +395,8 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         panel.x = panelX;
         panel.y = panelY;
         
-        panel.interactive = true;  // Změněno z false na true
-        panel.interactiveChildren = true;  // Změněno z false na true
+        panel.interactive = true;
+        panel.interactiveChildren = true;
         
         overlayContainer.addChild(panel);
         
@@ -473,13 +473,16 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
                     console.warn("Could not update character sprite:", error);
                 }
             }
-
+    
             if (currentTextIndex === buildingTexts.length - 1) {
                 instructionText.text = "Toto byl poslední text...";
             }
         } else if (currentTextIndex === buildingTexts.length - 1) {
             const buildingDataWithTransaction = BUILDING_TEXTS[buildingKey];
-            if (buildingDataWithTransaction && buildingDataWithTransaction.transaction) {
+            if (buildingDataWithTransaction && 
+                buildingDataWithTransaction.transaction && 
+                !transactionState.active && 
+                transactionState.buildingKey !== buildingKey) {
                 transactionState.active = true;
                 transactionState.buildingKey = buildingKey;
                 showTransactionStep();
