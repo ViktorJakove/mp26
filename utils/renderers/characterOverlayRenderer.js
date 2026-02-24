@@ -33,6 +33,27 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         console.log("Getting sprite path:", path);
         return path;
     }
+    function getBuildingSpritePos(buildingKey, index) {
+        
+        let spritePos = BUILDING_TEXTS[buildingKey].spritePos[index];
+        switch (spritePos){
+            case "L":
+                spritePos = app.screen.width * 0.25;
+                break;
+            case "C":
+                spritePos = app.screen.width * 0.5;
+                break;
+            case "R":
+                spritePos = app.screen.width * 0.75;
+                break;
+            default:
+                spritePos = app.screen.width * 0.5;
+                console.warn("nezadal jsi pozici pro " + buildingKey + ", index: "+index+ " tlammo");
+        }
+
+
+        return spritePos;
+    }
 
     function showCityInfo(cityArea) {
         if (cityArea.building === "none") return;
@@ -57,6 +78,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         try {
             const buildingKey = cityArea.building || "none";
             const spritePath = getBuildingSpritePath(buildingKey, currentTextIndex);
+            const spritePos = getBuildingSpritePos(buildingKey, currentTextIndex);
             
             if (!spritePath) {
                 console.warn(`No sprite path for ${buildingKey}`);
@@ -66,7 +88,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             characterSprite = new PIXI.Sprite(PIXI.Texture.from(spritePath));
             
             characterSprite.anchor.set(0.5);
-            characterSprite.x = app.screen.width / 2;
+            characterSprite.x = spritePos;
             characterSprite.y = app.screen.height / 2;
 
             if (characterSprite) {
