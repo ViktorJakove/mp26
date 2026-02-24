@@ -1,17 +1,16 @@
 import { RAIL_TYPES, DESTROY_ENTRY } from "../../enums/railTypes.js";
 
-const LOCKED_RAIL_TYPES = new Set(["CROSS"]);
+const TYPES_LIST = [...Object.values(RAIL_TYPES), DESTROY_ENTRY];
+
+export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode) {
+
+    const LOCKED_RAIL_TYPES = new Set(["CROSS"]);
     
-    // Function to unlock a rail type
     function unlockRailType(typeId) {
         LOCKED_RAIL_TYPES.delete(typeId);
         hudDirty = true;
         draw();
     }
-
-const TYPES_LIST = [...Object.values(RAIL_TYPES), DESTROY_ENTRY];
-
-export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode) {
 
     const topBarContainer = new PIXI.Container();
     topBarContainer.zIndex = 25;
@@ -80,7 +79,6 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
     function drawLeftBar() {
         leftBarContainer.removeChildren();
 
-        // Always update visibility based on current placement mode
         leftBarContainer.visible = getPlacementMode();
         
         if (!getPlacementMode()) {
@@ -89,28 +87,23 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
 
         const gridScale = getGridScale();
 
-        const availableTypes = TYPES_LIST.filter(type => {
-            // Always show destroy entry
-            if (type.isDestroy) return true;
-            // Hide locked rail types
-            return !LOCKED_RAIL_TYPES.has(type.id);
-        });
-
         const PANEL_W = ICON_SIZE + PADDING * 2;
-        const PANEL_H = TYPES_LIST.length * (ICON_SIZE + PADDING + 10) + PADDING; // Extra height for cost
+        const PANEL_H = TYPES_LIST.length * (ICON_SIZE + PADDING + 10) + PADDING;
 
         const bg = new PIXI.Graphics();
         bg.beginFill(0x222222, 0.88);
         bg.drawRect(0, 0, PANEL_W, PANEL_H, 8);
         bg.endFill();
+        bg.interactive = true;
         leftBarContainer.addChild(bg);
 
         TYPES_LIST.forEach((type, i) => {
             const x = PADDING;
-            const y = PADDING + i * (ICON_SIZE + PADDING + 10); // Add spacing for cost
+            const y = PADDING + i * (ICON_SIZE + PADDING + 10);
 
-            //highlight
-            if (i === selectedIndex) {
+            const isLocked = !type.isDestroy && LOCKED_RAIL_TYPES.has(type.id);
+
+            if (i === selectedIndex && !isLocked) {
                 const hl = new PIXI.Graphics();
                 hl.beginFill(0xffcc00, 0.55);
                 hl.drawRoundedRect(x, y, ICON_SIZE, ICON_SIZE, 4);
@@ -118,7 +111,6 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
                 leftBarContainer.addChild(hl);
             }
 
-            //ikona(jezis)
             if (type.isDestroy) {
                 const g = new PIXI.Graphics();
                 g.beginFill(0xaa0000, 0.9);
@@ -150,6 +142,15 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
                     if (type.connections[3]) { g.moveTo(cx, cy); g.lineTo(x, cy); }
                     leftBarContainer.addChild(g);
                 }
+                
+                if (isLocked) {
+                    const lockOverlay = new PIXI.Graphics();
+                    lockOverlay.beginFill(0x888888, 0.6);
+                    lockOverlay.drawRect(x, y, ICON_SIZE, ICON_SIZE);
+                    lockOverlay.endFill();
+                    leftBarContainer.addChild(lockOverlay);
+                }
+
                 const costLabel = new PIXI.Text(`$${type.cost}`, {
                     fontFamily: "Arial",
                     fontSize: 12,
@@ -163,21 +164,25 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
                 leftBarContainer.addChild(costLabel);
             }
 
-            //hit area
-            const hit = new PIXI.Graphics();
-            hit.beginFill(0xffffff, 0.001);
-            hit.drawRect(x, y, ICON_SIZE, ICON_SIZE + 10);
-            hit.endFill();
-            hit.interactive = true;
-            hit.cursor = "pointer";
-            hit.on('pointerdown', (e) => {
+            // Single hit area per item
+            const hitArea = new PIXI.Graphics();
+            hitArea.beginFill(0xffffff, 0.001);
+            hitArea.drawRect(x, y, ICON_SIZE, ICON_SIZE + 10);
+            hitArea.endFill();
+            hitArea.interactive = true;
+            hitArea.cursor = isLocked ? "not-allowed" : "pointer";
+            
+            hitArea.on('pointerdown', (e) => {
                 e.stopPropagation();
-                selectedIndex = i;
-                hudDirty = true;
-                draw();
-                if (onSelectCallback) onSelectCallback(type);
+                if (!isLocked) {
+                    selectedIndex = i;
+                    hudDirty = true;
+                    draw();
+                    if (onSelectCallback) onSelectCallback(type);
+                }
             });
-            leftBarContainer.addChild(hit);
+            
+            leftBarContainer.addChild(hitArea);
         });
 
         leftBarContainer.scale.set(1 / gridScale);
@@ -190,7 +195,6 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
         const currentPlacementMode = getPlacementMode();
         const currentGridScale = getGridScale();
 
-        // Force redraw if placement mode changed, regardless of other state
         if (currentPlacementMode !== lastPlacementMode) {
             hudDirty = true;
         }

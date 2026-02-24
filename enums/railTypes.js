@@ -10,7 +10,7 @@ export const RAIL_TYPES = {
         id: "STRAIGHT_V",
         connections: [true, false, true, false],  // N-S
         texture: "../../graphics/map/rails/rail_v.png",
-        cost: 15
+        cost: 10
     },
     CURVE_NE: {
         id: "CURVE_NE",
