@@ -25,9 +25,9 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         const key = city.building;
         const texts = getTexts(key, buildingState);
         const d = BUILDING_TEXTS[key];
-        const s = buildingState.get(key) || { questionShown: false, completed: false };
+        const s = buildingState.get(key) || { questionShown: false, completed: false, shopOpened: false };
         const textIdx = ui.getTextIndex();
-
+    
         if (textIdx < texts.length - 1) {
             ui.incrementTextIndex();
             ui.setText(texts[ui.getTextIndex()]);
@@ -37,8 +37,6 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
                 ui.setInstruction("Toto byl poslední text...");
                 if (d?.transaction && !s.completed) {
                     buildingState.set(key, { ...s, questionShown: true });
-                } else if (shopManager.hasItems(key) && !s.completed) {
-                    shopManager.showShop(key, ui.panel, ui.desc, ui.instr);
                 }
             }
         } else if (textIdx === texts.length - 1) {
@@ -46,6 +44,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
                 transactionManager.setActive(true, key);
                 transactionManager.showTransaction(key, buildingState);
             } else if (shopManager.hasItems(key) && !s.completed) {
+                buildingState.set(key, { ...s, shopOpened: true });
                 shopManager.showShop(key, ui.panel, ui.desc, ui.instr);
             } else {
                 hide();
@@ -70,24 +69,41 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         city = c;
         const key = c.building;
         const s = buildingState.get(key);
-        const textIdx = getStart(key, buildingState);
-        ui.setTextIndex(textIdx);
-        transactionManager.setActive(false, null);
+        
+        const hasShopItems = shopManager.hasItems(key);
+        const wasShopOpened = s?.shopOpened || false;
         
         container.removeChildren();
-
-        //ui
         ui.createBackground();
         
-        const path = getPath(key, textIdx, s?.completed, buildingState);
-        const posX = getPos(key, textIdx, s?.completed, app, buildingState);
-        ui.createSprite(path, posX);
-        
         const title = c.name;
-        const description = getTexts(key, buildingState)[textIdx];
-        const instruction = "Klikni kamkoli pro další text...";
-        ui.createPanel(title, description, instruction);
         
+        if (hasShopItems && wasShopOpened) {
+            const texts = getTexts(key, buildingState);
+            ui.setTextIndex(texts.length - 1);
+            
+            const path = getPath(key, texts.length - 1, s?.completed, buildingState);
+            const posX = getPos(key, texts.length - 1, s?.completed, app, buildingState);
+            ui.createSprite(path, posX);
+            
+            ui.createPanel(title, "", "Vyber si zboží...");
+            
+            shopManager.showShop(key, ui.panel, ui.desc, ui.instr);
+            
+        } else {
+            const textIdx = getStart(key, buildingState);
+            ui.setTextIndex(textIdx);
+            
+            const path = getPath(key, textIdx, s?.completed, buildingState);
+            const posX = getPos(key, textIdx, s?.completed, app, buildingState);
+            ui.createSprite(path, posX);
+            
+            const description = getTexts(key, buildingState)[textIdx];
+            const instruction = "Klikni kamkoli pro další text...";
+            ui.createPanel(title, description, instruction);
+        }
+        
+        transactionManager.setActive(false, null);
         container.visible = true;
         ui.fadeIn();
     };
