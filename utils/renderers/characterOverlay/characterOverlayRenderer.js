@@ -15,7 +15,6 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
     const buildingState = new Map();
     const firstOpenTracker = new Set();
     
-    // sub-moduly
     const ui = createOverlayUI(app, container, () => handleClick());
     const shopManager = createShopManager(app, getMoney, subMoney, railRenderer, stationRenderer);
     const transactionManager = createTransactionManager(app, ui.panel, ui.desc, ui.instr, ui.sprite, railRenderer, stationRenderer, getMoney, subMoney, hide);
@@ -53,7 +52,6 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             const elapsed = Date.now() - startTime;
             const progress = Math.min(elapsed / duration, 1);
             
-            //0x000000 -> 0xFFFFF
             const brightness = Math.floor(progress * 255);
             sprite.tint = (brightness << 16) | (brightness << 8) | brightness;
             
@@ -76,7 +74,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         let startY = targetY;
         
         if (targetX < screenWidth * 0.4) {
-            startX = -sprite.width; //mimo obrazovk
+            startX = -sprite.width;
         } else if (targetX > screenWidth * 0.6) {
             startX = screenWidth + sprite.width;
         } else {

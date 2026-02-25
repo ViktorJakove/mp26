@@ -7,12 +7,15 @@ export function createShopManager(app, getMoney, subMoney, railRenderer, station
         "marco": MARCO_ITEMS
     };
     
-    const purchasedItems = new Map(); //key: buildingType,val: purchased item name
+    const purchasedItems = new Map();
     let shopContainer = null;
     let currentBuildingType = null;
     let currentPanel = null;
     let currentDesc = null;
     let currentInstr = null;
+    
+    let currentPage = 0;
+    const ITEMS_PER_PAGE = 3;
 
     function showShop(buildingType, panel, desc, instr) {
         if (!buildingType) return;
@@ -32,107 +35,221 @@ export function createShopManager(app, getMoney, subMoney, railRenderer, station
         
         if (instr) instr.visible = false;
         
-        desc.text = "Co si přejete koupit?";
+        desc.text = "Vyber si zboží...";
         
         shopContainer = new PIXI.Container();
         
         const panelW = panel.width;
-        const itemHeight = 40;
-        const itemMargin = 4;
-        const startY = 110;
+        const panelH = panel.height;
+        
+        const squareSize = Math.min(160, panelW * 0.22);
+        const spacing = 20;
+        const totalWidth = 3 * squareSize + 2 * spacing;
+        const startX = (panelW - totalWidth) / 2;
+        const startY = 90;
         
         const currentPurchased = purchasedItems.get(buildingType);
         
-        items.forEach((item, index) => {
-            const y = startY + index * (itemHeight + itemMargin);
+        const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
+        const startIndex = currentPage * ITEMS_PER_PAGE;
+        const displayItems = items.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+        
+        displayItems.forEach((item, index) => {
+            const x = startX + index * (squareSize + spacing);
+            const y = startY;
             
             const isPurchased = currentPurchased === item.name;
             
-            const itemBg = createItemBackground(panelW, y, itemHeight, isPurchased);
-            itemBg.interactive = !isPurchased;
-            itemBg.cursor = isPurchased ? "default" : "pointer";
-            
-            const itemName = createItemName(item.name, y, isPurchased);
-            
-            const priceText = createPriceText(item, y, isPurchased, panelW);
-            
-            if (!isPurchased) {
-                const buyText = createBuyText(item.buyText, y);
-                itemBg.addChild(buyText);
-            }
-            
-            itemBg.addChild(itemName, priceText);
-            
-            if (!isPurchased) {
-                itemBg.on('pointerdown', (e) => handleItemPurchase(e, buildingType, item, panel, desc, instr));
-            }
-            
-            shopContainer.addChild(itemBg);
+            const squareContainer = createItemSquare(item, x, y, squareSize, isPurchased, buildingType, panel, desc, instr);
+            shopContainer.addChild(squareContainer);
         });
         
-        const closeBtn = createCloseButton(panel.width, panel.height, hide);
+        if (totalPages > 1) {
+            addNavigationButtons(panelW, startY + squareSize + 30, totalPages);
+        }
+        
+        if (totalPages > 1) {
+            const pageIndicator = createPageIndicator(panelW, startY + squareSize + 70, currentPage + 1, totalPages);
+            shopContainer.addChild(pageIndicator);
+        }
+        
+        const closeBtn = createCloseButton(panelW, panelH, hide);
         shopContainer.addChild(closeBtn);
+        
         panel.addChild(shopContainer);
     }
-
-    function createItemBackground(panelW, y, itemHeight, isPurchased) {
-        const bg = new PIXI.Graphics();
+    
+    function createItemSquare(item, x, y, size, isPurchased, buildingType, panel, desc, instr) {
+        const container = new PIXI.Container();
+        container.x = x;
+        container.y = y;
+        
+        const squareBg = new PIXI.Graphics();
         if (isPurchased) {
-            bg.beginFill(0x2c3e50, 0.8);
-            bg.lineStyle(1, 0x7f8c8d);
+            squareBg.beginFill(0x2c3e50, 0.8);
+            squareBg.lineStyle(4, 0x27ae60);
         } else {
-            bg.beginFill(0x34495e, 0.8);
-            bg.lineStyle(1, 0xf5c518);
+            squareBg.beginFill(0x34495e, 0.9);
+            squareBg.lineStyle(4, 0xf5c518);
         }
-        bg.drawRoundedRect(20, y, panelW - 40, itemHeight, 4);
-        bg.endFill();
-        return bg;
-    }
-
-    function createItemName(name, y, isPurchased) {
-        const text = new PIXI.Text(name, {
+        squareBg.drawRoundedRect(0, 0, size, size, 16);
+        squareBg.endFill();
+        container.addChild(squareBg);
+        
+        const iconBg = new PIXI.Graphics();
+        iconBg.beginFill(0x2c3e50, 0.6);
+        iconBg.drawRoundedRect(10, 10, size - 20, size - 70, 10);
+        iconBg.endFill();
+        container.addChild(iconBg);
+        
+        const itemIcon = new PIXI.Text("📦", {
             fontFamily: "Arial",
-            fontSize: 13,
-            fill: isPurchased ? 0x7f8c8d : 0xecf0f1,
+            fontSize: 36,
+            fill: 0xf5c518
+        });
+        itemIcon.anchor.set(0.5);
+        itemIcon.x = size / 2;
+        itemIcon.y = size / 2 - 15;
+        container.addChild(itemIcon);
+        
+        const nameText = new PIXI.Text(item.name, {
+            fontFamily: "Arial",
+            fontSize: 14,
+            fill: 0xecf0f1,
+            fontWeight: "bold",
+            align: "center",
+            wordWrap: true,
+            wordWrapWidth: size - 15
+        });
+        nameText.anchor.set(0.5, 0);
+        nameText.x = size / 2;
+        nameText.y = size - 55;
+        container.addChild(nameText);
+        
+        const priceBg = new PIXI.Graphics();
+        priceBg.beginFill(0xf5c518, 0.9);
+        priceBg.drawRoundedRect(size/2 - 35, size - 40, 70, 24, 6);
+        priceBg.endFill();
+        container.addChild(priceBg);
+        
+        const priceText = new PIXI.Text(`$${item.cost}`, {
+            fontFamily: "Arial",
+            fontSize: 14,
+            fill: 0x000000,
             fontWeight: "bold"
         });
-        text.x = 25;
-        text.y = y + 6;
-        return text;
-    }
-
-    function createPriceText(item, y, isPurchased, panelW) {
-        let text;
+        priceText.anchor.set(0.5);
+        priceText.x = size / 2;
+        priceText.y = size - 28;
+        container.addChild(priceText);
+        
         if (isPurchased) {
-            text = new PIXI.Text("AKTIVNÍ", {
+            const activeText = new PIXI.Text("AKTIVNÍ", {
                 fontFamily: "Arial",
-                fontSize: 13,
+                fontSize: 10,
                 fill: 0x27ae60,
                 fontWeight: "bold"
             });
+            activeText.anchor.set(0.5);
+            activeText.x = size / 2;
+            activeText.y = size - 12;
+            container.addChild(activeText);
         } else {
-            text = new PIXI.Text(`$${item.cost}`, {
+            const buyText = new PIXI.Text(item.buyText || "Koupit", {
                 fontFamily: "Arial",
-                fontSize: 13,
-                fill: 0xf5c518,
-                fontWeight: "bold"
+                fontSize: 10,
+                fill: 0x95a5a6
+            });
+            buyText.anchor.set(0.5);
+            buyText.x = size / 2;
+            buyText.y = size - 12;
+            container.addChild(buyText);
+        }
+        
+        if (!isPurchased) {
+            container.interactive = true;
+            container.cursor = "pointer";
+            
+            container.on('pointerdown', (e) => {
+                e.stopPropagation();
+                handleItemPurchase(e, buildingType, item, panel, desc, instr);
             });
         }
-        text.x = panelW - 100;
-        text.y = y + 6;
-        return text;
+        
+        return container;
     }
-
-    function createBuyText(buyText, y) {
-        const text = new PIXI.Text(buyText || "Koupit", {
+    
+    function addNavigationButtons(panelW, yPos, totalPages) {
+        const btnSize = 40;
+        const spacing = 70;
+        const centerX = panelW / 2;
+        
+        if (currentPage > 0) {
+            const leftBtn = createNavButton("◀", centerX - spacing, yPos, btnSize, () => {
+                currentPage--;
+                refreshShop();
+            });
+            shopContainer.addChild(leftBtn);
+        }
+        
+        if (currentPage < totalPages - 1) {
+            const rightBtn = createNavButton("▶", centerX + spacing, yPos, btnSize, () => {
+                currentPage++;
+                refreshShop();
+            });
+            shopContainer.addChild(rightBtn);
+        }
+    }
+    
+    function createNavButton(text, x, y, size, onClick) {
+        const btn = new PIXI.Container();
+        btn.x = x;
+        btn.y = y;
+        
+        const bg = new PIXI.Graphics();
+        bg.beginFill(0x34495e, 0.9);
+        bg.lineStyle(2, 0xf5c518);
+        bg.drawCircle(0, 0, size/2);
+        bg.endFill();
+        btn.addChild(bg);
+        
+        const label = new PIXI.Text(text, {
             fontFamily: "Arial",
-            fontSize: 10,
-            fill: 0x95a5a6,
-            fontStyle: "italic"
+            fontSize: 24,
+            fill: 0xf5c518,
+            fontWeight: "bold"
         });
-        text.x = 25;
-        text.y = y + 22;
-        return text;
+        label.anchor.set(0.5);
+        label.x = 0;
+        label.y = 0;
+        btn.addChild(label);
+        
+        btn.interactive = true;
+        btn.cursor = "pointer";
+        
+        btn.on('pointerdown', (e) => {
+            e.stopPropagation();
+            onClick();
+        });
+        
+        return btn;
+    }
+    
+    function createPageIndicator(panelW, yPos, currentPage, totalPages) {
+        const container = new PIXI.Container();
+        container.x = panelW / 2;
+        container.y = yPos;
+        
+        const text = new PIXI.Text(`${currentPage} / ${totalPages}`, {
+            fontFamily: "Arial",
+            fontSize: 14,
+            fill: 0xf5c518,
+            fontWeight: "bold"
+        });
+        text.anchor.set(0.5);
+        container.addChild(text);
+        
+        return container;
     }
 
     function createCloseButton(panelW, panelH, hideCallback) {
@@ -140,24 +257,24 @@ export function createShopManager(app, getMoney, subMoney, railRenderer, station
         
         const bg = new PIXI.Graphics();
         bg.beginFill(0xc0392b, 0.9);
-        bg.lineStyle(1, 0xe74c3c);
-        bg.drawRoundedRect(0, 0, 70, 25, 4);
+        bg.lineStyle(2, 0xe74c3c);
+        bg.drawRoundedRect(0, 0, 90, 32, 6);
         bg.endFill();
         btn.addChild(bg);
         
         const text = new PIXI.Text("Zavřít", {
             fontFamily: "Arial",
-            fontSize: 12,
+            fontSize: 14,
             fill: 0xffffff,
             fontWeight: "bold"
         });
         text.anchor.set(0.5);
-        text.x = 35;
-        text.y = 12.5;
+        text.x = 45;
+        text.y = 16;
         btn.addChild(text);
         
-        btn.x = panelW - 90;
-        btn.y = panelH - 35;
+        btn.x = panelW - 110;
+        btn.y = panelH - 45;
         btn.interactive = true;
         btn.cursor = "pointer";
         
@@ -167,6 +284,12 @@ export function createShopManager(app, getMoney, subMoney, railRenderer, station
         });
         
         return btn;
+    }
+    
+    function refreshShop() {
+        if (currentBuildingType && currentPanel && currentDesc && currentInstr) {
+            showShop(currentBuildingType, currentPanel, currentDesc, currentInstr);
+        }
     }
 
     function handleItemPurchase(e, buildingType, item, panel, desc, instr) {
@@ -194,7 +317,6 @@ export function createShopManager(app, getMoney, subMoney, railRenderer, station
         if (currentPanel && currentPanel.parent && currentPanel.parent.hideOverlay) {
             currentPanel.parent.hideOverlay();
         }
-        
     }
 
     function hasItems(buildingType) {
