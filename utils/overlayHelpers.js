@@ -1,4 +1,4 @@
-import { BUILDING_TEXTS, DEFAULT_BUILDING_TEXT } from "../../../text/buildingTexts.js";
+import { BUILDING_TEXTS, DEFAULT_BUILDING_TEXT } from "../text/buildingTexts.js";
 
 export function getPath(key, idx, after, buildingState) {
     const d = BUILDING_TEXTS[key];

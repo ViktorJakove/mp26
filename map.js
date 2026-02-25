@@ -45,7 +45,7 @@ const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer, trainR
 window.trainRenderer = trainRenderer;
 window.hudRenderer = hudRenderer;
 
-const characterOverlay = createCharacterOverlay(app, getGridScale, railRenderer, stationRenderer, getMoney, subMoney);
+const characterOverlay = createCharacterOverlay(app, getGridScale, railRenderer, stationRenderer, getMoney, subMoney, addMoney);
 
 const fgContainer = new PIXI.Container();
 fgContainer.zIndex = 10;

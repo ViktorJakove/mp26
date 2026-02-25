@@ -1,6 +1,7 @@
 import { BUILDING_TEXTS } from "../../../text/buildingTexts.js";
+import { createBankManager } from "../../bankManager.js";
 
-export function createTransactionManager(app, panel, desc, instr, sprite, railRenderer, stationRenderer, getMoney, subMoney, hideOverlay) {
+export function createTransactionManager(app, panel, desc, instr, sprite, railRenderer, stationRenderer, getMoney, subMoney, addMoney, hideOverlay) {
     let trans = { active: false, key: null };
     let btnContainer = null;
     
@@ -8,6 +9,16 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
     let currentDesc = desc;
     let currentInstr = instr;
     let currentSprite = sprite;
+
+    //init
+    const bankManager = createBankManager(app, getMoney, addMoney, subMoney);
+
+    // Pomocná funkce pro addMoney (není v parametrech)
+    /*function addMoney(amount) {
+        if (window.addMoney) {
+            window.addMoney(amount);
+        }
+    }*/
 
     function updateUIElements(newPanel, newDesc, newInstr, newSprite) {
         if (newPanel) currentPanel = newPanel;
@@ -20,6 +31,10 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
         try{
             const d = BUILDING_TEXTS[key];
             if (!d?.transaction) return false;
+            
+            if (d.transaction.type === "bank") {
+                return showBankTransaction(key, d, buildingState);
+            }
         
             if (d.transaction.questionSprite !== undefined) {
                 const path = `../../graphics/chars/${key}/${key}${d.transaction.questionSprite}.png`;
@@ -66,7 +81,6 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
                 if (getMoney() >= cost) {
                     subMoney(cost);
                     
-                    //random = ne success msg
                     if (d.transaction.randomAfterText && d.afterTransaction && d.afterTransaction.text) {
                         const afterTextIndex = Math.floor(Math.random() * d.afterTransaction.text.length);
                         buildingState.set(key, { completed: true, questionShown: true, afterTextIndex });
@@ -155,6 +169,50 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
             console.error("Error v showTransaction:", error);
             return false;
         }
+    }
+
+    function showBankTransaction(key, d, buildingState) {
+        if (currentInstr) currentInstr.visible = false;
+        
+        const path = `../../graphics/chars/${key}/${key}${d.transaction.questionSprite}.png`;
+        const tex = PIXI.Texture.from(path);
+        
+        const update = () => {
+            if (currentSprite) {
+                currentSprite.texture = tex;
+                const scale = Math.min(app.screen.width, app.screen.height) * 0.6 / Math.max(tex.width, tex.height);
+                currentSprite.scale.set(scale);
+            }
+        };
+        
+        if (tex.valid) {
+            update();
+        } else {
+            tex.once('update', update);
+        }
+        
+        if (d.transaction.questionSpritePos && currentSprite) {
+            const map = { L: 0.33, C: 0.5, P: 0.66, R: 0.66 };
+            currentSprite.x = app.screen.width * (map[d.transaction.questionSpritePos] || 0.5);
+        }
+        
+        if (bankManager.isLoanActive()) {
+            currentDesc.text = "Chceš splatit svůj dluh?";
+            bankManager.showLoanUI(currentPanel, currentDesc, currentInstr, currentSprite, (shouldClose) => {
+                if (shouldClose) {
+                    hideOverlay();
+                }
+            });
+        } else {
+            currentDesc.text = ``;
+            bankManager.showLoanUI(currentPanel, currentDesc, currentInstr, currentSprite, (shouldClose) => {
+                if (shouldClose) {
+                    hideOverlay();
+                }
+            });
+        }
+        
+        return true;
     }
 
     function updateSuccessSprite(key, d) {

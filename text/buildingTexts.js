@@ -23,8 +23,34 @@ export const BUILDING_TEXTS = {
             "Zde se ukládají peníze z vlaků",
             "Těžké dubové dveře a ocelový trezor"
         ],
+        afterTransaction: {
+            text: [
+                "Děkujeme za splacení dluhu!",
+                "Úspěšně jsi vrátil peníze i s úrokem.",
+                "Tvá důvěryhodnost u banky stoupla."
+            ],
+            sprite: [1, 1, 1],
+            spritePos: ["C", "C", "C"]
+        },
         sprite: [0, 1, "S"],
-        spritePos: ["P", "P", "C"]
+        spritePos: ["P", "P", "C"],
+        transaction: {
+            type: "bank",
+            cost: 0,
+            failText: "Transakce zrušena.",
+            questionSprite: 1,
+            questionSpritePos: "C",
+            successSprite: "S",
+            successSpritePos: "C",
+            failSprite: 0,
+            failSpritePos: "C",
+            question: "Co si přejete udělat?",
+            bankOptions: {
+                maxLoan: 5000,
+                interestRate: 2,
+                repaymentTime:5
+            }
+        }
     },
     "graveyard": {
         text: [

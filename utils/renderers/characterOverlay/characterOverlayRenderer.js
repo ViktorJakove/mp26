@@ -2,9 +2,9 @@ import { BUILDING_TEXTS } from "../../../text/buildingTexts.js";
 import { createOverlayUI } from "./overlayUI.js";
 import { createShopManager } from "./shopManager.js";
 import { createTransactionManager } from "./transactionManager.js";
-import { getPath, getPos, getTexts, getStart, updateSprite } from "./overlayHelpers.js";
+import { getPath, getPos, getTexts, getStart, updateSprite } from "../../overlayHelpers.js";
 
-export function createCharacterOverlay(app, getGridScale, railRenderer, stationRenderer, getMoney, subMoney) {
+export function createCharacterOverlay(app, getGridScale, railRenderer, stationRenderer, getMoney, subMoney, addMoney) {
     const container = new PIXI.Container();
     Object.assign(container, { zIndex: 100, visible: false, interactive: true });
     container.hitArea = new PIXI.Rectangle(0, 0, app.screen.width, app.screen.height);
@@ -17,7 +17,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
     
     const ui = createOverlayUI(app, container, () => handleClick());
     const shopManager = createShopManager(app, getMoney, subMoney, railRenderer, stationRenderer);
-    const transactionManager = createTransactionManager(app, ui.panel, ui.desc, ui.instr, ui.sprite, railRenderer, stationRenderer, getMoney, subMoney, hide);
+    const transactionManager = createTransactionManager(app, ui.panel, ui.desc, ui.instr, ui.sprite, railRenderer, stationRenderer, getMoney, subMoney, addMoney, hide);
 
     function animateSpriteEntry(sprite, startX, startY, targetX, targetY, duration = 800) {
         sprite.x = startX;
