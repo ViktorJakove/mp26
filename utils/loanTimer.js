@@ -1,12 +1,11 @@
 export function createLoanTimer(onTimeExpired) {
     let loanActive = false;
     let loanAmount = 0;
-    let timeRemaining = 0; // v sekundách
+    let timeRemaining = 0; //s
     let timerInterval = null;
-    const TOTAL_LOAN_TIME = 15 * 60; // 15 minut v sekundách
+    const TOTAL_LOAN_TIME = 5 * 60;
 
     function startTimer(amount) {
-        // Zastavíme předchozí timer
         stopTimer();
         
         loanActive = true;
@@ -16,9 +15,8 @@ export function createLoanTimer(onTimeExpired) {
         timerInterval = setInterval(() => {
             if (timeRemaining > 0) {
                 timeRemaining--;
-                // ŽÁDNÉ ukládání do localStorage
             } else {
-                // Čas vypršel
+                //čas vypršel
                 stopTimer();
                 if (onTimeExpired) {
                     onTimeExpired(loanAmount);

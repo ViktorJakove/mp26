@@ -211,7 +211,7 @@ const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZo
 app.ticker.add(() => {
     keyboardMapMovement();
     
-    if (hudRenderer && typeof hudRenderer.markDirty === 'function') {
+    /*if (hudRenderer && typeof hudRenderer.markDirty === 'function') {
         hudRenderer.markDirty();
-    }
+    }*/
 });

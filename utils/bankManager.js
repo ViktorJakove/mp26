@@ -207,7 +207,7 @@ export function createBankManager(app, getMoney, addMoney, subMoney, onLoanExpir
         }
         
         removeHTMLInput();
-        showSuccessMessage(panel, desc, instr, sprite, `Půjčeno $${amount}. Čas na splacení: 15 minut! Nezapomeň vrátit $${amount * bankOptions.interestRate}!`, onComplete);
+        showSuccessMessage(panel, desc, instr, sprite, `Půjčeno $${amount}. Čas na splacení: 5 minut! Nezapomeň vrátit $${amount * bankOptions.interestRate}!`, onComplete);
         return true;
     }
 
@@ -349,7 +349,7 @@ export function createBankManager(app, getMoney, addMoney, subMoney, onLoanExpir
             }
         } else {
             const infoText = new PIXI.Text(
-                `Maximální půjčka: $${bankOptions.maxLoan}\nVrátit budeš muset ${bankOptions.interestRate * 100}%!\nČas na splacení: 15 minut!`,
+                `Maximální půjčka: $${bankOptions.maxLoan}\nVrátit budeš muset ${bankOptions.interestRate * 100}%!\nČas na splacení: 5 minut!`,
                 {
                     fontFamily: "Arial",
                     fontSize: 16,

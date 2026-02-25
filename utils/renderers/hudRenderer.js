@@ -3,7 +3,7 @@ import { RAIL_TYPES, DESTROY_ENTRY } from "../../enums/railTypes.js";
 const TYPES_LIST = [...Object.values(RAIL_TYPES), DESTROY_ENTRY];
 
 export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode, getLoanTimerInfo) {
-    // getLoanTimerInfo vraci{ isActive: boolean, formattedTime: string }
+    // getLoanTimerInfo by měla vracet { isActive: boolean, formattedTime: string }
 
     const LOCKED_RAIL_TYPES = new Set(/*["CROSS"]*/);
     
@@ -21,18 +21,20 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
     const TOP_BAR_H = 48;
     const TOP_BAR_FONT = 18;
 
+    let lastTimerString = "";//check zmen
+
     function drawTopBar() {
         topBarContainer.removeChildren();
-    
+
         const gridScale = getGridScale();
         const w = app.screen.width;
-    
+
         const bg = new PIXI.Graphics();
         bg.beginFill(0x222222, 0.88);
         bg.drawRect(0, 0, w, TOP_BAR_H);
         bg.endFill();
         topBarContainer.addChild(bg);
-    
+
         const money = getMoney();
         const moneyLabel = new PIXI.Text(`💰 $${money}`, {
             fontFamily: "Arial",
@@ -48,16 +50,23 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
             try {
                 const timerInfo = getLoanTimerInfo();
                 if (timerInfo && timerInfo.isActive) {
+                    lastTimerString = timerInfo.formattedTime;
+                    
                     const timeParts = timerInfo.formattedTime.split(':');
                     const minutes = parseInt(timeParts[0]) || 0;
                     const seconds = parseInt(timeParts[1]) || 0;
                     const totalSeconds = minutes * 60 + seconds;
                     
-                    let timerColor = 0xf5c518; // Zlatá
-                    if (totalSeconds < 300) { // Méně než 5 minut
-                        timerColor = 0xe74c3c; // Červená
-                    } else if (totalSeconds < 600) { // Méně než 10 minut
-                        timerColor = 0xf39c12; // Oranžová
+                    let timerColor = 0xf5c518;
+                    
+                    if (totalSeconds < 60) {
+                        timerColor = 0xe74c3c;
+                    } else if (totalSeconds < 120) {
+                        timerColor = 0xe67e22;
+                    } else if (totalSeconds < 180) {
+                        timerColor = 0xf39c12;
+                    } else if (totalSeconds < 240) {
+                        timerColor = 0xf1c40f;
                     }
                     
                     const timerLabel = new PIXI.Text(`⏱️ ${timerInfo.formattedTime}`, {
@@ -71,17 +80,29 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
                     timerLabel.y = TOP_BAR_H / 2 - TOP_BAR_FONT / 2;
                     topBarContainer.addChild(timerLabel);
                     
-                    if (totalSeconds < 120) {
+                    if (totalSeconds < 30) {
+                        const warningIcon = new PIXI.Text("⚠️⚠️", {
+                            fontFamily: "Arial",
+                            fontSize: TOP_BAR_FONT + 6,
+                            fill: 0xe74c3c,
+                        });
+                        warningIcon.anchor.set(0.5, 0);
+                        warningIcon.x = w / 2 - 85;
+                        warningIcon.y = TOP_BAR_H / 2 - TOP_BAR_FONT / 2 - 2;
+                        topBarContainer.addChild(warningIcon);
+                    } else if (totalSeconds < 60) {
                         const warningIcon = new PIXI.Text("⚠️", {
                             fontFamily: "Arial",
                             fontSize: TOP_BAR_FONT + 4,
                             fill: 0xe74c3c,
                         });
+                        warningIcon.anchor.set(0.5, 0);
                         warningIcon.x = w / 2 - 70;
                         warningIcon.y = TOP_BAR_H / 2 - TOP_BAR_FONT / 2;
                         topBarContainer.addChild(warningIcon);
                     }
                 } else {
+                    lastTimerString = "";
                     const noLoanText = new PIXI.Text("💰 Žádná půjčka", {
                         fontFamily: "Arial",
                         fontSize: TOP_BAR_FONT - 2,
@@ -96,10 +117,8 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
             } catch (error) {
                 console.error("Chyba při zobrazování časovače:", error);
             }
-        } else {
-            console.log("getLoanTimerInfo není definováno");
         }
-    
+
         topBarContainer.scale.set(1 / gridScale);
         topBarContainer.x = 0;
         topBarContainer.y = 0;
@@ -121,6 +140,25 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
     let lastPlacementMode = null;
     let lastGridScale = null;
     let lastTimerInfo = null;
+
+    let lastSecond = Date.now();
+    
+    function updateTimer() {
+        const now = Date.now();
+        if (now - lastSecond >= 1000) {
+            lastSecond = now;
+            if (getLoanTimerInfo) {
+                const timerInfo = getLoanTimerInfo();
+                if (timerInfo && timerInfo.isActive && timerInfo.formattedTime !== lastTimerString) {
+                    hudDirty = true;
+                    draw();
+                }
+            }
+        }
+    }
+
+    // Přidáme ticker do app pro pravidelné volání updateTimer
+    app.ticker.add(updateTimer);
 
     function getSelectedType() {
         const availableTypes = TYPES_LIST.filter(type => {
