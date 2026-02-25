@@ -53,6 +53,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             const elapsed = Date.now() - startTime;
             const progress = Math.min(elapsed / duration, 1);
             
+            //0x000000 -> 0xFFFFF
             const brightness = Math.floor(progress * 255);
             sprite.tint = (brightness << 16) | (brightness << 8) | brightness;
             
@@ -64,6 +65,33 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         };
         
         animate();
+    }
+
+    function setupSpriteAnimation(sprite, targetX, targetY, isFirstOpen) {
+        if (!sprite) return;
+        
+        const screenWidth = app.screen.width;
+        const screenHeight = app.screen.height;
+        let startX = targetX;
+        let startY = targetY;
+        
+        if (targetX < screenWidth * 0.4) {
+            startX = -sprite.width; //mimo obrazovk
+        } else if (targetX > screenWidth * 0.6) {
+            startX = screenWidth + sprite.width;
+        } else {
+            startY = screenHeight + sprite.height;
+        }
+        
+        animateSpriteEntry(sprite, startX, startY, targetX, targetY, 800);
+        
+        if (isFirstOpen) {
+            sprite.tint = 0x000000;
+            
+            setTimeout(() => {
+                fadeFromBlack(sprite, 2000);
+            }, 1000);
+        }
     }
 
     function handleClick() {
@@ -119,6 +147,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         
         const hasShopItems = shopManager.hasItems(key);
         const wasShopOpened = s?.shopOpened || false;
+        const isFirstOpen = !firstOpenTracker.has(key);
         
         container.removeChildren();
         ui.createBackground();
@@ -130,8 +159,12 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             ui.setTextIndex(texts.length - 1);
             
             const path = getPath(key, texts.length - 1, s?.completed, buildingState);
-            const posX = getPos(key, texts.length - 1, s?.completed, app, buildingState);
-            ui.createSprite(path, posX);
+            const targetX = getPos(key, texts.length - 1, s?.completed, app, buildingState);
+            const targetY = app.screen.height / 5 * 2;
+            ui.createSprite(path, targetX, targetY);
+            
+            setupSpriteAnimation(ui.sprite, targetX, targetY, isFirstOpen);
+            if (isFirstOpen) firstOpenTracker.add(key);
             
             ui.createPanel(title, "", "Vyber si zboží...");
             
@@ -146,31 +179,8 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             const targetY = app.screen.height / 5 * 2;
             ui.createSprite(path, targetX, targetY);
             
-            if (ui.sprite) {
-                const screenWidth = app.screen.width;
-                let startX = targetX;
-                let startY = targetY;
-                
-                if (targetX < screenWidth * 0.4) {
-                    startX = -ui.sprite.width; //mimo obrazovk
-                } else if (targetX > screenWidth * 0.6) {
-                    startX = screenWidth + ui.sprite.width;
-                } else {
-                    startY = app.screen.height + ui.sprite.height;
-                }
-                
-                animateSpriteEntry(ui.sprite, startX, startY, targetX, targetY, 800);
-                
-                if (!firstOpenTracker.has(key) && textIdx === 0) {
-                    firstOpenTracker.add(key);
-                    
-                    ui.sprite.tint = 0x000000;
-                    
-                    setTimeout(() => {
-                        fadeFromBlack(ui.sprite, 2000);
-                    }, 1000);
-                }
-            }
+            setupSpriteAnimation(ui.sprite, targetX, targetY, isFirstOpen);
+            if (isFirstOpen) firstOpenTracker.add(key);
             
             const description = getTexts(key, buildingState)[textIdx];
             const instruction = "Klikni kamkoli pro další text...";
