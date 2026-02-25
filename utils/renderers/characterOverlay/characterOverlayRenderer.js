@@ -101,6 +101,32 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         const s = buildingState.get(key) || { questionShown: false, completed: false, shopOpened: false };
         const textIdx = ui.getTextIndex();
     
+        if (s?.completed) {
+            buildingState.set(key, { ...s, completed: false });
+            
+            ui.setTextIndex(texts.length - 1);
+            
+            if (!ui.sprite || !ui.desc || !ui.panel) {
+                const targetX = getPos(key, texts.length - 1, false, app, buildingState);
+                const targetY = app.screen.height / 5 * 2;
+                const path = getPath(key, texts.length - 1, false, buildingState);
+                
+                ui.createSprite(path, targetX, targetY);
+                
+                if (!ui.panel) {
+                    const title = city.name;
+                    const description = texts[texts.length - 1];
+                    const instruction = "Klikni kamkoli pro další text...";
+                    ui.createPanel(title, description, instruction);
+                }
+            }
+            
+            transactionManager.updateUIElements(ui.panel, ui.desc, ui.instr, ui.sprite);
+            transactionManager.setActive(true, key);
+            transactionManager.showTransaction(key, buildingState);
+            return;
+        }
+    
         if (textIdx < texts.length - 1) {
             ui.incrementTextIndex();
             ui.setText(texts[ui.getTextIndex()]);
@@ -114,6 +140,22 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             }
         } else if (textIdx === texts.length - 1) {
             if (d?.transaction && !s.completed) {
+                if (!ui.sprite || !ui.desc || !ui.panel) {
+                    const targetX = getPos(key, textIdx, s?.completed, app, buildingState);
+                    const targetY = app.screen.height / 5 * 2;
+                    const path = getPath(key, textIdx, s?.completed, buildingState);
+                    
+                    ui.createSprite(path, targetX, targetY);
+                    
+                    if (!ui.panel) {
+                        const title = city.name;
+                        const description = texts[textIdx];
+                        const instruction = "Klikni kamkoli pro další text...";
+                        ui.createPanel(title, description, instruction);
+                    }
+                }
+                
+                transactionManager.updateUIElements(ui.panel, ui.desc, ui.instr, ui.sprite);
                 transactionManager.setActive(true, key);
                 transactionManager.showTransaction(key, buildingState);
             } else if (shopManager.hasItems(key) && !s.completed) {

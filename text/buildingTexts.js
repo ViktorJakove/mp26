@@ -32,8 +32,30 @@ export const BUILDING_TEXTS = {
             "Nápisy na náhrobcích vyprávějí příběhy",
             "Stromy šumí nad starými hroby"
         ],
+        afterTransaction: {
+            text: [
+                "Hřbitov bude nyní udržovaný díky tvému daru",
+                "Náhrobky jsou očištěné a cesty upravené",
+                "Místní rodiny ti jsou vděčné za tvou štědrost",
+                "Starý hřbitov získal nový nádech",
+                "Díky tvému daru byl opraven plot kolem hřbitova",
+                "Na hrobech se objevily čerstvé květiny"
+            ],
+            sprite: [1, 1, 1, 1, 1, 0],
+            spritePos: ["C", "C", "C", "C", "C", "C"]
+        },
         sprite: [0, 1, 0],
-        spritePos: ["P", "C", "P"]
+        spritePos: ["P", "C", "P"],
+        transaction: {
+            cost: 67,
+            failText: "Nemáš dost peněz na příspěvek.",
+            questionSprite: 1,
+            questionSpritePos: "C",
+            failSprite: 0,
+            failSpritePos: "C",
+            question: "Vyslechneš si moudro??",
+            randomAfterText: true
+        }
     },
     "olda": {
         text: [

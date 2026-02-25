@@ -25,7 +25,15 @@ export function getPos(key, idx, after, app, buildingState) {
 export function getTexts(key, buildingState) {
     const d = BUILDING_TEXTS[key];
     const s = buildingState.get(key);
-    return s?.completed && d?.afterTransaction?.text ? d.afterTransaction.text : d?.text || DEFAULT_BUILDING_TEXT.text;
+    
+    if (s?.completed && d?.afterTransaction?.text) {
+        if (d.transaction?.randomAfterText && s.afterTextIndex !== undefined) {
+            return [d.afterTransaction.text[s.afterTextIndex]];
+        }
+        return d.afterTransaction.text;
+    }
+    
+    return d?.text || DEFAULT_BUILDING_TEXT.text;
 }
 
 export function getStart(key, buildingState) {
