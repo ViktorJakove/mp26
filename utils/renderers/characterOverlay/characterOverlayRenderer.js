@@ -5,6 +5,7 @@ import { createTransactionManager } from "./transactionManager.js";
 import { getPath, getPos, getTexts, getStart, updateSprite } from "../../overlayHelpers.js";
 
 export function createCharacterOverlay(app, getGridScale, railRenderer, stationRenderer, getMoney, subMoney, addMoney) {
+    let isAnimating = false;
     const container = new PIXI.Container();
     Object.assign(container, { zIndex: 100, visible: false, interactive: true });
     container.hitArea = new PIXI.Rectangle(0, 0, app.screen.width, app.screen.height);
@@ -39,6 +40,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             } else {
                 sprite.x = targetX;
                 sprite.y = targetY;
+                isAnimating = false;
             }
         };
         
@@ -59,6 +61,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
                 requestAnimationFrame(animate);
             } else {
                 sprite.tint = 0xFFFFFF;
+                isAnimating = false;
             }
         };
         
@@ -82,6 +85,8 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
                 startY = screenHeight + sprite.height;
             }
             
+            isAnimating = true;
+            
             animateSpriteEntry(sprite, startX, startY, targetX, targetY, 800);
             
             if (isFirstOpen) {
@@ -93,11 +98,12 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             }
         }catch(error){
             console.error("Error v setupSpriteAnimation:", error);
+            isAnimating = false;
         }
     }
 
     function handleClick() {
-        if (!city || !ui.desc || transactionManager.isActive() || shopManager.shopContainer) return;
+        if (!city || !ui.desc || transactionManager.isActive() || shopManager.shopContainer ||isAnimating) return;
         
         const key = city.building;
         const texts = getTexts(key, buildingState);

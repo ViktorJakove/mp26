@@ -63,14 +63,16 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
         document.body.appendChild(htmlInput);
         
         setTimeout(() => {
-            htmlInput.focus();
-            htmlInput.select();
+            if (htmlInput) {
+                htmlInput.focus();
+                htmlInput.select();
+            }
         }, 50);
         
         return htmlInput;
     }
 
-    function showSuccessMessage(panel, desc, instr, message, onComplete) {
+    function showSuccessMessage(panel, desc, instr, sprite, message, onComplete) {
         destroyUI();
         
         const successContainer = new PIXI.Container();
@@ -78,6 +80,7 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
         const panelW = panel.width;
         const panelH = panel.height;
         
+        //průhledny pozadí přes celý panel pro zachycenii kliknutí
         const clickCatcher = new PIXI.Graphics();
         clickCatcher.beginFill(0x000000, 0.001);
         clickCatcher.drawRect(0, 0, panelW, panelH);
@@ -136,6 +139,64 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
         
         panel.addChild(successContainer);
         uiContainer = successContainer;
+        
+        const overlayContainer = panel.parent;
+        if (overlayContainer) {
+            const background = overlayContainer.children[0];
+            if (background) {
+                background.interactive = true;
+                background.once('pointerdown', (e) => {
+                    e.stopPropagation();
+                    destroyUI();
+                    onComplete(true);
+                });
+            }
+        }
+    }
+
+    function handleLoan(amount, panel, desc, instr, sprite, options, onComplete) {
+        if (!amount || amount <= 0 || amount > bankOptions.maxLoan) {
+            desc.text = `Neplatná částka (1-${bankOptions.maxLoan})`;
+            return false;
+        }
+        
+        loanAmount = amount;
+        loanActive = true;
+        addMoney(amount);
+        
+        if (sprite && options?.successSprite !== undefined) {
+            const successPath = `../../graphics/chars/bank/bank${options.successSprite}.png`;
+            const tex = PIXI.Texture.from(successPath);
+            sprite.texture = tex;
+            
+            if (options.successSpritePos) {
+                const map = { L: 0.33, C: 0.5, P: 0.66, R: 0.66 };
+                sprite.x = app.screen.width * (map[options.successSpritePos] || 0.5);
+            }
+        }
+        
+        removeHTMLInput();
+        showSuccessMessage(panel, desc, instr, sprite, `Půjčeno $${amount}. Nezapomeň vrátit $${amount * bankOptions.interestRate}!`, onComplete);
+        return true;
+    }
+
+    function handleRepayment(panel, desc, instr, sprite, onComplete) {
+        const repaymentAmount = loanAmount * bankOptions.interestRate;
+        
+        subMoney(repaymentAmount);
+        loanAmount = 0;
+        loanActive = false;
+        
+        if (sprite) {
+            const normalPath = "../../graphics/chars/bank/bank1.png";
+            const tex = PIXI.Texture.from(normalPath);
+            sprite.texture = tex;
+        }
+        
+        removeHTMLInput();
+        destroyUI();
+        
+        showSuccessMessage(panel, desc, instr, sprite, "Dluh úspěšně splacen! Děkujeme.", onComplete);
     }
 
     function showLoanUI(panel, desc, instr, sprite, onComplete, options) {
@@ -222,29 +283,7 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
             const confirmBtn = createButton("Půjčit", 0x27ae60, 0x2ecc71, panelW/2 - 75, 260, 150, 45, () => {
                 if (htmlInput) {
                     const amount = parseInt(htmlInput.value);
-                    if (amount && amount > 0 && amount <= bankOptions.maxLoan) {
-                        loanAmount = amount;
-                        loanActive = true;
-                        addMoney(amount);
-                        
-                        if (sprite && options?.successSprite !== undefined) {
-                            const successPath = `../../graphics/chars/bank/bank${options.successSprite}.png`;
-                            const tex = PIXI.Texture.from(successPath);
-                            sprite.texture = tex;
-                            
-                            if (options.successSpritePos) {
-                                const map = { L: 0.33, C: 0.5, P: 0.66, R: 0.66 };
-                                sprite.x = app.screen.width * (map[options.successSpritePos] || 0.5);
-                            }
-                        }
-                        
-                        removeHTMLInput();
-                        
-                        showSuccessMessage(panel, desc, instr, `Půjčeno $${amount}. Nezapomeň vrátit $${amount * bankOptions.interestRate}!`, onComplete);
-                        
-                    } else {
-                        desc.text = `Neplatná částka (1-${bankOptions.maxLoan})`;
-                    }
+                    handleLoan(amount, panel, desc, instr, sprite, options, onComplete);
                 }
             });
             uiContainer.addChild(confirmBtn);
@@ -258,27 +297,9 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
             
             panel.addChild(uiContainer);
             
-            setTimeout(() => {
-                if (panel && uiContainer) {
-                    createHTMLInput(panel, inputX, inputY, inputWidth, (value) => {
-                        if (value && value > 0 && value <= bankOptions.maxLoan) {
-                            loanAmount = value;
-                            loanActive = true;
-                            addMoney(value);
-                            
-                            if (sprite && options?.successSprite !== undefined) {
-                                const successPath = `../../graphics/chars/bank/bank${options.successSprite}.png`;
-                                const tex = PIXI.Texture.from(successPath);
-                                sprite.texture = tex;
-                            }
-                            
-                            removeHTMLInput();
-                            
-                            showSuccessMessage(panel, desc, instr, `Půjčeno $${value}. Nezapomeň vrátit ${bankOptions.interestRate}× ($${value * bankOptions.interestRate})!`, onComplete);
-                        }
-                    }, bankOptions.maxLoan);
-                }
-            }, 100);
+            createHTMLInput(panel, inputX, inputY, inputWidth, (value) => {
+                handleLoan(value, panel, desc, instr, sprite, options, onComplete);
+            }, bankOptions.maxLoan);
             
         } else {
             const repaymentAmount = loanAmount * bankOptions.interestRate;
@@ -302,20 +323,7 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
             
             if (hasEnoughMoney) {
                 const repayBtn = createButton("Splatit dluh", 0x27ae60, 0x2ecc71, panelW/2 - 100, 210, 200, 50, () => {
-                    subMoney(repaymentAmount);
-                    loanAmount = 0;
-                    loanActive = false;
-                    
-                    if (sprite) {
-                        const normalPath = "../../graphics/chars/bank/bank1.png";
-                        const tex = PIXI.Texture.from(normalPath);
-                        sprite.texture = tex;
-                    }
-                    
-                    removeHTMLInput();
-                    destroyUI();
-                    
-                    showSuccessMessage(panel, desc, instr, "Dluh úspěšně splacen! Děkujeme.", onComplete);
+                    handleRepayment(panel, desc, instr, sprite, onComplete);
                 });
                 uiContainer.addChild(repayBtn);
                 
