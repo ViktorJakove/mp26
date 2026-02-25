@@ -9,6 +9,7 @@ import { setupMouseControls } from "./mouseControls.js";
 import { createStationManager } from "./stationManager.js";
 import { createRouteChecker } from "./utils/routeChecker.js";
 import { createCharacterOverlay } from "./utils/renderers/characterOverlay/characterOverlayRenderer.js";
+import { createBankManager } from "./utils/bankManager.js";
 
 const app = createApp();
 app.stage.sortableChildren = true;
@@ -39,7 +40,49 @@ const getMoney = () => money;
 const subMoney = (amount) => money -= amount;
 const addMoney = (amount) => money += amount;
 
-const renderers = creatRenderers(app, camera, getGridScale, cellSize, getAreas, getLevel, addMoney, subMoney, getMoney, getPlacementMode, getRelations, setRelations);
+function onLoanExpired(amount) {
+    console.log(`Půjčka ${amount} vypršela!`);
+    if (money >= amount * 2) {
+        subMoney(amount * 2);
+        alert(`Čas na splacení půjčky $${amount} vypršel! Byla ti udělena pokuta $${amount * 2}.`);
+    } else {
+        money = 0;
+        alert(`Čas na splacení půjčky $${amount} vypršel! Přišel jsi o všechny peníze a tvá reputace klesla.`);
+        setRelations(relations - 2);
+    }
+    
+    if (hudRenderer) hudRenderer.markDirty();
+}
+
+const bankManager = createBankManager(app, getMoney, addMoney, subMoney, onLoanExpired);
+window.bankManager = bankManager;
+bankManager.reset();
+
+function getLoanTimerInfo() {
+    if (bankManager) {
+        return {
+            isActive: bankManager.isLoanActive ? bankManager.isLoanActive() : false,
+            formattedTime: bankManager.getFormattedTime ? bankManager.getFormattedTime() : "0:00"
+        };
+    }
+    return { isActive: false, formattedTime: "0:00" };
+}
+const renderers = creatRenderers(
+    app, 
+    camera, 
+    getGridScale, 
+    cellSize, 
+    getAreas, 
+    getLevel, 
+    addMoney, 
+    subMoney, 
+    getMoney, 
+    getPlacementMode, 
+    getRelations, 
+    setRelations,
+    getLoanTimerInfo
+);
+
 const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer, trainRenderer, hudRenderer } = renderers;
 
 window.trainRenderer = trainRenderer;
@@ -164,6 +207,11 @@ window.addEventListener("resize", () => {
 });
 
 const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, addStations, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } }, areaRenderer, pointerTextRenderer, resetDrag, stationRenderer, hudRenderer, characterOverlay);
+
 app.ticker.add(() => {
     keyboardMapMovement();
+    
+    if (hudRenderer && typeof hudRenderer.markDirty === 'function') {
+        hudRenderer.markDirty();
+    }
 });

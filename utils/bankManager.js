@@ -1,11 +1,26 @@
 import { BUILDING_TEXTS } from "../text/buildingTexts.js";
+import { createLoanTimer } from "./loanTimer.js";
 
-export function createBankManager(app, getMoney, addMoney, subMoney) {
+export function createBankManager(app, getMoney, addMoney, subMoney, onLoanExpired) {
     let loanAmount = 0;
     let loanActive = false;
     let htmlInput = null;
     let uiContainer = null;
-    let bankOptions = {maxLoan: BUILDING_TEXTS["bank"].transaction.bankOptions.maxLoan, interestRate: BUILDING_TEXTS["bank"].transaction.bankOptions.interestRate, repaymentTime: BUILDING_TEXTS["bank"].transaction.bankOptions.repaymentTime};
+    let bankOptions = {
+        maxLoan: BUILDING_TEXTS["bank"].transaction.bankOptions.maxLoan,
+        interestRate: BUILDING_TEXTS["bank"].transaction.bankOptions.interestRate,
+        repaymentTime: BUILDING_TEXTS["bank"].transaction.bankOptions.repaymentTime
+    };
+    
+    // Vytvoříme časovač půjčky - BEZ načítání z localStorage
+    const loanTimer = createLoanTimer((expiredAmount) => {
+        // Toto se zavolá, když vyprší čas
+        if (onLoanExpired) {
+            onLoanExpired(expiredAmount);
+        }
+        loanActive = false;
+        loanAmount = 0;
+    });
 
     function removeHTMLInput() {
         if (htmlInput && htmlInput.parentNode) {
@@ -80,7 +95,6 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
         const panelW = panel.width;
         const panelH = panel.height;
         
-        //průhledny pozadí přes panel pro kliks
         const clickCatcher = new PIXI.Graphics();
         clickCatcher.beginFill(0x000000, 0.001);
         clickCatcher.drawRect(0, 0, panelW, panelH);
@@ -94,7 +108,6 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
         });
         successContainer.addChild(clickCatcher);
         
-        // Success text
         const successText = new PIXI.Text(
             message,
             {
@@ -118,7 +131,6 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
         });
         successContainer.addChild(successText);
         
-        // Instruction text
         const instructionText = new PIXI.Text(
             "Klikni kamkoli pro zavření...",
             {
@@ -142,7 +154,6 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
         panel.addChild(successContainer);
         uiContainer = successContainer;
         
-        // Zachytáváme kliknutí na sprite (postavičku)
         if (sprite) {
             sprite.interactive = true;
             sprite.once('pointerdown', (e) => {
@@ -152,10 +163,8 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
             });
         }
         
-        // Zachytáváme kliknutí na celém overlay (background)
         const overlayContainer = panel.parent;
         if (overlayContainer) {
-            // Najdeme background (první dítě by měl být bg z overlayUI)
             const background = overlayContainer.children[0];
             if (background) {
                 background.interactive = true;
@@ -174,9 +183,17 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
             return false;
         }
         
+        // Resetujeme starou půjčku, pokud existuje
+        if (loanActive) {
+            loanTimer.stopTimer();
+        }
+        
         loanAmount = amount;
         loanActive = true;
         addMoney(amount);
+        
+        // Spustíme NOVÝ časovač
+        loanTimer.startTimer(amount);
         
         if (sprite && options?.successSprite !== undefined) {
             const successPath = `../../graphics/chars/bank/bank${options.successSprite}.png`;
@@ -190,33 +207,45 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
         }
         
         removeHTMLInput();
-        showSuccessMessage(panel, desc, instr, sprite, `Půjčeno $${amount}. Nezapomeň vrátit $${amount * bankOptions.interestRate}!`, onComplete);
+        showSuccessMessage(panel, desc, instr, sprite, `Půjčeno $${amount}. Čas na splacení: 15 minut! Nezapomeň vrátit $${amount * bankOptions.interestRate}!`, onComplete);
         return true;
     }
 
     function handleRepayment(panel, desc, instr, sprite, onComplete) {
         const repaymentAmount = loanAmount * bankOptions.interestRate;
         
-        subMoney(repaymentAmount);
-        loanAmount = 0;
-        loanActive = false;
-        
-        if (sprite) {
-            const normalPath = "../../graphics/chars/bank/bank1.png";
-            const tex = PIXI.Texture.from(normalPath);
-            sprite.texture = tex;
+        if (getMoney() >= repaymentAmount) {
+            subMoney(repaymentAmount);
+            
+            // Zastavíme časovač
+            loanTimer.stopTimer();
+            
+            loanAmount = 0;
+            loanActive = false;
+            
+            if (sprite) {
+                const normalPath = "../../graphics/chars/bank/bank1.png";
+                const tex = PIXI.Texture.from(normalPath);
+                sprite.texture = tex;
+            }
+            
+            removeHTMLInput();
+            destroyUI();
+            
+            showSuccessMessage(panel, desc, instr, sprite, "Dluh úspěšně splacen! Děkujeme.", onComplete);
+            return true;
+        } else {
+            desc.text = "Nemáš dost peněz na splacení dluhu!";
+            return false;
         }
-        
-        removeHTMLInput();
-        destroyUI();
-        
-        showSuccessMessage(panel, desc, instr, sprite, "Dluh úspěšně splacen! Děkujeme.", onComplete);
     }
 
     function showLoanUI(panel, desc, instr, sprite, onComplete, options) {
         if (options) {
             bankOptions = { ...bankOptions, ...options };
         }
+        
+        // ŽÁDNÉ načítání z localStorage!
         
         if (instr) instr.visible = false;
         
@@ -245,8 +274,9 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
         titleText.y = 30;
         uiContainer.addChild(titleText);
         
+        if(!loanActive){
         const statusText = new PIXI.Text(
-            loanActive ? "Aktuální dluh: $" + loanAmount : "Nemáš žádný dluh",
+            "Nemáš žádný dluh",
             {
                 fontFamily: "Arial",
                 fontSize: 18,
@@ -261,10 +291,65 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
         statusText.x = panelW / 2;
         statusText.y = 70;
         uiContainer.addChild(statusText);
+        }
         
-        if (!loanActive) {
+        if (loanActive) {
+            const timeText = new PIXI.Text(
+                `Zbývá: ${loanTimer.getFormattedTime()}`,
+                {
+                    fontFamily: "Arial",
+                    fontSize: 16,
+                    fill: loanTimer.getTimeRemaining() < 300 ? 0xe74c3c : 0xf5c518,
+                    fontWeight: "bold",
+                    align: "center"
+                }
+            );
+            timeText.anchor.set(0.5);
+            timeText.x = panelW / 2;
+            timeText.y = 100;
+            uiContainer.addChild(timeText);
+            
+            const repaymentAmount = loanAmount * bankOptions.interestRate;
+            const hasEnoughMoney = getMoney() >= repaymentAmount;
+            
+            const repaymentText = new PIXI.Text(
+                `Pro splacení dluhu potřebuješ $${repaymentAmount}`,
+                {
+                    fontFamily: "Arial",
+                    fontSize: 18,
+                    fill: hasEnoughMoney ? 0x2ecc71 : 0xe74c3c,
+                    align: "center",
+                    wordWrap: true,
+                    wordWrapWidth: panelW - 60
+                }
+            );
+            repaymentText.anchor.set(0.5);
+            repaymentText.x = panelW / 2;
+            repaymentText.y = 150;
+            uiContainer.addChild(repaymentText);
+            
+            if (hasEnoughMoney) {
+                const repayBtn = createButton("Splatit dluh", 0x27ae60, 0x2ecc71, panelW/2 - 100, 210, 200, 50, () => {
+                    handleRepayment(panel, desc, instr, sprite, onComplete);
+                });
+                uiContainer.addChild(repayBtn);
+                
+                const backBtn = createButton("Zpět", 0x7f8c8d, 0x95a5a6, panelW/2 - 100, 280, 200, 40, () => {
+                    destroyUI();
+                    onComplete(true);
+                });
+                uiContainer.addChild(backBtn);
+                
+            } else {
+                const backBtn = createButton("Zpět", 0x7f8c8d, 0x95a5a6, panelW/2 - 100, 300, 200, 40, () => {
+                    destroyUI();
+                    onComplete(true);
+                });
+                uiContainer.addChild(backBtn);
+            }
+        } else {
             const infoText = new PIXI.Text(
-                `Maximální půjčka: $${bankOptions.maxLoan}\nVrátit budeš muset ${bankOptions.interestRate * 100}%! Bacha!`,
+                `Maximální půjčka: $${bankOptions.maxLoan}\nVrátit budeš muset ${bankOptions.interestRate * 100}%!\nČas na splacení: 15 minut!`,
                 {
                     fontFamily: "Arial",
                     fontSize: 16,
@@ -311,50 +396,9 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
             
             panel.addChild(uiContainer);
             
-            // Vytvoříme input
             createHTMLInput(panel, inputX, inputY, inputWidth, (value) => {
                 handleLoan(value, panel, desc, instr, sprite, options, onComplete);
             }, bankOptions.maxLoan);
-            
-        } else {
-            const repaymentAmount = loanAmount * bankOptions.interestRate;
-            const hasEnoughMoney = getMoney() >= repaymentAmount;
-            
-            const repaymentText = new PIXI.Text(
-                `Pro splacení dluhu potřebuješ $${repaymentAmount}`,
-                {
-                    fontFamily: "Arial",
-                    fontSize: 18,
-                    fill: hasEnoughMoney ? 0x2ecc71 : 0xe74c3c,
-                    align: "center",
-                    wordWrap: true,
-                    wordWrapWidth: panelW - 60
-                }
-            );
-            repaymentText.anchor.set(0.5);
-            repaymentText.x = panelW / 2;
-            repaymentText.y = 150;
-            uiContainer.addChild(repaymentText);
-            
-            if (hasEnoughMoney) {
-                const repayBtn = createButton("Splatit dluh", 0x27ae60, 0x2ecc71, panelW/2 - 100, 210, 200, 50, () => {
-                    handleRepayment(panel, desc, instr, sprite, onComplete);
-                });
-                uiContainer.addChild(repayBtn);
-                
-                const backBtn = createButton("Zpět", 0x7f8c8d, 0x95a5a6, panelW/2 - 100, 280, 200, 40, () => {
-                    destroyUI();
-                    onComplete(true);
-                });
-                uiContainer.addChild(backBtn);
-                
-            } else {
-                const backBtn = createButton("Zpět", 0x7f8c8d, 0x95a5a6, panelW/2 - 100, 300, 200, 40, () => {
-                    destroyUI();
-                    onComplete(true);
-                });
-                uiContainer.addChild(backBtn);
-            }
         }
         
         panel.addChild(uiContainer);
@@ -403,11 +447,32 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
     }
     
     function reset() {
+        loanTimer.reset();
         loanAmount = 0;
         loanActive = false;
-        bankOptions = { maxLoan: 1000, interestRate: 2, minRepayment: 100 };
         destroyUI();
     }
+    
+    function isLoanActive() {
+        return loanActive;
+    }
+    
+    function getFormattedTime() {
+        return loanTimer.getFormattedTime();
+    }
+    
+    // Pravidelně aktualizujeme zobrazení času
+    app.ticker.add(() => {
+        if (loanActive && uiContainer && uiContainer.parent) {
+            const timeText = uiContainer.children.find(child => 
+                child instanceof PIXI.Text && child.text && child.text.includes("Zbývá:")
+            );
+            if (timeText) {
+                timeText.text = `Zbývá: ${loanTimer.getFormattedTime()}`;
+                timeText.style.fill = loanTimer.getTimeRemaining() < 300 ? 0xe74c3c : 0xf5c518;
+            }
+        }
+    });
     
     window.addEventListener('resize', () => {
         if (htmlInput && uiContainer && uiContainer.parent) {
@@ -418,7 +483,9 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
     return {
         showLoanUI,
         reset,
-        isLoanActive: () => loanActive,
-        getLoanAmount: () => loanAmount
+        isLoanActive,
+        getLoanAmount: () => loanAmount,
+        getTimeRemaining: () => loanTimer.getTimeRemaining(),
+        getFormattedTime
     };
 }

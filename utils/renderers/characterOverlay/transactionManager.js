@@ -1,5 +1,4 @@
 import { BUILDING_TEXTS } from "../../../text/buildingTexts.js";
-import { createBankManager } from "../../bankManager.js";
 
 export function createTransactionManager(app, panel, desc, instr, sprite, railRenderer, stationRenderer, getMoney, subMoney, addMoney, hideOverlay) {
     let trans = { active: false, key: null };
@@ -10,14 +9,7 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
     let currentInstr = instr;
     let currentSprite = sprite;
 
-    //init
-    const bankManager = createBankManager(app, getMoney, addMoney, subMoney);
-
-    /*function addMoney(amount) {
-        if (window.addMoney) {
-            window.addMoney(amount);
-        }
-    }*/
+    const bankManager = window.bankManager;
 
     function updateUIElements(newPanel, newDesc, newInstr, newSprite) {
         if (newPanel) currentPanel = newPanel;
@@ -195,7 +187,7 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
             currentSprite.x = app.screen.width * (map[d.transaction.questionSpritePos] || 0.5);
         }
         
-        if (bankManager.isLoanActive()) {
+        if (bankManager && bankManager.isLoanActive()) {
             currentDesc.text = "Chceš splatit svůj dluh?";
             bankManager.showLoanUI(currentPanel, currentDesc, currentInstr, currentSprite, (shouldClose) => {
                 if (shouldClose) {
