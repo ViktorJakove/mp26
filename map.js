@@ -8,7 +8,7 @@ import { createDrawGraphics } from "./drawGraphics.js";
 import { setupMouseControls } from "./mouseControls.js";
 import { createStationManager } from "./stationManager.js";
 import { createRouteChecker } from "./utils/routeChecker.js";
-import { createCharacterOverlay } from "./utils/renderers/characterOverlayRenderer.js";
+import { createCharacterOverlay } from "./utils/renderers/characterOverlay/characterOverlayRenderer.js";
 
 const app = createApp();
 app.stage.sortableChildren = true;
