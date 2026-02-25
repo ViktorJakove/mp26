@@ -18,65 +18,69 @@ export function createShopManager(app, getMoney, subMoney, railRenderer, station
     const ITEMS_PER_PAGE = 3;
 
     function showShop(buildingType, panel, desc, instr) {
+        try{
         if (!buildingType) return;
         
-        const items = SHOP_ITEMS_MAP[buildingType];
-        if (!items || items.length === 0) return;
+            const items = SHOP_ITEMS_MAP[buildingType];
+            if (!items || items.length === 0) return;
         
-        currentBuildingType = buildingType;
-        currentPanel = panel;
-        currentDesc = desc;
-        currentInstr = instr;
+            currentBuildingType = buildingType;
+            currentPanel = panel;
+            currentDesc = desc;
+            currentInstr = instr;
         
-        if (shopContainer) {
-            shopContainer.destroy();
-            shopContainer = null;
-        }
+            if (shopContainer) {
+                shopContainer.destroy();
+                shopContainer = null;
+            }
         
-        if (instr) instr.visible = false;
+            if (instr) instr.visible = false;
         
-        desc.text = "Vyber si zboží...";
+            desc.text = "Vyber si zboží...";
         
-        shopContainer = new PIXI.Container();
+            shopContainer = new PIXI.Container();
         
-        const panelW = panel.width;
-        const panelH = panel.height;
+            const panelW = panel.width;
+            const panelH = panel.height;
         
-        const squareSize = Math.min(160, panelW * 0.22);
-        const spacing = 20;
-        const totalWidth = 3 * squareSize + 2 * spacing;
-        const startX = (panelW - totalWidth) / 2;
-        const startY = 90;
+            const squareSize = Math.min(160, panelW * 0.22);
+            const spacing = 20;
+            const totalWidth = 3 * squareSize + 2 * spacing;
+            const startX = (panelW - totalWidth) / 2;
+            const startY = 90;
         
-        const currentPurchased = purchasedItems.get(buildingType);
+            const currentPurchased = purchasedItems.get(buildingType);
         
-        const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
-        const startIndex = currentPage * ITEMS_PER_PAGE;
-        const displayItems = items.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+            const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
+            const startIndex = currentPage * ITEMS_PER_PAGE;
+            const displayItems = items.slice(startIndex, startIndex + ITEMS_PER_PAGE);
         
-        displayItems.forEach((item, index) => {
-            const x = startX + index * (squareSize + spacing);
-            const y = startY;
+            displayItems.forEach((item, index) => {
+                const x = startX + index * (squareSize + spacing);
+                const y = startY;
             
-            const isPurchased = currentPurchased === item.name;
+                const isPurchased = currentPurchased === item.name;
             
-            const squareContainer = createItemSquare(item, x, y, squareSize, isPurchased, buildingType, panel, desc, instr);
-            shopContainer.addChild(squareContainer);
-        });
+                const squareContainer = createItemSquare(item, x, y, squareSize, isPurchased, buildingType, panel, desc, instr);
+                shopContainer.addChild(squareContainer);
+            });
         
-        if (totalPages > 1) {
-            addNavigationButtons(panelW, startY + squareSize + 30, totalPages);
+            if (totalPages > 1) {
+                addNavigationButtons(panelW, startY + squareSize + 30, totalPages);
+            }
+        
+            if (totalPages > 1) {
+                const pageIndicator = createPageIndicator(panelW, startY + squareSize + 70, currentPage + 1, totalPages);
+                shopContainer.addChild(pageIndicator);
+            }
+        
+            const closeBtn = createCloseButton(panelW, panelH, hide);
+            shopContainer.addChild(closeBtn);
+        
+            panel.addChild(shopContainer);
+        } catch (error) {
+            console.error("Chyba při zobrazování shopu:", error);
         }
-        
-        if (totalPages > 1) {
-            const pageIndicator = createPageIndicator(panelW, startY + squareSize + 70, currentPage + 1, totalPages);
-            shopContainer.addChild(pageIndicator);
-        }
-        
-        const closeBtn = createCloseButton(panelW, panelH, hide);
-        shopContainer.addChild(closeBtn);
-        
-        panel.addChild(shopContainer);
     }
     
     function createItemSquare(item, x, y, size, isPurchased, buildingType, panel, desc, instr) {

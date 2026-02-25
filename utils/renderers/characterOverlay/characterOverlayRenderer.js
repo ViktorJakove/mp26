@@ -68,27 +68,31 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
     function setupSpriteAnimation(sprite, targetX, targetY, isFirstOpen) {
         if (!sprite) return;
         
-        const screenWidth = app.screen.width;
-        const screenHeight = app.screen.height;
-        let startX = targetX;
-        let startY = targetY;
-        
-        if (targetX < screenWidth * 0.4) {
-            startX = -sprite.width;
-        } else if (targetX > screenWidth * 0.6) {
-            startX = screenWidth + sprite.width;
-        } else {
-            startY = screenHeight + sprite.height;
-        }
-        
-        animateSpriteEntry(sprite, startX, startY, targetX, targetY, 800);
-        
-        if (isFirstOpen) {
-            sprite.tint = 0x000000;
+        try{
+            const screenWidth = app.screen.width;
+            const screenHeight = app.screen.height;
+            let startX = targetX;
+            let startY = targetY;
             
-            setTimeout(() => {
-                fadeFromBlack(sprite, 2000);
-            }, 1000);
+            if (targetX < screenWidth * 0.4) {
+                startX = -sprite.width;
+            } else if (targetX > screenWidth * 0.6) {
+                startX = screenWidth + sprite.width;
+            } else {
+                startY = screenHeight + sprite.height;
+            }
+            
+            animateSpriteEntry(sprite, startX, startY, targetX, targetY, 800);
+            
+            if (isFirstOpen) {
+                sprite.tint = 0x000000;
+                
+                setTimeout(() => {
+                    fadeFromBlack(sprite, 2000);
+                }, 1000);
+            }
+        }catch(error){
+            console.error("Error v setupSpriteAnimation:", error);
         }
     }
 

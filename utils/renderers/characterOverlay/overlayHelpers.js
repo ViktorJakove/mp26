@@ -44,21 +44,25 @@ export function getStart(key, buildingState) {
 
 export function updateSprite(sprite, key, idx, after, app, buildingState) {
     if (!sprite) return;
-    const path = getPath(key, idx, after, buildingState);
-    if (!path) return;
-    
-    const tex = PIXI.Texture.from(path);
-    sprite.x = getPos(key, idx, after, app, buildingState);
-    
-    const update = () => {
-        sprite.texture = tex;
-        const scale = Math.min(app.screen.width, app.screen.height) * 0.6 / Math.max(tex.width, tex.height);
-        sprite.scale.set(scale);
-    };
-    
-    if (tex.valid) {
-        update();
-    } else {
-        tex.once('update', update);
+    try{
+        const path = getPath(key, idx, after, buildingState);
+        if (!path) return;
+        
+        const tex = PIXI.Texture.from(path);
+        sprite.x = getPos(key, idx, after, app, buildingState);
+        
+        const update = () => {
+            sprite.texture = tex;
+            const scale = Math.min(app.screen.width, app.screen.height) * 0.6 / Math.max(tex.width, tex.height);
+            sprite.scale.set(scale);
+        };
+        
+        if (tex.valid) {
+            update();
+        } else {
+            tex.once('update', update);
+        }
+    } catch (e) {
+        console.error(`Error při updatování ${key} napozici ${idx}:`, e);
     }
 }
