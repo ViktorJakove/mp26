@@ -80,7 +80,7 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
         const panelW = panel.width;
         const panelH = panel.height;
         
-        //průhledny pozadí přes celý panel pro zachycenii kliknutí
+        //průhledny pozadí přes panel pro kliks
         const clickCatcher = new PIXI.Graphics();
         clickCatcher.beginFill(0x000000, 0.001);
         clickCatcher.drawRect(0, 0, panelW, panelH);
@@ -94,6 +94,7 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
         });
         successContainer.addChild(clickCatcher);
         
+        // Success text
         const successText = new PIXI.Text(
             message,
             {
@@ -117,6 +118,7 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
         });
         successContainer.addChild(successText);
         
+        // Instruction text
         const instructionText = new PIXI.Text(
             "Klikni kamkoli pro zavření...",
             {
@@ -140,8 +142,20 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
         panel.addChild(successContainer);
         uiContainer = successContainer;
         
+        // Zachytáváme kliknutí na sprite (postavičku)
+        if (sprite) {
+            sprite.interactive = true;
+            sprite.once('pointerdown', (e) => {
+                e.stopPropagation();
+                destroyUI();
+                onComplete(true);
+            });
+        }
+        
+        // Zachytáváme kliknutí na celém overlay (background)
         const overlayContainer = panel.parent;
         if (overlayContainer) {
+            // Najdeme background (první dítě by měl být bg z overlayUI)
             const background = overlayContainer.children[0];
             if (background) {
                 background.interactive = true;
@@ -297,6 +311,7 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
             
             panel.addChild(uiContainer);
             
+            // Vytvoříme input
             createHTMLInput(panel, inputX, inputY, inputWidth, (value) => {
                 handleLoan(value, panel, desc, instr, sprite, options, onComplete);
             }, bankOptions.maxLoan);
