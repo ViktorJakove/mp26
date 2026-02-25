@@ -13,11 +13,58 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
     let city = null;
     let onClose = null;
     const buildingState = new Map();
+    const firstOpenTracker = new Set();
     
-    //sub-moduly
+    // sub-moduly
     const ui = createOverlayUI(app, container, () => handleClick());
     const shopManager = createShopManager(app, getMoney, subMoney, railRenderer, stationRenderer);
     const transactionManager = createTransactionManager(app, ui.panel, ui.desc, ui.instr, ui.sprite, railRenderer, stationRenderer, getMoney, subMoney, hide);
+
+    function animateSpriteEntry(sprite, startX, startY, targetX, targetY, duration = 800) {
+        sprite.x = startX;
+        sprite.y = startY;
+        
+        const startTime = Date.now();
+        
+        const animate = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            const eased = 1 - Math.pow(1 - progress, 3);
+            
+            sprite.x = startX + (targetX - startX) * eased;
+            sprite.y = startY + (targetY - startY) * eased;
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                sprite.x = targetX;
+                sprite.y = targetY;
+            }
+        };
+        
+        animate();
+    }
+
+    function fadeFromBlack(sprite, duration = 2000) {
+        const startTime = Date.now();
+        
+        const animate = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            const brightness = Math.floor(progress * 255);
+            sprite.tint = (brightness << 16) | (brightness << 8) | brightness;
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                sprite.tint = 0xFFFFFF;
+            }
+        };
+        
+        animate();
+    }
 
     function handleClick() {
         if (!city || !ui.desc || transactionManager.isActive() || shopManager.shopContainer) return;
@@ -95,8 +142,35 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             ui.setTextIndex(textIdx);
             
             const path = getPath(key, textIdx, s?.completed, buildingState);
-            const posX = getPos(key, textIdx, s?.completed, app, buildingState);
-            ui.createSprite(path, posX);
+            const targetX = getPos(key, textIdx, s?.completed, app, buildingState);
+            const targetY = app.screen.height / 5 * 2;
+            ui.createSprite(path, targetX, targetY);
+            
+            if (ui.sprite) {
+                const screenWidth = app.screen.width;
+                let startX = targetX;
+                let startY = targetY;
+                
+                if (targetX < screenWidth * 0.4) {
+                    startX = -ui.sprite.width; //mimo obrazovk
+                } else if (targetX > screenWidth * 0.6) {
+                    startX = screenWidth + ui.sprite.width;
+                } else {
+                    startY = app.screen.height + ui.sprite.height;
+                }
+                
+                animateSpriteEntry(ui.sprite, startX, startY, targetX, targetY, 800);
+                
+                if (!firstOpenTracker.has(key) && textIdx === 0) {
+                    firstOpenTracker.add(key);
+                    
+                    ui.sprite.tint = 0x000000;
+                    
+                    setTimeout(() => {
+                        fadeFromBlack(ui.sprite, 2000);
+                    }, 1000);
+                }
+            }
             
             const description = getTexts(key, buildingState)[textIdx];
             const instruction = "Klikni kamkoli pro další text...";
