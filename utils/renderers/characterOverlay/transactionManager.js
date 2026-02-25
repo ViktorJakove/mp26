@@ -13,7 +13,6 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
     //init
     const bankManager = createBankManager(app, getMoney, addMoney, subMoney);
 
-    // Pomocná funkce pro addMoney (není v parametrech)
     /*function addMoney(amount) {
         if (window.addMoney) {
             window.addMoney(amount);
