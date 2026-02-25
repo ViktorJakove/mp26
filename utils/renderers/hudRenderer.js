@@ -4,7 +4,7 @@ const TYPES_LIST = [...Object.values(RAIL_TYPES), DESTROY_ENTRY];
 
 export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode) {
 
-    const LOCKED_RAIL_TYPES = new Set(["CROSS"]);
+    const LOCKED_RAIL_TYPES = new Set(/*["CROSS"]*/);
     
     function unlockRailType(typeId) {
         LOCKED_RAIL_TYPES.delete(typeId);
@@ -69,7 +69,14 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
             if (type.isDestroy) return true;
             return !LOCKED_RAIL_TYPES.has(type.id);
         });
-        return availableTypes[selectedIndex];
+        
+        // Ensure selectedIndex is within bounds
+        if (selectedIndex >= availableTypes.length) {
+            selectedIndex = 0;
+        }
+        
+        // Return the selected type or the first available type if something goes wrong
+        return availableTypes[selectedIndex] || availableTypes[0] || TYPES_LIST[0];
     }
 
     function setOnSelect(cb) {
@@ -164,7 +171,6 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
                 leftBarContainer.addChild(costLabel);
             }
 
-            // Single hit area per item
             const hitArea = new PIXI.Graphics();
             hitArea.beginFill(0xffffff, 0.001);
             hitArea.drawRect(x, y, ICON_SIZE, ICON_SIZE + 10);

@@ -1,4 +1,5 @@
 import { BUILDING_TEXTS, DEFAULT_BUILDING_TEXT } from "../../text/buildingTexts.js";
+import { SHOP_ITEMS, BARBER_ITEMS, MARCO_ITEMS } from "../../enums/shopItems.js";
 
 export function createCharacterOverlay(app, getGridScale, railRenderer, stationRenderer, getMoney, subMoney) {
     const container = new PIXI.Container();
@@ -8,7 +9,15 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
 
     let city = null, onClose = null, textIdx = 0, desc = null, sprite = null, bg = null, panel = null, instr = null;
     let btnContainer = null, trans = { active: false, key: null };
+    let shopContainer = null; // New container for shop items
     const buildingState = new Map();
+
+    // Shop items mapping
+    const SHOP_ITEMS_MAP = {
+        "shop": SHOP_ITEMS,
+        "barber": BARBER_ITEMS,
+        "marco": MARCO_ITEMS
+    };
 
     const getPath = (key, idx, after) => {
         const d = BUILDING_TEXTS[key];
@@ -60,6 +69,169 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             update();
         } else {
             tex.once('update', update);
+        }
+    };
+
+    const showShop = () => {
+        if (!city || !city.building) return;
+        
+        const buildingType = city.building;
+        const items = SHOP_ITEMS_MAP[buildingType];
+        
+        if (!items || items.length === 0) return;
+        
+        // Clear any existing shop container
+        if (shopContainer) {
+            shopContainer.destroy();
+            shopContainer = null;
+        }
+        
+        // Hide instruction text
+        if (instr) instr.visible = false;
+        
+        // Update description
+        desc.text = "Co si přejete koupit?";
+        
+        // Create shop container
+        shopContainer = new PIXI.Container();
+        
+        const panelW = panel.width;
+        const itemHeight = 40; // Reduced from 60
+        const itemMargin = 4; // Reduced from 5
+        const startY = 110; // Adjusted for smaller items
+        
+        items.forEach((item, index) => {
+            const y = startY + index * (itemHeight + itemMargin);
+            
+            // Item background - smaller
+            const itemBg = new PIXI.Graphics();
+            itemBg.beginFill(0x34495e, 0.8);
+            itemBg.lineStyle(1, 0xf5c518);
+            itemBg.drawRoundedRect(20, y, panelW - 40, itemHeight, 4); // Smaller border radius
+            itemBg.endFill();
+            itemBg.interactive = true;
+            itemBg.cursor = "pointer";
+            
+            // Item name - smaller font
+            const itemName = new PIXI.Text(item.name, {
+                fontFamily: "Arial",
+                fontSize: 13, // Reduced from 16
+                fill: 0xecf0f1,
+                fontWeight: "bold"
+            });
+            itemName.x = 25; // Slightly adjusted
+            itemName.y = y + 6; // Centered vertically
+            
+            // Item price - smaller font
+            const itemPrice = new PIXI.Text(`$${item.cost}`, {
+                fontFamily: "Arial",
+                fontSize: 13, // Reduced from 16
+                fill: 0xf5c518,
+                fontWeight: "bold"
+            });
+            itemPrice.x = panelW - 100;
+            itemPrice.y = y + 6; // Centered vertically
+            
+            // Buy text - smaller font
+            const buyText = new PIXI.Text(item.buyText || "Koupit", {
+                fontFamily: "Arial",
+                fontSize: 10, // Reduced from 12
+                fill: 0x95a5a6,
+                fontStyle: "italic"
+            });
+            buyText.x = 25;
+            buyText.y = y + 22; // Adjusted for smaller item height
+            
+            itemBg.addChild(itemName, itemPrice, buyText);
+            
+            // Buy handler
+            itemBg.on('pointerdown', (e) => {
+                e.stopPropagation();
+                
+                if (getMoney() >= item.cost) {
+                    subMoney(item.cost);
+                    
+                    // Show success message
+                    desc.text = `Zakoupeno: ${item.name}!`;
+                    
+                    // Apply item effects here
+                    applyItemEffect(buildingType, item);
+                    
+                    // Remove shop and show continue instruction
+                    if (shopContainer) {
+                        shopContainer.destroy();
+                        shopContainer = null;
+                    }
+                    
+                    if (instr) {
+                        instr.visible = true;
+                        instr.text = "Klikni kamkoli pro zavření...";
+                    }
+                    
+                    if (railRenderer) railRenderer.markDirty();
+                    if (stationRenderer) stationRenderer.markDirty();
+                } else {
+                    desc.text = "Nemáš dost peněz!";
+                }
+            });
+            
+            shopContainer.addChild(itemBg);
+        });
+        
+        // Add close button - fixed positioning
+        const closeBtn = new PIXI.Container();
+        
+        // Button background
+        const closeBg = new PIXI.Graphics();
+        closeBg.beginFill(0xc0392b, 0.9);
+        closeBg.lineStyle(1, 0xe74c3c);
+        closeBg.drawRoundedRect(0, 0, 70, 25, 4); // Smaller button
+        closeBg.endFill();
+        closeBtn.addChild(closeBg);
+        
+        // Button text
+        const closeText = new PIXI.Text("Zavřít", {
+            fontFamily: "Arial",
+            fontSize: 12,
+            fill: 0xffffff,
+            fontWeight: "bold"
+        });
+        closeText.anchor.set(0.5);
+        closeText.x = 35; // Half of button width
+        closeText.y = 12.5; // Half of button height
+        closeBtn.addChild(closeText);
+        
+        // Position button in bottom right corner
+        closeBtn.x = panel.width - 90; // 20px from right edge
+        closeBtn.y = panel.height - 35; // 10px from bottom edge
+        
+        closeBtn.interactive = true;
+        closeBtn.cursor = "pointer";
+        
+        closeBtn.on('pointerdown', (e) => {
+            e.stopPropagation();
+            hide();
+        });
+        
+        shopContainer.addChild(closeBtn);
+        panel.addChild(shopContainer);
+    };
+
+    const applyItemEffect = (buildingType, item) => {
+        // Add special effects based on item type
+        switch(item.name) {
+            case "flag":
+                // Example effect: increase relations
+                console.log("Flag purchased - MURRICA!");
+                break;
+            case "lowtaper":
+                console.log("Low taper fade - massive!");
+                break;
+            case "tuxedo":
+                console.log("Tuxedo purchased - looking sharp!");
+                break;
+            default:
+                console.log(`Purchased ${item.name} from ${buildingType}`);
         }
     };
 
@@ -218,7 +390,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
     };
 
     const handleClick = () => {
-        if (!city || !desc || trans.active) return;
+        if (!city || !desc || trans.active || shopContainer) return;
         const key = city.building;
         const texts = getTexts(key);
         const d = BUILDING_TEXTS[key];
@@ -230,14 +402,23 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             updateSprite(key, textIdx, s.completed);
             if (textIdx === texts.length - 1) {
                 instr.text = "Toto byl poslední text...";
-                if (d?.transaction && !s.completed) buildingState.set(key, { ...s, questionShown: true });
+                if (d?.transaction && !s.completed) {
+                    buildingState.set(key, { ...s, questionShown: true });
+                } else if (SHOP_ITEMS_MAP[key] && !s.completed) {
+                    // Show shop if this building has items
+                    showShop();
+                }
             }
         } else if (textIdx === texts.length - 1) {
             if (d?.transaction && !s.completed) {
                 trans.active = true;
                 trans.key = key;
                 showTrans();
-            } else hide();
+            } else if (SHOP_ITEMS_MAP[key] && !s.completed) {
+                showShop();
+            } else {
+                hide();
+            }
         }
     };
 
@@ -254,6 +435,10 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         if (btnContainer) {
             btnContainer.destroy();
             btnContainer = null;
+        }
+        if (shopContainer) {
+            shopContainer.destroy();
+            shopContainer = null;
         }
         if (onClose) onClose();
     };
