@@ -17,7 +17,6 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
     function createHTMLInput(panel, x, y, width, onSubmit, maxLoan) {
         removeHTMLInput();
         
-        // Vytvoření HTML input elementu
         htmlInput = document.createElement('input');
         htmlInput.type = 'number';
         htmlInput.min = '1';
@@ -71,6 +70,74 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
         return htmlInput;
     }
 
+    function showSuccessMessage(panel, desc, instr, message, onComplete) {
+        destroyUI();
+        
+        const successContainer = new PIXI.Container();
+        
+        const panelW = panel.width;
+        const panelH = panel.height;
+        
+        const clickCatcher = new PIXI.Graphics();
+        clickCatcher.beginFill(0x000000, 0.001);
+        clickCatcher.drawRect(0, 0, panelW, panelH);
+        clickCatcher.endFill();
+        clickCatcher.interactive = true;
+        clickCatcher.cursor = "pointer";
+        clickCatcher.on('pointerdown', (e) => {
+            e.stopPropagation();
+            destroyUI();
+            onComplete(true);
+        });
+        successContainer.addChild(clickCatcher);
+        
+        const successText = new PIXI.Text(
+            message,
+            {
+                fontFamily: "Arial",
+                fontSize: 24,
+                fill: 0x2ecc71,
+                fontWeight: "bold",
+                align: "center",
+                wordWrap: true,
+                wordWrapWidth: panelW - 60
+            }
+        );
+        successText.anchor.set(0.5);
+        successText.x = panelW / 2;
+        successText.y = panelH / 2 - 30;
+        successText.interactive = true;
+        successText.on('pointerdown', (e) => {
+            e.stopPropagation();
+            destroyUI();
+            onComplete(true);
+        });
+        successContainer.addChild(successText);
+        
+        const instructionText = new PIXI.Text(
+            "Klikni kamkoli pro zavření...",
+            {
+                fontFamily: "Arial",
+                fontSize: 18,
+                fill: 0xf5c518,
+                align: "center"
+            }
+        );
+        instructionText.anchor.set(0.5);
+        instructionText.x = panelW / 2;
+        instructionText.y = panelH / 2 + 30;
+        instructionText.interactive = true;
+        instructionText.on('pointerdown', (e) => {
+            e.stopPropagation();
+            destroyUI();
+            onComplete(true);
+        });
+        successContainer.addChild(instructionText);
+        
+        panel.addChild(successContainer);
+        uiContainer = successContainer;
+    }
+
     function showLoanUI(panel, desc, instr, sprite, onComplete, options) {
         if (options) {
             bankOptions = { ...bankOptions, ...options };
@@ -103,9 +170,8 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
         titleText.y = 30;
         uiContainer.addChild(titleText);
         
-        //TEMP - ukázat čas
         const statusText = new PIXI.Text(
-            loanActive ? "ZATIM XYXYXY" : "Nemáš žádný dluh",
+            loanActive ? "Aktuální dluh: $" + loanAmount : "Nemáš žádný dluh",
             {
                 fontFamily: "Arial",
                 fontSize: 18,
@@ -149,7 +215,6 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
             inputLabel.y = 170;
             uiContainer.addChild(inputLabel);
             
-            //HTML input bleh
             const inputWidth = 200;
             const inputX = (panelW - inputWidth) / 2;
             const inputY = 190;
@@ -161,8 +226,6 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
                         loanAmount = amount;
                         loanActive = true;
                         addMoney(amount);
-                        
-                        desc.text = `Půjčeno $${amount}. Nezapomeň vrátit $${amount * bankOptions.interestRate}! Čas běží!`;
                         
                         if (sprite && options?.successSprite !== undefined) {
                             const successPath = `../../graphics/chars/bank/bank${options.successSprite}.png`;
@@ -176,12 +239,9 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
                         }
                         
                         removeHTMLInput();
-                        destroyUI();
                         
-                        //tohle ne!
-                        setTimeout(() => {
-                            onComplete(true);
-                        }, 2000);
+                        showSuccessMessage(panel, desc, instr, `Půjčeno $${amount}. Nezapomeň vrátit $${amount * bankOptions.interestRate}!`, onComplete);
+                        
                     } else {
                         desc.text = `Neplatná částka (1-${bankOptions.maxLoan})`;
                     }
@@ -198,7 +258,6 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
             
             panel.addChild(uiContainer);
             
-            //HTML input
             setTimeout(() => {
                 if (panel && uiContainer) {
                     createHTMLInput(panel, inputX, inputY, inputWidth, (value) => {
@@ -207,8 +266,6 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
                             loanActive = true;
                             addMoney(value);
                             
-                            desc.text = `Půjčeno $${value}. Nezapomeň vrátit ${bankOptions.interestRate}× ($${value * bankOptions.interestRate})!`;
-                            
                             if (sprite && options?.successSprite !== undefined) {
                                 const successPath = `../../graphics/chars/bank/bank${options.successSprite}.png`;
                                 const tex = PIXI.Texture.from(successPath);
@@ -216,11 +273,8 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
                             }
                             
                             removeHTMLInput();
-                            destroyUI();
                             
-                            setTimeout(() => {
-                                onComplete(true);
-                            }, 2000);
+                            showSuccessMessage(panel, desc, instr, `Půjčeno $${value}. Nezapomeň vrátit ${bankOptions.interestRate}× ($${value * bankOptions.interestRate})!`, onComplete);
                         }
                     }, bankOptions.maxLoan);
                 }
@@ -235,7 +289,7 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
                 {
                     fontFamily: "Arial",
                     fontSize: 18,
-                    fill: hasEnoughMoney ? 0x2ecc71 : 0xe74c3c, //zelena : cervena
+                    fill: hasEnoughMoney ? 0x2ecc71 : 0xe74c3c,
                     align: "center",
                     wordWrap: true,
                     wordWrapWidth: panelW - 60
@@ -252,21 +306,16 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
                     loanAmount = 0;
                     loanActive = false;
                     
-                    desc.text = "Dluh úspěšně splacen! Děkujeme.";
-                    
                     if (sprite) {
                         const normalPath = "../../graphics/chars/bank/bank1.png";
                         const tex = PIXI.Texture.from(normalPath);
                         sprite.texture = tex;
                     }
                     
-                    destroyUI();
                     removeHTMLInput();
+                    destroyUI();
                     
-                    //tohle NE
-                    setTimeout(() => {
-                        onComplete(true);
-                    }, 2000);
+                    showSuccessMessage(panel, desc, instr, "Dluh úspěšně splacen! Děkujeme.", onComplete);
                 });
                 uiContainer.addChild(repayBtn);
                 
@@ -277,7 +326,6 @@ export function createBankManager(app, getMoney, addMoney, subMoney) {
                 uiContainer.addChild(backBtn);
                 
             } else {
-                //JENOM zpatky
                 const backBtn = createButton("Zpět", 0x7f8c8d, 0x95a5a6, panelW/2 - 100, 300, 200, 40, () => {
                     destroyUI();
                     onComplete(true);
