@@ -26,13 +26,17 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
     function handleRailAction(tileX, tileY) {
         try{
             const selected = getSelectedRailType();
+            console.log('handleRailAction - selected type:', selected?.id || 'DESTROY', 'isDestroy:', selected?.isDestroy);
+            
             if (selected.isDestroy) {
+                console.log('Mažu kolej');
                 if (railRenderer.isTileOccupied(tileX, tileY)) {
-                    railRenderer.removeRail(tileX, tileY,false);
+                    railRenderer.removeRail(tileX, tileY, false);
                     drawGraphics();
                 }
                 return;
             }
+            console.log('Pokládám kolej typu:', selected.id);
             if (!railRenderer.isTileOccupied(tileX, tileY)) {
                 if (railRenderer.addRail(tileX, tileY, selected)) drawGraphics();
             }

@@ -5,10 +5,28 @@ const TYPES_LIST = [...Object.values(RAIL_TYPES), DESTROY_ENTRY];
 export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode, getLoanTimerInfo) {
     // getLoanTimerInfo by měla vracet { isActive: boolean, formattedTime: string }
 
-    const LOCKED_RAIL_TYPES = new Set(/*["CROSS"]*/);
+    const LOCKED_RAIL_TYPES = new Set(["T_N", "T_E", "T_S", "T_W"]); //cross moc dulezitej
     
     function unlockRailType(typeId) {
+        console.log(`Odemkám kolejnice: ${typeId}`);
+        console.log(`Před odemčením - locked:`, Array.from(LOCKED_RAIL_TYPES));
+        
         LOCKED_RAIL_TYPES.delete(typeId);
+        
+        console.log(`Po odemčení - locked:`, Array.from(LOCKED_RAIL_TYPES));
+        
+        // Zkontrolujeme, jestli vybraný typ je stále dostupný
+        const availableTypes = TYPES_LIST.filter(type => {
+            if (type.isDestroy) return true;
+            return !LOCKED_RAIL_TYPES.has(type.id);
+        });
+        
+        const selected = availableTypes.find(t => t.id === selectedTypeId);
+        if (!selected && availableTypes.length > 0) {
+            console.log(`Vybraný typ ${selectedTypeId} není dostupný, přepínám na ${availableTypes[0].id}`);
+            selectedTypeId = availableTypes[0].id;
+        }
+        
         hudDirty = true;
         draw();
     }
@@ -89,9 +107,7 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
                     timerLabel.y = TOP_BAR_H / 2 - TOP_BAR_FONT / 2 - 10;
                     timerContainer.addChild(timerLabel);
                     
-                    //TADYTO BY SE MELO AKTUALIZOVAT S DLUHEM (KAZDOU ODEBRANOU KOLEJI PO SPLATNOSTI) TEMP TEMP TEMP
                     if (loanAmount > 0) {
-                        console.log(`Vykresluji dluh: $${loanAmount}`);
                         const debtLabel = new PIXI.Text(`Dluh: $${loanAmount}`, {
                             fontFamily: "Arial",
                             fontSize: TOP_BAR_FONT - 2,
@@ -105,7 +121,6 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
                     }
                     
                     topBarContainer.addChild(timerContainer);
-                    
                 }
             } catch (error) {
                 console.error("Chyba při zobrazování časovače:", error);
@@ -125,7 +140,8 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
     const ICON_SIZE = 48;
     const PADDING = 6;
 
-    let selectedIndex = 0;
+    // Místo selectedIndex použijeme selectedTypeId
+    let selectedTypeId = "STRAIGHT_H"; // výchozí typ
     let onSelectCallback = null;
 
     let hudDirty = true;
@@ -153,16 +169,30 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
     app.ticker.add(updateTimer);
 
     function getSelectedType() {
+        // Vždycky filtrujeme dostupné typy
         const availableTypes = TYPES_LIST.filter(type => {
             if (type.isDestroy) return true;
             return !LOCKED_RAIL_TYPES.has(type.id);
         });
         
-        if (selectedIndex >= availableTypes.length) {
-            selectedIndex = 0;
+        // Najdeme typ podle ID
+        let selected = availableTypes.find(t => t.id === selectedTypeId);
+        
+        // Pokud není dostupný (třeba byl zamčený), vybereme první dostupný
+        if (!selected && availableTypes.length > 0) {
+            console.log(`Typ ${selectedTypeId} není dostupný, vybírám ${availableTypes[0].id}`);
+            selectedTypeId = availableTypes[0].id;
+            selected = availableTypes[0];
         }
         
-        return availableTypes[selectedIndex] || availableTypes[0] || TYPES_LIST[0];
+        // Pokud stále nic není, vezmeme první z TYPES_LIST jako fallback
+        if (!selected) {
+            console.warn('Žádné dostupné kolejnice!');
+            selected = TYPES_LIST[0];
+            if (selected) selectedTypeId = selected.id;
+        }
+        
+        return selected || TYPES_LIST[0];
     }
 
     function setOnSelect(cb) {
@@ -195,8 +225,11 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
             const y = PADDING + i * (ICON_SIZE + PADDING + 10);
 
             const isLocked = !type.isDestroy && LOCKED_RAIL_TYPES.has(type.id);
+            
+            // Zvýrazníme vybraný typ (podle ID, ne podle indexu)
+            const isSelected = !isLocked && type.id === selectedTypeId;
 
-            if (i === selectedIndex && !isLocked) {
+            if (isSelected) {
                 const hl = new PIXI.Graphics();
                 hl.beginFill(0xffcc00, 0.55);
                 hl.drawRoundedRect(x, y, ICON_SIZE, ICON_SIZE, 4);
@@ -266,8 +299,11 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
             
             hitArea.on('pointerdown', (e) => {
                 e.stopPropagation();
+                e.preventDefault();
+                
                 if (!isLocked) {
-                    selectedIndex = i;
+                    console.log('Kliknuto na typ:', type.id || 'DESTROY');
+                    selectedTypeId = type.id || 'DESTROY'; // Uložíme ID, ne index
                     hudDirty = true;
                     draw();
                     if (onSelectCallback) onSelectCallback(type);
@@ -314,8 +350,7 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
 
     function markDirty() {
         hudDirty = true;
-        console.log("HUD markDirty called");
-        draw(); //temp
+        draw();
     }
 
     function refresh() {

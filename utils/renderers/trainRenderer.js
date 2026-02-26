@@ -17,7 +17,7 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         }
     }
 
-    const TRAIN_SPEED = 15; /*3*/ 
+    const TRAIN_SPEED = 3; /*3*/ 
     const TRAIN_SIZE = 0.6;
     const STATION_WAIT_TIME = 3500; //ms
     const WAGON_OFFSET = 0.75;

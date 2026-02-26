@@ -32,8 +32,8 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
             if (d.transaction.type === "unlock_speed") {
                 return showSpeedUnlockTransaction(key, d, buildingState);
             }
-            if (d.transaction.type === "unlock_cross") {
-                return showCrossUnlockTransaction(key, d, buildingState);
+            if (d.transaction.type === "unlock_tracks") {
+                return showTracksUnlockTransaction(key, d, buildingState);
             }
         
             if (d.transaction.questionSprite !== undefined) {
@@ -66,7 +66,10 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
                 }
             } else if (key === "mech" && d.transaction.cost === 500) {
                 if (window.hudRenderer) {
-                    window.hudRenderer.unlockRailType("CROSS");
+                    window.hudRenderer.unlockRailType("T_N");
+                    window.hudRenderer.unlockRailType("T_E");
+                    window.hudRenderer.unlockRailType("T_S");
+                    window.hudRenderer.unlockRailType("T_W");
                 }
             }
             
@@ -367,7 +370,7 @@ function showSpeedUnlockTransaction(key, d, buildingState) {
     return true;
 }
 
-function showCrossUnlockTransaction(key, d, buildingState) {
+function showTracksUnlockTransaction(key, d, buildingState) {
     if (currentInstr) currentInstr.visible = false;
     
     const path = `../../graphics/chars/${key}/${key}${d.transaction.questionSprite}.png`;
@@ -396,8 +399,11 @@ function showCrossUnlockTransaction(key, d, buildingState) {
             subMoney(d.transaction.cost);
             
             if (window.hudRenderer) {
-                window.hudRenderer.unlockRailType("CROSS");
-                console.log("Kolej typu CROSS odemčena!");
+                window.hudRenderer.unlockRailType("T_N");
+                window.hudRenderer.unlockRailType("T_E");
+                window.hudRenderer.unlockRailType("T_S");
+                window.hudRenderer.unlockRailType("T_W");
+                console.log("Všechny T kolejnice odemčeny!");
             }
             
             buildingState.set(key, { completed: true, questionShown: true });
