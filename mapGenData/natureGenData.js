@@ -119,7 +119,7 @@ export const MOUNTAIN_GEN_DATA=[
         name: "Indigo Peak",
         length: 20,
         thickness: 1,
-        description: "zabil jsi mého otce, připrav se na smrd."
+        description: "zabil jsi mého otce, připrav se na smrt."
     },{
         name: "Bi-montana",
         length: 30,
