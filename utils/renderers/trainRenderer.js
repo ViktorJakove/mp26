@@ -107,7 +107,9 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         if (isBisonUnlocked && calcBisonProfitForPath) {
             const bisonBonus = calcBisonProfitForPath(train.path);
             if (bisonBonus > 0) {
-                addMoney(bisonBonus);
+                if (window.bisonProfitStore) {
+                     window.bisonProfitStore.addProfit(bisonBonus);
+                }
             }
         }
     

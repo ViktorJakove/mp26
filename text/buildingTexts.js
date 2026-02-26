@@ -91,7 +91,7 @@ export const BUILDING_TEXTS = {
         ],
         afterTransaction: {
             text: [
-                "Děkujeme za investici!",
+                "Děkujeme za investici! Máš nastřádáno $${profit} z bizonů, tady to máš!",
                 "Díky tvé pomoci můžeme modernizovat vybavení.",
                 "Přijď se podívat na novou lokomotivu!"
             ],

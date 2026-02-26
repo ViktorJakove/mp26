@@ -27,6 +27,15 @@ export function getTexts(key, buildingState) {
     const s = buildingState.get(key);
     
     if (s?.completed && d?.afterTransaction?.text) {
+         if (key === "olda" && window.bisonProfitStore) {
+             const profit = window.bisonProfitStore.getStoredProfit();
+             if (profit > 0) {
+                 return d.afterTransaction.text.map(text => 
+                     text.replace('${profit}', profit)
+                 );
+             }
+         }
+         
         if (d.transaction?.randomAfterText && s.afterTextIndex !== undefined) {
             return [d.afterTransaction.text[s.afterTextIndex]];
         }

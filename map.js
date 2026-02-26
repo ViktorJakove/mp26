@@ -11,6 +11,7 @@ import { createRouteChecker } from "./utils/routeChecker.js";
 import { createCharacterOverlay } from "./utils/renderers/characterOverlay/characterOverlayRenderer.js";
 import { createBankManager } from "./utils/bankManager.js";
 import { createBisonManager } from "./utils/bisonManager.js";
+import{createBisonProfitStore} from "./createBisonProfitStore.js";
 
 const app = createApp();
 app.stage.sortableChildren = true;
@@ -84,6 +85,8 @@ window.hudRenderer = hudRenderer;
 
 const bisonManager = createBisonManager(app, getAreas, railRenderer, hudRenderer);
 window.bisonManager = bisonManager;
+const bisonProfitStore = createBisonProfitStore();
+window.bisonProfitStore = bisonProfitStore;
 
 function onLoanExpired(expiredAmount, seizedMoney, remainingDebt) {
     console.log(`Půjčka $${expiredAmount} vypršela! Zabaveno $${seizedMoney}, zbývá $${remainingDebt}`);

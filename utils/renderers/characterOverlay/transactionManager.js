@@ -71,62 +71,25 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
             btnContainer = new PIXI.Container();
         
             const yes = createButton("ANO", 0x27ae60, 0x2ecc71, () => {
-                const cost = d.transaction.cost;
-                if (getMoney() >= cost) {
-                    subMoney(cost);
-                    
-                    //random text = znovu question
-                    if (d.transaction.randomAfterText && d.afterTransaction && d.afterTransaction.text) {
-                        const afterTextIndex = Math.floor(Math.random() * d.afterTransaction.text.length);
-                        buildingState.set(key, { completed: true, questionShown: true, afterTextIndex });
-                        
-                        trans.active = false;
-                        currentDesc.text = d.afterTransaction.text[afterTextIndex];
-                        
-                        if (currentInstr) {
-                            currentInstr.visible = true;
-                            currentInstr.text = "Klikni kamkoli pro zavření...";
-                        }
-                        
-                        if (d.afterTransaction.sprite && d.afterTransaction.sprite[afterTextIndex] !== undefined) {
-                            updateSuccessSprite(key, d, afterTextIndex);
-                        }
-                    } else {
-                        //zbytek (olda, barney..) normal
-                        buildingState.set(key, { completed: true, questionShown: true });
-                        trans.active = false;
-                        currentDesc.text = d.transaction.successText;
-                        
-                        if (currentInstr) {
-                            currentInstr.visible = true;
-                            currentInstr.text = "Klikni kamkoli pro zavření...";
-                        }
-                        
-                        if (d.transaction.successSprite !== undefined) {
-                            updateSuccessSprite(key, d);
-                        }
-                    }
-                    
-                    destroyButtons();
-                    showInstruction(true);
-                    if (railRenderer) railRenderer.markDirty();
-                    if (stationRenderer) stationRenderer.markDirty();
-                } else {
-                    currentDesc.text = d.transaction.failText;
-                    
-                    if (currentInstr) {
-                        currentInstr.visible = true;
-                        currentInstr.text = "Klikni kamkoli pro zavření...";
-                    }
-                    
-                    if (d.transaction.failSprite !== undefined) {
-                        updateFailSprite(key, d);
-                    }
-                    
-                    destroyButtons();
-                    trans.active = false;
-                    showInstruction(true);
+                console.log("Vybírám profit, aktuální storedProfit:", window.bisonProfitStore.getStoredProfit());
+                console.log("Aktuální peníze před výběrem:", getMoney());
+                
+                const withdrawn = window.bisonProfitStore.withdrawProfit(addMoney);
+                
+                console.log("Vybráno:", withdrawn);
+                console.log("Peníze po výběru:", getMoney());
+                console.log("StoredProfit po výběru:", window.bisonProfitStore.getStoredProfit());
+                
+                currentDesc.text = `Vyzvedl jsi $${withdrawn}!`;
+                
+                if (currentInstr) {
+                    currentInstr.visible = true;
+                    currentInstr.text = "Klikni kamkoli pro zavření...";
                 }
+                
+                destroyButtons();
+                trans.active = false;
+                showInstruction(true);
             });
         
             const no = createButton("NE", 0xc0392b, 0xe74c3c, hideOverlay);
@@ -167,64 +130,104 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
             const map = { L: 0.33, C: 0.5, P: 0.66, R: 0.66 };
             currentSprite.x = app.screen.width * (map[d.transaction.questionSpritePos] || 0.5);
         }
-        
-        currentDesc.text = `${d.transaction.question}\n\nCena: $${d.transaction.cost}`;
-        
-        if (btnContainer) btnContainer.destroy();
-        btnContainer = new PIXI.Container();
-        
-        const yes = createButton("ANO", 0x27ae60, 0x2ecc71, () => {
-            if (getMoney() >= d.transaction.cost) {
-                subMoney(d.transaction.cost);
+
+        if (window.bisonProfitStore) {
+            const profit = window.bisonProfitStore.getStoredProfit();
+            if (profit > 0) {
+                currentDesc.text = `Máš nastřádáno $${profit} z bizonů! Chceš si to vyzvednout?`;
                 
-                if (window.bisonManager) {
-                    window.bisonManager.unlockBisonBuilding();
-                    console.log("Bison profit unlocked!");
-                }
+                if (btnContainer) btnContainer.destroy();
+                btnContainer = new PIXI.Container();
                 
-                buildingState.set(key, { completed: true, questionShown: true });
+                const yes = createButton("ANO", 0x27ae60, 0x2ecc71, () => {
+                    const withdrawn = window.bisonProfitStore.withdrawProfit(addMoney);
+                    currentDesc.text = `Vyzvedl jsi $${withdrawn}!`;
+                    
+                    if (currentInstr) {
+                        currentInstr.visible = true;
+                        currentInstr.text = "Klikni kamkoli pro zavření...";
+                    }
+                    
+                    destroyButtons();
+                    trans.active = false;
+                    showInstruction(true);
+                });
                 
-                trans.active = false;
-                currentDesc.text = d.transaction.successText;
+                const no = createButton("NE", 0xc0392b, 0xe74c3c, hideOverlay);
                 
-                if (currentInstr) {
-                    currentInstr.visible = true;
-                    currentInstr.text = "Klikni kamkoli pro zavření...";
-                }
+                const total = 120 * 2 + 30;
+                yes.x = (currentPanel.width - total) / 2;
+                no.x = yes.x + 150;
+                yes.y = no.y = (currentPanel.height - 50) / 2 + 40;
                 
-                if (d.transaction.successSprite !== undefined) {
-                    updateSuccessSprite(key, d);
-                }
+                btnContainer.addChild(yes, no);
+                currentPanel.addChild(btnContainer);
                 
-                destroyButtons();
-                showInstruction(true);
-            } else {
-                currentDesc.text = d.transaction.failText;
-                
-                if (currentInstr) {
-                    currentInstr.visible = true;
-                    currentInstr.text = "Klikni kamkoli pro zavření...";
-                }
-                
-                if (d.transaction.failSprite !== undefined) {
-                    updateFailSprite(key, d);
-                }
-                
-                destroyButtons();
-                trans.active = false;
-                showInstruction(true);
+                return true;
             }
-        });
-        
-        const no = createButton("NE", 0xc0392b, 0xe74c3c, hideOverlay);
-        
-        const total = 120 * 2 + 30;
-        yes.x = (currentPanel.width - total) / 2;
-        no.x = yes.x + 150;
-        yes.y = no.y = (currentPanel.height - 50) / 2 + 40;
-        
-        btnContainer.addChild(yes, no);
-        currentPanel.addChild(btnContainer);
+        }
+
+        if (!window.bisonManager?.isBisonUnlocked()) {
+            currentDesc.text = `${d.transaction.question}\n\nCena: $${d.transaction.cost}`;
+            
+            if (btnContainer) btnContainer.destroy();
+            btnContainer = new PIXI.Container();
+            
+            const yes = createButton("ANO", 0x27ae60, 0x2ecc71, () => {
+                if (getMoney() >= d.transaction.cost) {
+                    subMoney(d.transaction.cost);
+                    
+                    if (window.bisonManager) {
+                        window.bisonManager.unlockBisonBuilding();
+                        console.log("Bison profit unlocked!");
+                    }
+                    
+                    buildingState.set(key, { completed: true, questionShown: true });
+                    
+                    trans.active = false;
+                    currentDesc.text = d.transaction.successText;
+                    
+                    if (currentInstr) {
+                        currentInstr.visible = true;
+                        currentInstr.text = "Klikni kamkoli pro zavření...";
+                    }
+                    
+                    if (d.transaction.successSprite !== undefined) {
+                        updateSuccessSprite(key, d);
+                    }
+                    
+                    destroyButtons();
+                    showInstruction(true);
+                } else {
+                    currentDesc.text = d.transaction.failText;
+                    
+                    if (currentInstr) {
+                        currentInstr.visible = true;
+                        currentInstr.text = "Klikni kamkoli pro zavření...";
+                    }
+                    
+                    if (d.transaction.failSprite !== undefined) {
+                        updateFailSprite(key, d);
+                    }
+                    
+                    destroyButtons();
+                    trans.active = false;
+                    showInstruction(true);
+                }
+            });
+            
+            const no = createButton("NE", 0xc0392b, 0xe74c3c, hideOverlay);
+            
+            const total = 120 * 2 + 30;
+            yes.x = (currentPanel.width - total) / 2;
+            no.x = yes.x + 150;
+            yes.y = no.y = (currentPanel.height - 50) / 2 + 40;
+            
+            btnContainer.addChild(yes, no);
+            currentPanel.addChild(btnContainer);
+        } else {
+            hideOverlay();
+        }
         
         return true;
     }

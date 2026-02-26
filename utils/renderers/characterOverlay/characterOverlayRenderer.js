@@ -110,6 +110,27 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         const d = BUILDING_TEXTS[key];
         const s = buildingState.get(key) || { questionShown: false, completed: false, shopOpened: false };
         const textIdx = ui.getTextIndex();
+
+        if (key === "olda" && window.bisonProfitStore && window.bisonProfitStore.getStoredProfit() > 0) {
+            if (!ui.sprite || !ui.desc || !ui.panel) {
+                const targetX = getPos(key, textIdx, s?.completed, app, buildingState);
+                const targetY = app.screen.height / 5 * 2;
+                const path = getPath(key, textIdx, s?.completed, buildingState);
+                
+                ui.createSprite(path, targetX, targetY);
+                
+                if (!ui.panel) {
+                    const title = city.name;
+                    const instruction = "Klikni pro výběr...";
+                    ui.createPanel(title, "", instruction);
+                }
+            }
+            
+            transactionManager.updateUIElements(ui.panel, ui.desc, ui.instr, ui.sprite);
+            transactionManager.setActive(true, key);
+            transactionManager.showTransaction(key, buildingState);
+            return;
+        }
     
         if (s?.completed) {
             if (textIdx === texts.length - 1) {
