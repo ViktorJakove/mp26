@@ -40,33 +40,17 @@ const getMoney = () => money;
 const subMoney = (amount) => money -= amount;
 const addMoney = (amount) => money += amount;
 
-function onLoanExpired(amount) {
-    console.log(`Půjčka ${amount} vypršela!`);
-    if (money >= amount * 2) {
-        subMoney(amount * 2);
-        alert(`Čas na splacení půjčky $${amount} vypršel! Byla ti udělena pokuta $${amount * 2}.`);
-    } else {
-        money = 0;
-        alert(`Čas na splacení půjčky $${amount} vypršel! Přišel jsi o všechny peníze a tvá reputace klesla.`);
-        setRelations(relations - 2);
-    }
-    
-    if (hudRenderer) hudRenderer.markDirty();
-}
-
-const bankManager = createBankManager(app, getMoney, addMoney, subMoney, onLoanExpired);
-window.bankManager = bankManager;
-bankManager.reset();
-
 function getLoanTimerInfo() {
-    if (bankManager) {
+    if (window.bankManager) {
         return {
-            isActive: bankManager.isLoanActive ? bankManager.isLoanActive() : false,
-            formattedTime: bankManager.getFormattedTime ? bankManager.getFormattedTime() : "0:00"
+            isActive: window.bankManager.isLoanActive ? window.bankManager.isLoanActive() : false,
+            formattedTime: window.bankManager.getFormattedTime ? window.bankManager.getFormattedTime() : "0:00"
         };
     }
     return { isActive: false, formattedTime: "0:00" };
 }
+
+// Nejdříve vytvoříme renderery (včetně railRenderer)
 const renderers = creatRenderers(
     app, 
     camera, 
@@ -88,6 +72,36 @@ const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer, trainR
 window.trainRenderer = trainRenderer;
 window.hudRenderer = hudRenderer;
 
+// AŽ TEĎ můžeme vytvořit bankManager (railRenderer už existuje)
+// map.js - upravená funkce onLoanExpired
+
+function onLoanExpired(expiredAmount, seizedMoney, remainingDebt) {
+    console.log(`Půjčka $${expiredAmount} vypršela! Zabaveno $${seizedMoney}, zbývá $${remainingDebt}`);
+    
+    // Žádný alert - informace se zobrazí v HUD
+    
+    if (remainingDebt <= 0) {
+        console.log("Dluh byl plně splacen zabavenými penězi");
+    } else {
+        console.log(`Pozor! Dluh $${remainingDebt} bude dále penalizován odebíráním kolejí každých 2-5 sekund.`);
+    }
+    
+    if (hudRenderer) hudRenderer.markDirty();
+}
+
+const bankManager = createBankManager(
+    app,
+    getMoney,
+    addMoney,
+    subMoney,
+    onLoanExpired,
+    railRenderer  // Teď už railRenderer existuje
+);
+
+window.bankManager = bankManager;
+bankManager.reset();
+
+// Pokračujeme zbytkem kódu
 const characterOverlay = createCharacterOverlay(app, getGridScale, railRenderer, stationRenderer, getMoney, subMoney, addMoney);
 
 const fgContainer = new PIXI.Container();
@@ -210,8 +224,4 @@ const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZo
 
 app.ticker.add(() => {
     keyboardMapMovement();
-    
-    /*if (hudRenderer && typeof hudRenderer.markDirty === 'function') {
-        hudRenderer.markDirty();
-    }*/
 });

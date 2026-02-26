@@ -1,9 +1,10 @@
-export function createLoanTimer(onTimeExpired) {
+export function createLoanTimer(onTimeExpired, onTrackRemoved) {
     let loanActive = false;
     let loanAmount = 0;
-    let timeRemaining = 0; //s
+    let timeRemaining = 0;
     let timerInterval = null;
-    const TOTAL_LOAN_TIME = 5 * 60;
+    let trackPenaltyInterval = null;
+    const TOTAL_LOAN_TIME = 5 /* * 60*/; // 5 minut
 
     function startTimer(amount) {
         stopTimer();
@@ -12,23 +13,73 @@ export function createLoanTimer(onTimeExpired) {
         loanAmount = amount;
         timeRemaining = TOTAL_LOAN_TIME;
         
+        console.log(`Časovač spuštěn: Dluh $${loanAmount}, čas 5 minut`);
+        
         timerInterval = setInterval(() => {
             if (timeRemaining > 0) {
                 timeRemaining--;
             } else {
-                //čas vypršel
-                stopTimer();
+                // Čas vypršel
+                clearInterval(timerInterval);
+                timerInterval = null;
+                
+                console.log(`Čas vypršel pro dluh $${loanAmount}`);
+                
                 if (onTimeExpired) {
-                    onTimeExpired(loanAmount);
+                    const remainingAfterSeizure = onTimeExpired(loanAmount);
+                    
+                    if (remainingAfterSeizure > 0) {
+                        loanAmount = remainingAfterSeizure;
+                        startTrackPenaltyInterval();
+                    } else {
+                        stopTimer();
+                    }
+                } else {
+                    stopTimer();
                 }
             }
         }, 1000);
+    }
+    
+    function startTrackPenaltyInterval() {
+        if (trackPenaltyInterval) {
+            clearTimeout(trackPenaltyInterval);
+        }
+        
+        const scheduleNextPenalty = () => {
+            const nextPenaltyTime = 2000 + Math.random() * 3000; // 2-5s
+            
+            trackPenaltyInterval = setTimeout(() => {
+                if (loanActive && onTrackRemoved) {
+                    const penaltyApplied = onTrackRemoved();  // true = kolej odebrána
+                    
+                    if (penaltyApplied) {
+                        loanAmount = Math.max(0, loanAmount - 10);
+                        console.log(`Dluh snížen o $10, zbývá $${loanAmount}`);
+                        
+                        if (loanAmount <= 0) {
+                            console.log("Dluh plně splacen penalizacemi");
+                            stopTimer();
+                            return;
+                        }
+                    }
+                    
+                    scheduleNextPenalty();
+                }
+            }, nextPenaltyTime);
+        };
+        
+        scheduleNextPenalty();
     }
     
     function stopTimer() {
         if (timerInterval) {
             clearInterval(timerInterval);
             timerInterval = null;
+        }
+        if (trackPenaltyInterval) {
+            clearTimeout(trackPenaltyInterval);
+            trackPenaltyInterval = null;
         }
         loanActive = false;
         loanAmount = 0;

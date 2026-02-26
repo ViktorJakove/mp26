@@ -69,7 +69,7 @@ export function createStationManager(stationRenderer, areaRenderer, drawGraphics
     
                 const tile = adjacentTiles.find(t => !stationRenderer.isTileOccupied(t.x, t.y)) ?? adjacentTiles[0];
                 stationRenderer.addStation(tile.x, tile.y, routeColor, stationIndex * 200, i, cityArea.peeps);
-                if (railRenderer.isTileOccupied(tile.x, tile.y)) railRenderer.removeRail(tile.x, tile.y);
+                if (railRenderer.isTileOccupied(tile.x, tile.y)) railRenderer.removeRail(tile.x, tile.y, false);
                 stationTiles.push(tile);
                 stationIndex++;
             });

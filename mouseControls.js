@@ -28,7 +28,7 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
             const selected = getSelectedRailType();
             if (selected.isDestroy) {
                 if (railRenderer.isTileOccupied(tileX, tileY)) {
-                    railRenderer.removeRail(tileX, tileY);
+                    railRenderer.removeRail(tileX, tileY,false);
                     drawGraphics();
                 }
                 return;

@@ -57,19 +57,30 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
                     const seconds = parseInt(timeParts[1]) || 0;
                     const totalSeconds = minutes * 60 + seconds;
                     
-                    let timerColor = 0xf5c518;
+                    // Získáme aktuální dluh
+                    const loanAmount = window.bankManager?.getLoanAmount?.() || 0;
+                    const isOverdue = totalSeconds <= 0;
                     
-                    if (totalSeconds < 60) {
-                        timerColor = 0xe74c3c;
+                    // Vytvoříme kontejner pro časovač a dluh
+                    const timerContainer = new PIXI.Container();
+                    
+                    let timerColor = 0xf5c518;
+                    let timerText = timerInfo.formattedTime;
+                    
+                    if (isOverdue) {
+                        timerColor = 0xe74c3c;  // Červená po splatnosti
+                        timerText = `⛓️ PO SPLATNOSTI ⛓️`;
+                    } else if (totalSeconds < 60) {
+                        timerColor = 0xe74c3c;  // Červená poslední minuta
                     } else if (totalSeconds < 120) {
-                        timerColor = 0xe67e22;
+                        timerColor = 0xe67e22;  // Oranžová
                     } else if (totalSeconds < 180) {
                         timerColor = 0xf39c12;
                     } else if (totalSeconds < 240) {
                         timerColor = 0xf1c40f;
                     }
                     
-                    const timerLabel = new PIXI.Text(`⏱️ ${timerInfo.formattedTime}`, {
+                    const timerLabel = new PIXI.Text(`⏱️ ${timerText}`, {
                         fontFamily: "Arial",
                         fontSize: TOP_BAR_FONT + 2,
                         fontWeight: "bold",
@@ -77,42 +88,26 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
                     });
                     timerLabel.anchor.set(0.5, 0);
                     timerLabel.x = w / 2;
-                    timerLabel.y = TOP_BAR_H / 2 - TOP_BAR_FONT / 2;
-                    topBarContainer.addChild(timerLabel);
+                    timerLabel.y = TOP_BAR_H / 2 - TOP_BAR_FONT / 2 - 10;
+                    timerContainer.addChild(timerLabel);
                     
-                    if (totalSeconds < 30) {
-                        const warningIcon = new PIXI.Text("⚠️⚠️", {
+                    // Zobrazíme aktuální dluh pod časovačem (červeně)
+                    if (loanAmount > 0) {
+                        const debtLabel = new PIXI.Text(`Dluh: $${loanAmount}`, {
                             fontFamily: "Arial",
-                            fontSize: TOP_BAR_FONT + 6,
-                            fill: 0xe74c3c,
+                            fontSize: TOP_BAR_FONT - 2,
+                            fontWeight: "bold",
+                            fill: 0xe74c3c,  // Červená
                         });
-                        warningIcon.anchor.set(0.5, 0);
-                        warningIcon.x = w / 2 - 85;
-                        warningIcon.y = TOP_BAR_H / 2 - TOP_BAR_FONT / 2 - 2;
-                        topBarContainer.addChild(warningIcon);
-                    } else if (totalSeconds < 60) {
-                        const warningIcon = new PIXI.Text("⚠️", {
-                            fontFamily: "Arial",
-                            fontSize: TOP_BAR_FONT + 4,
-                            fill: 0xe74c3c,
-                        });
-                        warningIcon.anchor.set(0.5, 0);
-                        warningIcon.x = w / 2 - 70;
-                        warningIcon.y = TOP_BAR_H / 2 - TOP_BAR_FONT / 2;
-                        topBarContainer.addChild(warningIcon);
+                        debtLabel.anchor.set(0.5, 0);
+                        debtLabel.x = w / 2;
+                        debtLabel.y = TOP_BAR_H / 2 - TOP_BAR_FONT / 2 + 12;
+                        timerContainer.addChild(debtLabel);
                     }
-                } else {
-                    lastTimerString = "";
-                    const noLoanText = new PIXI.Text("💰 Žádná půjčka", {
-                        fontFamily: "Arial",
-                        fontSize: TOP_BAR_FONT - 2,
-                        fill: 0x7f8c8d,
-                        fontStyle: "italic",
-                    });
-                    noLoanText.anchor.set(0.5, 0);
-                    noLoanText.x = w / 2;
-                    noLoanText.y = TOP_BAR_H / 2 - TOP_BAR_FONT / 2 + 2;
-                    topBarContainer.addChild(noLoanText);
+                    
+                    topBarContainer.addChild(timerContainer);
+                    
+                    // ... warning ikony ...
                 }
             } catch (error) {
                 console.error("Chyba při zobrazování časovače:", error);
