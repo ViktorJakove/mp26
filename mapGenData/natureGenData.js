@@ -99,52 +99,52 @@ export const MOUNTAIN_GEN_DATA=[
         name: "Uprock",
         length: 5,
         thickness: 3,
-        description: "Local water source."
+        description: "Vrchní kámen."
     },{
         name: "Sinaj",
         length: 3,
         thickness: 2,
-        description: "Local diarrhea source."
+        description: "Na špici stojí divný pán s kamennými deskami."
     },{
         name: "Rockhard",
         length: 67,
         thickness: 2,
-        description: "Exceptionally pure."
+        description: "Pozůstatek seismické aktivity."
     },{
-        name: "hugorock",
+        name: "Kata",
         length: 4,
         thickness: 2,
-        description: "Exceptionally pure."
+        description: "Domov mnoha zvířátek."
     },{
-        name: "hugerock2",
+        name: "Indigo Peak",
         length: 20,
         thickness: 1,
-        description: "Exceptionally pure."
+        description: "zabil jsi mého otce, připrav se na smrd."
     },{
-        name: "hugerock3",
+        name: "Bi-montana",
         length: 30,
         thickness: 1,
-        description: "Exceptionally pure."
+        description: "Je tu pár hotelů."
     },{
-        name: "hugerock4",
+        name: "Big rock",
         length: 10,
         thickness: 2,
-        description: "Exceptionally pure."
+        description: "Velmi originální jméno."
     },{
-        name: "hugerock5",
+        name: "Overhang Summit",
         length: 35,
         thickness: 1,
-        description: "Exceptionally pure."
+        description: "Šikmá špice."
     },{
-        name: "hugecock",
+        name: "Mt. Ebott",
         length: 35,
         thickness: 2,
-        description: "Exceptionally pure."
+        description: "Huh? Cože?"
     },{
-        name: "hugecock2",
+        name: "The Boulder",
         length: 20,
         thickness: 2,
-        description: "Exceptionally pure."
+        description: "Nějací blázni po tom lezou."
     }
 ];export const INDIAN_GEN_DATA=[
     {
@@ -158,25 +158,25 @@ export const MOUNTAIN_GEN_DATA=[
         sizeY: 6,
         description: "Náčelník: Matonabbee"
     },{
-        name: "ShizzPeeze",
+        name: "Siouxové",
         sizeX:6,
         sizeY: 12,
-        description: "piss."
+        description: "Náčelník: Sedící býk."
     },{
-        name: "Clam Cove",
+        name: "Komanči",
         sizeX: 12,
         sizeY:11,
-        description: "Exceptionally pure."
+        description: "Náčelník: Quanah Parker."
     },{
-        name: "Clam Cove",
+        name: "Hunkpapové",
         sizeX: 7,
         sizeY:7,
-        description: "Exceptionally pure."
+        description: "Náčelník: Žluč."
     },{
-        name: "Clam Cove",
+        name: "Senecové",
         sizeX: 15,
         sizeY:8,
-        description: "Exceptionally pure."
+        description: "Náčelník: Cornplanter."
     }
 ];
 export const BISON_GEN_DATA=[
