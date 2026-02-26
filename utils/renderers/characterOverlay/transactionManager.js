@@ -29,6 +29,12 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
             if (d.transaction.type === "unlock_bison") {
                 return showBisonUnlockTransaction(key, d, buildingState);
             }
+            if (d.transaction.type === "unlock_speed") {
+                return showSpeedUnlockTransaction(key, d, buildingState);
+            }
+            if (d.transaction.type === "unlock_cross") {
+                return showCrossUnlockTransaction(key, d, buildingState);
+            }
         
             if (d.transaction.questionSprite !== undefined) {
                 const path = `../../graphics/chars/${key}/${key}${d.transaction.questionSprite}.png`;
@@ -275,6 +281,175 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
         
         return true;
     }
+
+
+function showSpeedUnlockTransaction(key, d, buildingState) {
+    if (currentInstr) currentInstr.visible = false;
+    
+    const path = `../../graphics/chars/${key}/${key}${d.transaction.questionSprite}.png`;
+    const tex = PIXI.Texture.from(path);
+    const update = () => {
+        if (currentSprite) {
+            currentSprite.texture = tex;
+            const scale = Math.min(app.screen.width, app.screen.height) * 0.6 / Math.max(tex.width, tex.height);
+            currentSprite.scale.set(scale);
+        }
+    };
+    if (tex.valid) update(); else tex.once('update', update);
+    
+    if (d.transaction.questionSpritePos && currentSprite) {
+        const map = { L: 0.33, C: 0.5, P: 0.66, R: 0.66 };
+        currentSprite.x = app.screen.width * (map[d.transaction.questionSpritePos] || 0.5);
+    }
+
+    currentDesc.text = `${d.transaction.question}\n\nCena: $${d.transaction.cost}`;
+    
+    if (btnContainer) btnContainer.destroy();
+    btnContainer = new PIXI.Container();
+    
+    const yes = createButton("ANO", 0x27ae60, 0x2ecc71, () => {
+        if (getMoney() >= d.transaction.cost) {
+            subMoney(d.transaction.cost);
+            
+            if (window.trainRenderer) {
+                window.trainRenderer.setTrainSpeedMultiplier(3);
+                console.log("Rychlost vlaku zvýšena na 3x!");
+            }
+            
+            buildingState.set(key, { completed: true, questionShown: true });
+            
+            trans.active = false;
+            if (d.transaction.successText) {
+                currentDesc.text = d.transaction.successText;
+            } else {
+                currentDesc.text = "Nákup proběhl úspěšně!";
+            }
+            
+            if (currentInstr) {
+                currentInstr.visible = true;
+                currentInstr.text = "Klikni kamkoli pro zavření...";
+            }
+            
+            if (d.transaction.successSprite !== undefined) {
+                updateSuccessSprite(key, d);
+            }
+            
+            destroyButtons();
+            showInstruction(true);
+        } else {
+            currentDesc.text = d.transaction.failText || "Nemáš dost peněz.";
+            
+            if (currentInstr) {
+                currentInstr.visible = true;
+                currentInstr.text = "Klikni kamkoli pro zavření...";
+            }
+            
+            if (d.transaction.failSprite !== undefined) {
+                updateFailSprite(key, d);
+            }
+            
+            destroyButtons();
+            trans.active = false;
+            showInstruction(true);
+        }
+    });
+    
+    const no = createButton("NE", 0xc0392b, 0xe74c3c, hideOverlay);
+    
+    const total = 120 * 2 + 30;
+    yes.x = (currentPanel.width - total) / 2;
+    no.x = yes.x + 150;
+    yes.y = no.y = (currentPanel.height - 50) / 2 + 40;
+    
+    btnContainer.addChild(yes, no);
+    currentPanel.addChild(btnContainer);
+    
+    return true;
+}
+
+function showCrossUnlockTransaction(key, d, buildingState) {
+    if (currentInstr) currentInstr.visible = false;
+    
+    const path = `../../graphics/chars/${key}/${key}${d.transaction.questionSprite}.png`;
+    const tex = PIXI.Texture.from(path);
+    const update = () => {
+        if (currentSprite) {
+            currentSprite.texture = tex;
+            const scale = Math.min(app.screen.width, app.screen.height) * 0.6 / Math.max(tex.width, tex.height);
+            currentSprite.scale.set(scale);
+        }
+    };
+    if (tex.valid) update(); else tex.once('update', update);
+    
+    if (d.transaction.questionSpritePos && currentSprite) {
+        const map = { L: 0.33, C: 0.5, P: 0.66, R: 0.66 };
+        currentSprite.x = app.screen.width * (map[d.transaction.questionSpritePos] || 0.5);
+    }
+
+    currentDesc.text = `${d.transaction.question}\n\nCena: $${d.transaction.cost}`;
+    
+    if (btnContainer) btnContainer.destroy();
+    btnContainer = new PIXI.Container();
+    
+    const yes = createButton("ANO", 0x27ae60, 0x2ecc71, () => {
+        if (getMoney() >= d.transaction.cost) {
+            subMoney(d.transaction.cost);
+            
+            if (window.hudRenderer) {
+                window.hudRenderer.unlockRailType("CROSS");
+                console.log("Kolej typu CROSS odemčena!");
+            }
+            
+            buildingState.set(key, { completed: true, questionShown: true });
+            
+            trans.active = false;
+            if (d.transaction.successText) {
+                currentDesc.text = d.transaction.successText;
+            } else {
+                currentDesc.text = "Nákup proběhl úspěšně!";
+            }
+            
+            if (currentInstr) {
+                currentInstr.visible = true;
+                currentInstr.text = "Klikni kamkoli pro zavření...";
+            }
+            
+            if (d.transaction.successSprite !== undefined) {
+                updateSuccessSprite(key, d);
+            }
+            
+            destroyButtons();
+            showInstruction(true);
+        } else {
+            currentDesc.text = d.transaction.failText || "Nemáš dost peněz.";
+            
+            if (currentInstr) {
+                currentInstr.visible = true;
+                currentInstr.text = "Klikni kamkoli pro zavření...";
+            }
+            
+            if (d.transaction.failSprite !== undefined) {
+                updateFailSprite(key, d);
+            }
+            
+            destroyButtons();
+            trans.active = false;
+            showInstruction(true);
+        }
+    });
+    
+    const no = createButton("NE", 0xc0392b, 0xe74c3c, hideOverlay);
+    
+    const total = 120 * 2 + 30;
+    yes.x = (currentPanel.width - total) / 2;
+    no.x = yes.x + 150;
+    yes.y = no.y = (currentPanel.height - 50) / 2 + 40;
+    
+    btnContainer.addChild(yes, no);
+    currentPanel.addChild(btnContainer);
+    
+    return true;
+}
 
     function updateSuccessSprite(key, d, afterTextIndex = null) {
         if (!currentSprite) return;

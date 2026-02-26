@@ -168,6 +168,7 @@ export const BUILDING_TEXTS = {
     sprite: [0, "S", 0],
     spritePos: ["C", "C", "C"],
     transaction: {
+        type: "unlock_speed",
         cost: 300,
         successText: "Investice přijata! Město ti děkuje.",
         failText: "Nemáš dostatek financí.",
@@ -189,6 +190,7 @@ export const BUILDING_TEXTS = {
         sprite: [0, 1, "S"],
         spritePos: ["L", "L", "C"],
         transaction: {
+            type: "unlock_cross", 
             cost: 500,
             successText: "Děkujeme za nákup! Nová lokomotiva brzy dorazí.",
             failText: "Nemáš dost peněz, příteli.",
