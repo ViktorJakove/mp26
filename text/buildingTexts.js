@@ -85,12 +85,35 @@ export const BUILDING_TEXTS = {
     },
     "olda": {
         text: [
-            "Usedlost bývalého lovce bizonů",
-            "Stěny zdobí paroží a kůže",
-            "Vůně kouře a vydělané kůže"
+            "zdar brop",
+            "tady Olda",
+            "pico tak co?"
         ],
-        sprite: [0, 0, 1],
-        spritePos: ["L", "L", "C"]
+        afterTransaction: {
+            text: [
+                "Děkujeme za investici!",
+                "Díky tvé pomoci můžeme modernizovat vybavení.",
+                "Přijď se podívat na novou lokomotivu!"
+            ],
+            sprite: [0, "1", 0],
+            spritePos: ["C", "C", "C"]
+        },
+        sprite: [0, "1", 0],
+        spritePos: ["C", "C", "C"],
+        transaction: {
+            type: "unlock_bison",
+            cost: 100,
+            successText: "Stav koleje podél.",
+            failText: "Nemáš dostatek financí.",
+            question: "Chceš se naučit, jak stavět koleje kolem bizonů?",
+            questionSprite: 1,
+            questionSpritePos: "C",
+            successSprite: 1,
+            successSpritePos: "C",
+            failSprite: 0,
+            failSpritePos: "C",
+            question: "Zjisti tajemství?"
+        }
     },
     "gallery": {
         text: [

@@ -10,6 +10,7 @@ import { createStationManager } from "./stationManager.js";
 import { createRouteChecker } from "./utils/routeChecker.js";
 import { createCharacterOverlay } from "./utils/renderers/characterOverlay/characterOverlayRenderer.js";
 import { createBankManager } from "./utils/bankManager.js";
+import { createBisonManager } from "./utils/bisonManager.js";
 
 const app = createApp();
 app.stage.sortableChildren = true;
@@ -59,7 +60,7 @@ function getLoanTimerInfo() {
     return { isActive: false, formattedTime: "0:00" };
 }
 
-// Nejdříve vytvoříme renderery (včetně railRenderer)
+//NEJPRVE renderers
 const renderers = creatRenderers(
     app, 
     camera, 
@@ -81,13 +82,11 @@ const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer, trainR
 window.trainRenderer = trainRenderer;
 window.hudRenderer = hudRenderer;
 
-// AŽ TEĎ můžeme vytvořit bankManager (railRenderer už existuje)
-// map.js - upravená funkce onLoanExpired
+const bisonManager = createBisonManager(app, getAreas, railRenderer, hudRenderer);
+window.bisonManager = bisonManager;
 
 function onLoanExpired(expiredAmount, seizedMoney, remainingDebt) {
     console.log(`Půjčka $${expiredAmount} vypršela! Zabaveno $${seizedMoney}, zbývá $${remainingDebt}`);
-    
-    // Žádný alert - informace se zobrazí v HUD
     
     if (remainingDebt <= 0) {
         console.log("Dluh byl plně splacen zabavenými penězi");
@@ -111,13 +110,12 @@ const bankManager = createBankManager(
 window.bankManager = bankManager;
 bankManager.reset();
 
-// Pokračujeme zbytkem kódu
 const characterOverlay = createCharacterOverlay(app, getGridScale, railRenderer, stationRenderer, getMoney, subMoney, addMoney);
 
 const fgContainer = new PIXI.Container();
 fgContainer.zIndex = 10;
-const { getHighlightedTile } = setupTileHighlight(app, camera, () => gridScale, cellSize, () => drawGraphics(), areas, getPlacementMode);
-const { drawGraphics } = createDrawGraphics(app, camera, getGridScale, cellSize, getLevel, getHighlightedTile, getPlacementMode, getAreas, renderers, fgContainer, trainRenderer);
+const { getHighlightedTile } = setupTileHighlight(app, camera, () => gridScale, cellSize, () => drawGraphics(), areas, getPlacementMode, bisonManager);
+const { drawGraphics } = createDrawGraphics(app, camera, getGridScale, cellSize, getLevel, getHighlightedTile, getPlacementMode, getAreas, renderers, fgContainer);
 
 const { addLevel, addStations, spawnTrainsForConnectedRoutes } = createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel, setLevel, railRenderer, trainRenderer, unlockCity);
 
@@ -148,11 +146,9 @@ railRenderer.setOnRailPlaceCheckConn(() => {
             
             if (city1 && !isCityUnlocked(city1.name)) {
                 unlockCity(city1.name);
-                console.log(`Město odemčeno: ${city1.name}`);
             }
             if (city2 && !isCityUnlocked(city2.name)) {
                 unlockCity(city2.name);
-                console.log(`Město odemčeno: ${city2.name}`);
             }
         }
     });
@@ -213,7 +209,7 @@ function mapZoom(zoomFactor, event) {
     }
 
     gridScale = newScale;
-    app.stage.scale.set(gridScale, gridScale, cellSize);
+    app.stage.scale.set(gridScale, gridScale);
     updateStageHitArea();
     areaRenderer.markDirty();
     stationRenderer.markDirty();
@@ -251,10 +247,6 @@ window.addEventListener("resize", () => {
     if (characterOverlay.isVisible && characterOverlay.isVisible()) {
         const currentCity = characterOverlay.getCurrentCity ? characterOverlay.getCurrentCity() : null;
         if (currentCity) {
-            characterOverlay.overlayContainer.scale.set(1);
-            characterOverlay.overlayContainer.x = 0;
-            characterOverlay.overlayContainer.y = 0;
-            characterOverlay.showCityInfo(currentCity);
             characterOverlay.refresh();
         }
     }

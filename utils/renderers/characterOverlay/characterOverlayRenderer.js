@@ -103,7 +103,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
     }
 
     function handleClick() {
-        if (!city || !ui.desc || transactionManager.isActive() || shopManager.shopContainer ||isAnimating) return;
+        if (!city || !ui.desc || transactionManager.isActive() || shopManager.shopContainer || isAnimating) return;
         
         const key = city.building;
         const texts = getTexts(key, buildingState);
@@ -112,28 +112,15 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         const textIdx = ui.getTextIndex();
     
         if (s?.completed) {
-            buildingState.set(key, { ...s, completed: false });
-            
-            ui.setTextIndex(texts.length - 1);
-            
-            if (!ui.sprite || !ui.desc || !ui.panel) {
-                const targetX = getPos(key, texts.length - 1, false, app, buildingState);
-                const targetY = app.screen.height / 5 * 2;
-                const path = getPath(key, texts.length - 1, false, buildingState);
-                
-                ui.createSprite(path, targetX, targetY);
-                
-                if (!ui.panel) {
-                    const title = city.name;
-                    const description = texts[texts.length - 1];
-                    const instruction = "Klikni kamkoli pro další text...";
-                    ui.createPanel(title, description, instruction);
-                }
+            if (textIdx === texts.length - 1) {
+                hide();
+                return;
             }
             
-            transactionManager.updateUIElements(ui.panel, ui.desc, ui.instr, ui.sprite);
-            transactionManager.setActive(true, key);
-            transactionManager.showTransaction(key, buildingState);
+            ui.setTextIndex(texts.length - 1);
+            ui.setText(texts[texts.length - 1]);
+            updateSprite(ui.sprite, key, texts.length - 1, true, app, buildingState);
+            ui.setInstruction("Klikni pro zavření...");
             return;
         }
     
