@@ -1,4 +1,4 @@
-export function createLoanTimer(onTimeExpired, onTrackRemoved) {
+export function createLoanTimer(onTimeExpired, onTrackRemoved, onLoanUpdate) {
     let loanActive = false;
     let loanAmount = 0;
     let timeRemaining = 0;
@@ -56,6 +56,11 @@ export function createLoanTimer(onTimeExpired, onTrackRemoved) {
                     if (penaltyApplied) {
                         loanAmount = Math.max(0, loanAmount - 10);
                         console.log(`Dluh snížen o $10, zbývá $${loanAmount}`);
+
+                        if (window.bankManager && window.bankManager.setLoanAmount) {
+                            window.bankManager.setLoanAmount(loanAmount);
+                        }
+                        onLoanUpdate();
                         
                         if (loanAmount <= 0) {
                             console.log("Dluh plně splacen penalizacemi");

@@ -1,7 +1,7 @@
 import { BUILDING_TEXTS } from "../text/buildingTexts.js";
 import { createLoanTimer } from "./loanTimer.js";
 
-export function createBankManager(app, getMoney, addMoney, subMoney, onLoanExpired, railRenderer) {
+export function createBankManager(app, getMoney, addMoney, subMoney, onLoanExpired, railRenderer, onLoanUpdate) {
     let loanAmount = 0;
     let loanActive = false;
     let htmlInput = null;
@@ -26,6 +26,7 @@ export function createBankManager(app, getMoney, addMoney, subMoney, onLoanExpir
         if (window.drawGraphics) window.drawGraphics();
         
         console.log(`Odebrána kolej na pozici [${rail.x}, ${rail.y}] jako penalizace za dluh`);
+        onLoanUpdate();
         return true;
     }
     
@@ -59,7 +60,8 @@ export function createBankManager(app, getMoney, addMoney, subMoney, onLoanExpir
     
     const loanTimer = createLoanTimer(
         handleLoanExpired,
-        removeRandomTrack
+        removeRandomTrack,
+        onLoanUpdate
     );
 
     function removeHTMLInput() {
@@ -627,6 +629,10 @@ export function createBankManager(app, getMoney, addMoney, subMoney, onLoanExpir
             removeHTMLInput();
         }
     });
+    function setLoanAmount(amount) {
+        loanAmount = amount;
+        if (onLoanUpdate) onLoanUpdate();
+    }
     
     return {
         showLoanUI,
@@ -634,6 +640,7 @@ export function createBankManager(app, getMoney, addMoney, subMoney, onLoanExpir
         isLoanActive,
         getLoanAmount,
         getTimeRemaining: () => loanTimer.getTimeRemaining(),
-        getFormattedTime
+        getFormattedTime,
+        setLoanAmount
     };
 }

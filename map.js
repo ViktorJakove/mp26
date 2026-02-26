@@ -95,7 +95,8 @@ const bankManager = createBankManager(
     addMoney,
     subMoney,
     onLoanExpired,
-    railRenderer  // Teď už railRenderer existuje
+    railRenderer,
+    hudRenderer.markDirty
 );
 
 window.bankManager = bankManager;

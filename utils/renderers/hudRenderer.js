@@ -57,11 +57,9 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
                     const seconds = parseInt(timeParts[1]) || 0;
                     const totalSeconds = minutes * 60 + seconds;
                     
-                    // Získáme aktuální dluh
                     const loanAmount = window.bankManager?.getLoanAmount?.() || 0;
                     const isOverdue = totalSeconds <= 0;
                     
-                    // Vytvoříme kontejner pro časovač a dluh
                     const timerContainer = new PIXI.Container();
                     
                     let timerColor = 0xf5c518;
@@ -91,8 +89,9 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
                     timerLabel.y = TOP_BAR_H / 2 - TOP_BAR_FONT / 2 - 10;
                     timerContainer.addChild(timerLabel);
                     
-                    // Zobrazíme aktuální dluh pod časovačem (červeně)
+                    //TADYTO BY SE MELO AKTUALIZOVAT S DLUHEM (KAZDOU ODEBRANOU KOLEJI PO SPLATNOSTI) TEMP TEMP TEMP
                     if (loanAmount > 0) {
+                        console.log(`Vykresluji dluh: $${loanAmount}`);
                         const debtLabel = new PIXI.Text(`Dluh: $${loanAmount}`, {
                             fontFamily: "Arial",
                             fontSize: TOP_BAR_FONT - 2,
@@ -107,7 +106,6 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
                     
                     topBarContainer.addChild(timerContainer);
                     
-                    // ... warning ikony ...
                 }
             } catch (error) {
                 console.error("Chyba při zobrazování časovače:", error);
@@ -152,7 +150,6 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
         }
     }
 
-    // Přidáme ticker do app pro pravidelné volání updateTimer
     app.ticker.add(updateTimer);
 
     function getSelectedType() {
@@ -317,6 +314,8 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
 
     function markDirty() {
         hudDirty = true;
+        console.log("HUD markDirty called");
+        draw(); //temp
     }
 
     function refresh() {
