@@ -1,4 +1,4 @@
-export function setupMouseControls(app, camera, getGridScale, cellSize, getPlacementMode, railRenderer, drawGraphics, getSelectedRailType, cityInfoOverlay, areas, stationRenderer) {
+export function setupMouseControls(app, camera, getGridScale, cellSize, getPlacementMode, railRenderer, drawGraphics, getSelectedRailType, cityInfoOverlay, areas, stationRenderer, isCityUnlocked,unlockCity) {
     let isDragging = false;
     let mouseInitialPos = { x: 0, y: 0 };
     let isPlacingRail = false;
@@ -51,6 +51,11 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
         );
 
         if (clickedCity) {
+            if (isCityUnlocked && isCityUnlocked(clickedCity.name)) {
+                cityInfoOverlay.showCityInfo(clickedCity);
+                return true;
+            }
+
             const stations = stationRenderer.getStations();
             
             const isConnected = stations.some(station => {
@@ -75,6 +80,9 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
             });
 
             if (isConnected) {
+                if (unlockCity) {
+                    unlockCity(clickedCity.name);
+                }
                 cityInfoOverlay.showCityInfo(clickedCity);
                 return true;
             }

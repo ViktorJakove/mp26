@@ -40,6 +40,15 @@ const getMoney = () => money;
 const subMoney = (amount) => money -= amount;
 const addMoney = (amount) => money += amount;
 
+let unlockedCities = new Set();
+
+const getUnlockedCities = () => discoveredCities;
+
+const unlockCity = (cityName) => {
+    unlockedCities.add(cityName);
+};
+const isCityUnlocked = (cityName) => unlockedCities.has(cityName);
+
 function getLoanTimerInfo() {
     if (window.bankManager) {
         return {
@@ -110,7 +119,7 @@ fgContainer.zIndex = 10;
 const { getHighlightedTile } = setupTileHighlight(app, camera, () => gridScale, cellSize, () => drawGraphics(), areas, getPlacementMode);
 const { drawGraphics } = createDrawGraphics(app, camera, getGridScale, cellSize, getLevel, getHighlightedTile, getPlacementMode, getAreas, renderers, fgContainer, trainRenderer);
 
-const { addLevel, addStations, spawnTrainsForConnectedRoutes } = createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel, setLevel, railRenderer, trainRenderer);
+const { addLevel, addStations, spawnTrainsForConnectedRoutes } = createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel, setLevel, railRenderer, trainRenderer, unlockCity);
 
 const { checkRouteConnections } = createRouteChecker(stationRenderer, railRenderer);
 
@@ -119,6 +128,26 @@ railRenderer.setOnRailPlaceCheckConn(() => {
 
     const connectedIndices = result.filter(r => r.connected).map(r => r.routeIndex);
     spawnTrainsForConnectedRoutes(connectedIndices);
+
+    const stations = stationRenderer.getStations();
+    connectedIndices.forEach(index => {
+        const pair = stations.filter(s => s.index === index);
+        if (pair.length === 2) {
+            const city1 = areas.find(area => 
+                area.type?.type === "city" &&
+                pair[0].x >= area.x && pair[0].x < area.x + area.sizeX &&
+                pair[0].y >= area.y && pair[0].y < area.y + area.sizeY
+            );
+            const city2 = areas.find(area => 
+                area.type?.type === "city" &&
+                pair[1].x >= area.x && pair[1].x < area.x + area.sizeX &&
+                pair[1].y >= area.y && pair[1].y < area.y + area.sizeY
+            );
+            
+            if (city1) unlockCity(city1.name);
+            if (city2) unlockCity(city2.name);
+        }
+    });
 
     const allConnected = result.length > 0 && result.every(r => r.connected);
     if (allConnected) addStations();
@@ -136,7 +165,9 @@ const { resetDrag } = setupMouseControls(
     () => hudRenderer.getSelectedType(),
     characterOverlay,
     areas,
-    stationRenderer
+    stationRenderer,
+    isCityUnlocked,
+    unlockCity
 );
 
 document.addEventListener("keydown", (event) => {
