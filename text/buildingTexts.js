@@ -43,17 +43,17 @@ export const BUILDING_TEXTS = {
             sprite: [1, 1, 1],
             spritePos: ["C", "C", "C"]
         },
-        sprite: [0, 1, "S"],
-        spritePos: ["P", "P", "C"],
+        sprite: [0, 1, "S", 1,0,0,1],
+        spritePos: ["C", "C", "C", "C", "C", "C", "C"],
         transaction: {
             type: "bank",
             cost: 0,
             failText: "Uh-uh, transakce zrušena.",
-            questionSprite: 1,
+            questionSprite: "S",
             questionSpritePos: "C",
             successSprite: "S",
             successSpritePos: "C",
-            failSprite: 0,
+            failSprite: 1,
             failSpritePos: "C",
             question: "Kolik si půjčíme?",
             bankOptions: {
