@@ -17,7 +17,7 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         }
     }
 
-    const TRAIN_SPEED = 3; /*3*/ 
+    const TRAIN_SPEED = 15; /*3*/ 
     const TRAIN_SIZE = 0.6;
     const STATION_WAIT_TIME = 3500; //ms
     const WAGON_OFFSET = 0.75;
@@ -101,16 +101,17 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         return false;
     }
     
-    function profit(train){
-        if (calcBisonProfitForPath) {
+    function profit(train) {
+        const isBisonUnlocked = window.bisonManager ? window.bisonManager.isBisonUnlocked() : false;
+        
+        if (isBisonUnlocked && calcBisonProfitForPath) {
             const bisonBonus = calcBisonProfitForPath(train.path);
             if (bisonBonus > 0) {
                 addMoney(bisonBonus);
             }
         }
-
-        let profit = avgPeeps > 50 ?  avgPeeps /4 : avgPeeps / 2;
-
+    
+        let profit = avgPeeps > 50 ? avgPeeps / 4 : avgPeeps / 2;
         addMoney(Math.round(profit));
     }
 

@@ -5,7 +5,6 @@ export function createBisonManager(app, getAreas, railRenderer, hudRenderer) {
     
     function unlockBisonBuilding() {
         bisonBuildingUnlocked = true;
-        console.log("Bison functionality unlocked! Nyní víš, že stavěním přes bizony ztrácíš zisk.");
         
         if (hudRenderer) hudRenderer.markDirty();
     }

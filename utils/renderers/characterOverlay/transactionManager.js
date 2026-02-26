@@ -148,7 +148,7 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
 
     function showBisonUnlockTransaction(key, d, buildingState) {
         if (currentInstr) currentInstr.visible = false;
-    
+        
         const path = `../../graphics/chars/${key}/${key}${d.transaction.questionSprite}.png`;
         const tex = PIXI.Texture.from(path);
         
@@ -179,6 +179,7 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
                 
                 if (window.bisonManager) {
                     window.bisonManager.unlockBisonBuilding();
+                    console.log("Bison profit unlocked!");
                 }
                 
                 buildingState.set(key, { completed: true, questionShown: true });

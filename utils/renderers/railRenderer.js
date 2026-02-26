@@ -205,7 +205,7 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
     }
 
     function getBisonProfit(path) {
-        const profit = calcBisonProfitForPath(path, getAreas, occupiedTiles);
+        const profit = calcBisonProfitForPath(path, getAreas, occupiedTiles, window.bisonManager ? window.bisonManager.isBisonUnlocked() : false);
         console.log(profit);
         return profit;
     }
