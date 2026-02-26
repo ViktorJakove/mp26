@@ -64,7 +64,7 @@ export const CITY_GEN_DATA=[
         building: "none",
         defenseLevel: 5,
         cathouseLevel: 0,
-        description: "Ve vzduchu prázdnota"
+        description: "Ve vzduchu prázdnota."
     },
     {
         name: "Anschussburg",
@@ -108,7 +108,7 @@ export const CITY_GEN_DATA=[
         building: "shop",
         defenseLevel: 5,
         cathouseLevel: 0,
-        description: "Město vetešníků"
+        description: "Město obchodu."
     },
     {
         name: "Boom-Mussel Bay",
@@ -119,7 +119,7 @@ export const CITY_GEN_DATA=[
         building: "barber",
         defenseLevel: 5,
         cathouseLevel: 0,
-        description: "Bárbr"
+        description: "Bárbr."
     },
     {
         name: "Cul's Cordonnier",
@@ -163,7 +163,7 @@ export const CITY_GEN_DATA=[
         building: "bussiness",
         defenseLevel: 5,
         cathouseLevel: 0,
-        description: "Město strojů a techniky"
+        description: "Město strojů a techniky."
     },
     {
         name: "Holy Cross",
@@ -174,7 +174,7 @@ export const CITY_GEN_DATA=[
         building: "church",
         defenseLevel: 5,
         cathouseLevel: 0,
-        description: "Posvátné místo"
+        description: "Sanktplatz."
     },
     {
         name: "Wash Him Tom DC",
