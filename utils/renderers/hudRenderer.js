@@ -2,15 +2,39 @@ import { RAIL_TYPES, DESTROY_ENTRY } from "../../enums/railTypes.js";
 
 const TYPES_LIST = [...Object.values(RAIL_TYPES), DESTROY_ENTRY];
 
-export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode) {
+export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode, getLoanTimerInfo) {
+    // getLoanTimerInfo by měla vracet { isActive: boolean, formattedTime: string }
+
+    const LOCKED_RAIL_TYPES = new Set(["T_N", "T_E", "T_S", "T_W"]); //cross moc dulezitej
+    
+    function unlockRailType(typeId) {
+        
+        LOCKED_RAIL_TYPES.delete(typeId);
+        
+        // Zkontrolujeme, jestli vybraný typ je stále dostupný
+        const availableTypes = TYPES_LIST.filter(type => {
+            if (type.isDestroy) return true;
+            return !LOCKED_RAIL_TYPES.has(type.id);
+        });
+        
+        const selected = availableTypes.find(t => t.id === selectedTypeId);
+        if (!selected && availableTypes.length > 0) {
+            selectedTypeId = availableTypes[0].id;
+        }
+        
+        hudDirty = true;
+        draw();
+    }
 
     const topBarContainer = new PIXI.Container();
     topBarContainer.zIndex = 25;
     topBarContainer.interactive = true;
     app.stage.addChild(topBarContainer);
 
-    const TOP_BAR_H = 36;
+    const TOP_BAR_H = 48;
     const TOP_BAR_FONT = 18;
+
+    let lastTimerString = "";//check zmen
 
     function drawTopBar() {
         topBarContainer.removeChildren();
@@ -25,15 +49,78 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
         topBarContainer.addChild(bg);
 
         const money = getMoney();
-        const label = new PIXI.Text(`💰 $${money}`, {
+        const moneyLabel = new PIXI.Text(`💰 $${money}`, {
             fontFamily: "Arial",
             fontSize: TOP_BAR_FONT,
             fontWeight: "bold",
             fill: 0xf5c518,
         });
-        label.x = 12;
-        label.y = TOP_BAR_H / 2 - TOP_BAR_FONT / 2;
-        topBarContainer.addChild(label);
+        moneyLabel.x = 12;
+        moneyLabel.y = TOP_BAR_H / 2 - TOP_BAR_FONT / 2;
+        topBarContainer.addChild(moneyLabel);
+        
+        if (getLoanTimerInfo) {
+            try {
+                const timerInfo = getLoanTimerInfo();
+                if (timerInfo && timerInfo.isActive) {
+                    lastTimerString = timerInfo.formattedTime;
+                    
+                    const timeParts = timerInfo.formattedTime.split(':');
+                    const minutes = parseInt(timeParts[0]) || 0;
+                    const seconds = parseInt(timeParts[1]) || 0;
+                    const totalSeconds = minutes * 60 + seconds;
+                    
+                    const loanAmount = window.bankManager?.getLoanAmount?.() || 0;
+                    const isOverdue = totalSeconds <= 0;
+                    
+                    const timerContainer = new PIXI.Container();
+                    
+                    let timerColor = 0xf5c518;
+                    let timerText = timerInfo.formattedTime;
+                    
+                    if (isOverdue) {
+                        timerColor = 0xe74c3c;  // Červená po splatnosti
+                        timerText = `⛓️ PO SPLATNOSTI ⛓️`;
+                    } else if (totalSeconds < 60) {
+                        timerColor = 0xe74c3c;  // Červená poslední minuta
+                    } else if (totalSeconds < 120) {
+                        timerColor = 0xe67e22;  // Oranžová
+                    } else if (totalSeconds < 180) {
+                        timerColor = 0xf39c12;
+                    } else if (totalSeconds < 240) {
+                        timerColor = 0xf1c40f;
+                    }
+                    
+                    const timerLabel = new PIXI.Text(`⏱️ ${timerText}`, {
+                        fontFamily: "Arial",
+                        fontSize: TOP_BAR_FONT + 2,
+                        fontWeight: "bold",
+                        fill: timerColor,
+                    });
+                    timerLabel.anchor.set(0.5, 0);
+                    timerLabel.x = w / 2;
+                    timerLabel.y = TOP_BAR_H / 2 - TOP_BAR_FONT / 2 - 10;
+                    timerContainer.addChild(timerLabel);
+                    
+                    if (loanAmount > 0) {
+                        const debtLabel = new PIXI.Text(`Dluh: $${loanAmount}`, {
+                            fontFamily: "Arial",
+                            fontSize: TOP_BAR_FONT - 2,
+                            fontWeight: "bold",
+                            fill: 0xe74c3c,  // Červená
+                        });
+                        debtLabel.anchor.set(0.5, 0);
+                        debtLabel.x = w / 2;
+                        debtLabel.y = TOP_BAR_H / 2 - TOP_BAR_FONT / 2 + 12;
+                        timerContainer.addChild(debtLabel);
+                    }
+                    
+                    topBarContainer.addChild(timerContainer);
+                }
+            } catch (error) {
+                console.error("Chyba při zobrazování časovače:", error);
+            }
+        }
 
         topBarContainer.scale.set(1 / gridScale);
         topBarContainer.x = 0;
@@ -48,16 +135,57 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
     const ICON_SIZE = 48;
     const PADDING = 6;
 
-    let selectedIndex = 0;
+    // Místo selectedIndex použijeme selectedTypeId
+    let selectedTypeId = "STRAIGHT_H"; // výchozí typ
     let onSelectCallback = null;
 
     let hudDirty = true;
     let lastMoney = null;
     let lastPlacementMode = null;
     let lastGridScale = null;
+    let lastTimerInfo = null;
+
+    let lastSecond = Date.now();
+    
+    function updateTimer() {
+        const now = Date.now();
+        if (now - lastSecond >= 1000) {
+            lastSecond = now;
+            if (getLoanTimerInfo) {
+                const timerInfo = getLoanTimerInfo();
+                if (timerInfo && timerInfo.isActive && timerInfo.formattedTime !== lastTimerString) {
+                    hudDirty = true;
+                    draw();
+                }
+            }
+        }
+    }
+
+    app.ticker.add(updateTimer);
 
     function getSelectedType() {
-        return TYPES_LIST[selectedIndex];
+        // Vždycky filtrujeme dostupné typy
+        const availableTypes = TYPES_LIST.filter(type => {
+            if (type.isDestroy) return true;
+            return !LOCKED_RAIL_TYPES.has(type.id);
+        });
+        
+        // Najdeme typ podle ID
+        let selected = availableTypes.find(t => t.id === selectedTypeId);
+        
+        // Pokud není dostupný (třeba byl zamčený), vybereme první dostupný
+        if (!selected && availableTypes.length > 0) {
+            selectedTypeId = availableTypes[0].id;
+            selected = availableTypes[0];
+        }
+        
+        // Pokud stále nic není, vezmeme první z TYPES_LIST jako fallback
+        if (!selected) {
+            selected = TYPES_LIST[0];
+            if (selected) selectedTypeId = selected.id;
+        }
+        
+        return selected || TYPES_LIST[0];
     }
 
     function setOnSelect(cb) {
@@ -67,7 +195,6 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
     function drawLeftBar() {
         leftBarContainer.removeChildren();
 
-        // Always update visibility based on current placement mode
         leftBarContainer.visible = getPlacementMode();
         
         if (!getPlacementMode()) {
@@ -77,20 +204,25 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
         const gridScale = getGridScale();
 
         const PANEL_W = ICON_SIZE + PADDING * 2;
-        const PANEL_H = TYPES_LIST.length * (ICON_SIZE + PADDING + 10) + PADDING; // Extra height for cost
+        const PANEL_H = TYPES_LIST.length * (ICON_SIZE + PADDING + 10) + PADDING;
 
         const bg = new PIXI.Graphics();
         bg.beginFill(0x222222, 0.88);
         bg.drawRect(0, 0, PANEL_W, PANEL_H, 8);
         bg.endFill();
+        bg.interactive = true;
         leftBarContainer.addChild(bg);
 
         TYPES_LIST.forEach((type, i) => {
             const x = PADDING;
-            const y = PADDING + i * (ICON_SIZE + PADDING + 10); // Add spacing for cost
+            const y = PADDING + i * (ICON_SIZE + PADDING + 10);
 
-            //highlight
-            if (i === selectedIndex) {
+            const isLocked = !type.isDestroy && LOCKED_RAIL_TYPES.has(type.id);
+            
+            // Zvýrazníme vybraný typ (podle ID, ne podle indexu)
+            const isSelected = !isLocked && type.id === selectedTypeId;
+
+            if (isSelected) {
                 const hl = new PIXI.Graphics();
                 hl.beginFill(0xffcc00, 0.55);
                 hl.drawRoundedRect(x, y, ICON_SIZE, ICON_SIZE, 4);
@@ -98,7 +230,6 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
                 leftBarContainer.addChild(hl);
             }
 
-            //ikona(jezis)
             if (type.isDestroy) {
                 const g = new PIXI.Graphics();
                 g.beginFill(0xaa0000, 0.9);
@@ -130,6 +261,15 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
                     if (type.connections[3]) { g.moveTo(cx, cy); g.lineTo(x, cy); }
                     leftBarContainer.addChild(g);
                 }
+                
+                if (isLocked) {
+                    const lockOverlay = new PIXI.Graphics();
+                    lockOverlay.beginFill(0x888888, 0.6);
+                    lockOverlay.drawRect(x, y, ICON_SIZE, ICON_SIZE);
+                    lockOverlay.endFill();
+                    leftBarContainer.addChild(lockOverlay);
+                }
+
                 const costLabel = new PIXI.Text(`$${type.cost}`, {
                     fontFamily: "Arial",
                     fontSize: 12,
@@ -143,21 +283,26 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
                 leftBarContainer.addChild(costLabel);
             }
 
-            //hit area
-            const hit = new PIXI.Graphics();
-            hit.beginFill(0xffffff, 0.001);
-            hit.drawRect(x, y, ICON_SIZE, ICON_SIZE + 10);
-            hit.endFill();
-            hit.interactive = true;
-            hit.cursor = "pointer";
-            hit.on('pointerdown', (e) => {
+            const hitArea = new PIXI.Graphics();
+            hitArea.beginFill(0xffffff, 0.001);
+            hitArea.drawRect(x, y, ICON_SIZE, ICON_SIZE + 10);
+            hitArea.endFill();
+            hitArea.interactive = true;
+            hitArea.cursor = isLocked ? "not-allowed" : "pointer";
+            
+            hitArea.on('pointerdown', (e) => {
                 e.stopPropagation();
-                selectedIndex = i;
-                hudDirty = true;
-                draw();
-                if (onSelectCallback) onSelectCallback(type);
+                e.preventDefault();
+                
+                if (!isLocked) {
+                    selectedTypeId = type.id || 'DESTROY';
+                    hudDirty = true;
+                    draw();
+                    if (onSelectCallback) onSelectCallback(type);
+                }
             });
-            leftBarContainer.addChild(hit);
+            
+            leftBarContainer.addChild(hitArea);
         });
 
         leftBarContainer.scale.set(1 / gridScale);
@@ -169,9 +314,14 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
         const currentMoney = getMoney();
         const currentPlacementMode = getPlacementMode();
         const currentGridScale = getGridScale();
+        const currentTimerInfo = getLoanTimerInfo ? getLoanTimerInfo() : { isActive: false, formattedTime: "0:00" };
 
-        // Force redraw if placement mode changed, regardless of other state
         if (currentPlacementMode !== lastPlacementMode) {
+            hudDirty = true;
+        }
+
+        if (currentTimerInfo.isActive !== lastTimerInfo?.isActive || 
+            currentTimerInfo.formattedTime !== lastTimerInfo?.formattedTime) {
             hudDirty = true;
         }
 
@@ -183,6 +333,7 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
         lastMoney = currentMoney;
         lastPlacementMode = currentPlacementMode;
         lastGridScale = currentGridScale;
+        lastTimerInfo = currentTimerInfo;
         hudDirty = false;
 
         drawTopBar();
@@ -191,6 +342,7 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
 
     function markDirty() {
         hudDirty = true;
+        draw();
     }
 
     function refresh() {
@@ -209,5 +361,6 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode)
         markDirty,
         getSelectedType,
         setOnSelect,
+        unlockRailType
     };
 }

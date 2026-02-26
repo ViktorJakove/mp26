@@ -5,7 +5,7 @@ export const CITY_GEN_DATA=[
         peepsMax: 25,
         sizeX: 2,
         sizeY: 2,
-        building: "hq",
+        building: "none",
         defenseLevel: 1,
         cathouseLevel: 0,
         description: "Domov úžasného myslitele. (tebe!)"
@@ -16,7 +16,7 @@ export const CITY_GEN_DATA=[
         peepsMax: 10,
         sizeX: 2,
         sizeY: 1,
-        building: "none",
+        building: "none", // temp -> none
         defenseLevel: 5,
         cathouseLevel: 0,
         description: "Jak již název napovídá..."
@@ -64,7 +64,7 @@ export const CITY_GEN_DATA=[
         building: "none",
         defenseLevel: 5,
         cathouseLevel: 0,
-        description: "Ve vzduchu prázdnota"
+        description: "Ve vzduchu prázdnota."
     },
     {
         name: "Anschussburg",
@@ -72,7 +72,7 @@ export const CITY_GEN_DATA=[
         peepsMax: 10,
         sizeX: 2,
         sizeY: 1,
-        building: "bisons",
+        building: "olda",
         defenseLevel: 5,
         cathouseLevel: 0,
         description: "Odpadlíkův úkryt..."
@@ -105,10 +105,10 @@ export const CITY_GEN_DATA=[
         peepsMax: 200,
         sizeX: 10,
         sizeY: 10,
-        building: "hokynar",
+        building: "shop",
         defenseLevel: 5,
         cathouseLevel: 0,
-        description: "Město vetešníků"
+        description: "Město obchodu."
     },
     {
         name: "Boom-Mussel Bay",
@@ -119,7 +119,7 @@ export const CITY_GEN_DATA=[
         building: "barber",
         defenseLevel: 5,
         cathouseLevel: 0,
-        description: "Bárbr"
+        description: "Bárbr."
     },
     {
         name: "Cul's Cordonnier",
@@ -131,6 +131,17 @@ export const CITY_GEN_DATA=[
         defenseLevel: 5,
         cathouseLevel: 0,
         description: "Zde sídlí švec. Říká si Marek."
+    },
+    {
+        name: "Techsas",
+        peepsMin: 10,
+        peepsMax: 25,
+        sizeX: 8,
+        sizeY: 9,
+        building: "mech",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "Dílna kolejáře."
     },
     {
         name: "Over the R",
@@ -149,10 +160,10 @@ export const CITY_GEN_DATA=[
         peepsMax: 200,
         sizeX: 6,
         sizeY: 7,
-        building: "trains",
+        building: "bussiness",
         defenseLevel: 5,
         cathouseLevel: 0,
-        description: "Město strojů a techniky"
+        description: "Město strojů a techniky."
     },
     {
         name: "Holy Cross",
@@ -163,6 +174,83 @@ export const CITY_GEN_DATA=[
         building: "church",
         defenseLevel: 5,
         cathouseLevel: 0,
-        description: "Posvátné místo"
-    }
+        description: "Sanktplatz."
+    },
+    {
+        name: "Wash Him Tom DC",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 3,
+        sizeY: 3,
+        building: "none",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "Lázně.(Otevře se mimo demo.)"
+    },
+    {
+        name: "Rasta-Pasta",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 5,
+        sizeY: 6,
+        building: "none",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "Město kouře.(Otevře se mimo demo.)"
+    },
+    {
+        name: "Sub-burps",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 5,
+        sizeY: 4,
+        building: "none",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "Domov nejlepší jídelny. Velké spoje na Rasta-Pasta.(Otevře se mimo demo.)"
+    },
+    {
+        name: "Mibombo",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 9,
+        sizeY: 2,
+        building: "none",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "Závodnická dráha.(Otevře se mimo demo.)"
+    },
+    {
+        name: "Condor's Nest",
+        peepsMin: 1,
+        peepsMax: 1,
+        sizeX: 1,
+        sizeY: 1,
+        building: "none",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "Pokladnice.(Otevře se mimo demo.)"
+    },
+    {
+        name: "Dirty Hollow",
+        peepsMin: 1,
+        peepsMax: 1,
+        sizeX: 2,
+        sizeY: 1,
+        building: "none",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "Pokladnice.(Otevře se mimo demo.)"
+    },
+    {
+        name: "Ermineland",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 5,
+        sizeY: 3,
+        building: "none",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "Domov pistolnice Ermíny.(Otevře se mimo demo.)"
+    },
 ]

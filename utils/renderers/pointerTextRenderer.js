@@ -37,6 +37,7 @@ export function createPointerTextRenderer(app){
     }
     
     function togglePointerText(value) {
+        // Tato funkce se dá případně použít jinde
     }
 
     function updateMousePosition(x, y, obstacleName) {
@@ -52,11 +53,19 @@ export function createPointerTextRenderer(app){
         updatePointerText(text, mousePosition.x, mousePosition.y, gridScale);
     }
 
+    function clearText() {
+        lastObstacle = null;
+        const pointerText = getPointerText();
+        pointerText.visible = false;
+        pointerText.text = "";
+    }
+
     return {
         updatePointerText,
         togglePointerText,
         updateMousePosition,
-        refresh
+        refresh,
+        clearText
     };
 }
 

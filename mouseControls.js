@@ -1,10 +1,14 @@
-export function setupMouseControls(app, camera, getGridScale, cellSize, getPlacementMode, railRenderer, drawGraphics, getSelectedRailType, cityInfoOverlay, areas, stationRenderer) {
+export function setupMouseControls(app, camera, getGridScale, cellSize, getPlacementMode, railRenderer, drawGraphics, getSelectedRailType, cityInfoOverlay, areas, stationRenderer, isCityUnlocked,unlockCity) {
     let isDragging = false;
     let mouseInitialPos = { x: 0, y: 0 };
     let isPlacingRail = false;
 
     function resetDrag() {
         isDragging = false;
+    }
+
+    function isOverlayVisible() {
+        return cityInfoOverlay && cityInfoOverlay.isVisible && cityInfoOverlay.isVisible();
     }
 
     function getTileFromMouse(event){
@@ -22,9 +26,10 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
     function handleRailAction(tileX, tileY) {
         try{
             const selected = getSelectedRailType();
+            
             if (selected.isDestroy) {
                 if (railRenderer.isTileOccupied(tileX, tileY)) {
-                    railRenderer.removeRail(tileX, tileY);
+                    railRenderer.removeRail(tileX, tileY, false);
                     drawGraphics();
                 }
                 return;
@@ -38,7 +43,7 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
     }
 
     function handleCityClick(tileX, tileY) {
-        if (cityInfoOverlay.isVisible()) return false;
+        if (isOverlayVisible()) return false;
         
         const clickedCity = areas.find(area => 
             area.type?.type === "city" &&
@@ -47,6 +52,11 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
         );
 
         if (clickedCity) {
+            if (isCityUnlocked && isCityUnlocked(clickedCity.name)) {
+                cityInfoOverlay.showCityInfo(clickedCity);
+                return true;
+            }
+            
             const stations = stationRenderer.getStations();
             
             const isConnected = stations.some(station => {
@@ -69,8 +79,17 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
                 }
                 return false;
             });
+    
+            if (isConnected) {
+                //projistotu
+                cityInfoOverlay.showCityInfo(clickedCity);
+                return true;
+            }
 
             if (isConnected) {
+                if (unlockCity) {
+                    unlockCity(clickedCity.name);
+                }
                 cityInfoOverlay.showCityInfo(clickedCity);
                 return true;
             }
@@ -80,11 +99,15 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
 
     app.stage.on('pointerdown', (event) => {
         try{
+            if (isOverlayVisible()) {
+                event.stopPropagation();
+                return;
+            }
+
             const button = event.data.button;
             
             const tilePos = getTileFromMouse(event);
             if (!tilePos) return;
-            
             
             if (button === 0 && !getPlacementMode()) {
                 const cityClicked = handleCityClick(tilePos.tileX, tilePos.tileY);
@@ -110,6 +133,8 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
     });
 
     app.stage.on('pointerup', (event) => {
+        if (isOverlayVisible()) return;
+
         const button = event.data.button;
         if (button === 0) isPlacingRail = false;
         if (getPlacementMode() ? (button === 2) : (button === 0 || button === 2)) {
@@ -124,6 +149,8 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
 
     app.stage.on('pointermove', (event) => {
         try{
+            if (isOverlayVisible()) return;
+
             if(getPlacementMode() && isPlacingRail){
                 const tilePos = getTileFromMouse(event);
                 if (tilePos) {
@@ -147,8 +174,9 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
     });
 
     app.view.addEventListener("contextmenu", (event) => {
-        // TEMP FIX DEBUG
-        // event.preventDefault();
+        if (isOverlayVisible()) {
+            event.preventDefault();
+        }
     });
 
     return { resetDrag };

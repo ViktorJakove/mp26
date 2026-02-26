@@ -54,7 +54,9 @@ function isBisonAreaDisturbed(area, occupiedTiles) {
     return false;
 }
 
-export function calcBisonProfitForPath(path, getAreas, occupiedTiles) {
+export function calcBisonProfitForPath(path, getAreas, occupiedTiles, isBisonUnlocked) {
+    if (!isBisonUnlocked) return 0;
+
     const areas = getAreas();
     const bisonAreas = areas.filter(a => a.type === AREA_TYPES.BISONS);
     const deltas = [[0,-1],[1,0],[0,1],[-1,0]];

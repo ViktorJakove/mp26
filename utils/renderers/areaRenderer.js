@@ -171,7 +171,7 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             
             if (textPosition) {
                 const textContent = ((area.type === BISONS) ? "bizoni" : area.name) + 
-                                  ((area.type === CITY || area.type === BISONS) ? '\n' + "populace : " + area.peeps : "");
+                                  ((area.type === CITY /*|| area.type === BISONS*/) ? '\n' + "populace : " + area.peeps : "");
                 
                 const areaText = getPooledText();
                 areaText.text = textContent;
@@ -185,6 +185,7 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
                 areaText.y = textPosition.textY;
                 areaText.anchor.set(0.5);
                 areaText.scale.set(1 / gridScale, 1 / gridScale);
+                areaText.cursor = "help";
                 
                 areaTextContainer.addChild(areaText);
             }

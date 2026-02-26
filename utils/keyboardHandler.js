@@ -1,9 +1,13 @@
 import { setShiftPressed } from "./shiftState.js";
-export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, /**/addLevel, /**/addStations, placementModeObj, areaRenderer, pointerTextRenderer, resetDrag, stationRenderer,hudRenderer) {
+export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, addStations, placementModeObj, areaRenderer, pointerTextRenderer, resetDrag, stationRenderer, hudRenderer, characterOverlay) {
     const keyboardMapMoveSpeed = 28;
     const keyboardZoomSpeed = zoomSpeed / 2;
     const keysDown = new Set();
     let spacePressed = false;
+
+    function isOverlayVisible() {
+        return characterOverlay && characterOverlay.isVisible && characterOverlay.isVisible();
+    }
 
     const movementActions = {
         "ArrowUp": () => camera.y -= keyboardMapMoveSpeed / gridScale,
@@ -15,6 +19,8 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
     };
 
     function keyboardMapMovement() {
+        if (isOverlayVisible()) return;
+
         let moved = false;
 
         keysDown.forEach((key) => {
@@ -31,6 +37,15 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
 
     document.addEventListener("keydown", (event) => {
         try {
+            if (event.code === "Escape" && isOverlayVisible()) {
+                return;
+            }
+
+            if (isOverlayVisible()) {
+                event.preventDefault();
+                return;
+            }
+
             switch (event.code) {
                 case "Space":
                     if (!spacePressed) {
@@ -56,7 +71,6 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
                     }
                     event.preventDefault();
                     return;
-                //temp ficurs
                 case "KeyP":
                     if (!keysDown.has("KeyP")) addLevel();
                     event.preventDefault();
@@ -76,6 +90,11 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
 
     document.addEventListener("keyup", (event) => {
         try{
+            if (isOverlayVisible() && 
+                !["Space", "ShiftLeft", "ShiftRight", "Shift"].includes(event.code)) {
+                return;
+            }
+
             switch (event.code) {
                 case "Space":
                     spacePressed = false;
@@ -88,6 +107,7 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
                     setShiftPressed(false);
                     if (stationRenderer)stationRenderer.setShiftPressed(false);
                     pointerTextRenderer.refresh(() => gridScale);
+                    pointerTextRenderer.clearText();
                     drawGraphics();
                     break;
             }

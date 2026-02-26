@@ -128,12 +128,12 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
         return true;
     }
 
-    function removeRail(tileX, tileY) {
+    function removeRail(tileX, tileY, indebted) {
         const key = `${tileX},${tileY}`;
         if (!occupiedTiles.has(key)) return;
 
         const rail = occupiedTiles.get(key);
-        addMoney(Math.round(rail.type.cost / 2));	
+        if (!indebted)addMoney(Math.round(rail.type.cost / 2));	
 
         occupiedTiles.delete(key);
         const index = rails.findIndex(r => r.x === tileX && r.y === tileY);
@@ -205,8 +205,7 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
     }
 
     function getBisonProfit(path) {
-        const profit = calcBisonProfitForPath(path, getAreas, occupiedTiles);
-        console.log(profit);
+        const profit = calcBisonProfitForPath(path, getAreas, occupiedTiles, window.bisonManager ? window.bisonManager.isBisonUnlocked() : false);
         return profit;
     }
 

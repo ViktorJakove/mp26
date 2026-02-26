@@ -20,25 +20,25 @@ export const LAKE_GEN_DATA=[
         sizeY: 14,
         description: "Neskutečně čirá voda."
     },{
-        name: "Pristine Pool3",
+        name: "Zel",
         sizeX: 7,
         sizeY: 2,
-        description: "Local water source."
+        description: "da!"
     },{
-        name: "Pristine Pool4",
+        name: "Gaster Pond",
         sizeX: 9,
         sizeY: 9,
-        description: "Local water source."
+        description: "Proč je zelené???"
     },{
-        name: "Pristine Pool4",
+        name: "Clam Cove (the real one)",
         sizeX: 2,
         sizeY: 3,
-        description: "Local water source."
+        description: "Nedokážou se shodnout."
     },{
-        name: "Pristine Pool4",
+        name: "SH Lake",
         sizeX: 1,
         sizeY: 15,
-        description: "Local water source."
+        description: "Úžasný přírodní úkaz."
     },
 ];
 export const FOREST_GEN_DATA=[
@@ -46,52 +46,52 @@ export const FOREST_GEN_DATA=[
         name: "Greentimber",
         length: 20,
         thickness: 2,
-        description: "pp poopoo."
+        description: "Prochozený les."
     },{
         name: "Shady Oaks",
         length: 8,
         thickness: 1,
-        description: "Local diarrhea source."
+        description: "Pár starých mystických stromů."
     },{
-        name: "Shady Blokes",
+        name: "Fat Blokes",
         length: 40,
         thickness: 1,
-        description: "Local diarrhea source."
+        description: "Skoro neprůchodná vrstva zeleně."
     },{
-        name: "The Woods",
+        name: "The Elwoods",
         length: 20,
         thickness: 2,
-        description: "Exceptionally pure."
+        description: "Jak často tu tak jezdí ty vlaky?"
     },{
-        name: "The b",
+        name: "The Jakes",
         length: 15,
         thickness: 2,
-        description: "Exceptionally pure."
+        description: "Kde je náš Káďa?!."
     },{
-        name: "The c",
+        name: "Mindstones",
         length: 7,
         thickness: 8,
-        description: "Exceptionally pure."
+        description: "Budoucí Yellowstone."
     },{
-        name: "The d",
+        name: "Forest of the Damned",
         length: 25,
         thickness: 1,
-        description: "Exceptionally pure."
+        description: "ow."
     },{
-        name: "The e",
+        name: "Butterlogs",
         length: 100,
         thickness: 1,
-        description: "Exceptionally pure."
+        description: "Odtud těžíš dřevo na koleje, ty zvíře."
     },{
-        name: "The f",
+        name: "Angelo’s Grove",
         length: 20,
         thickness: 2,
-        description: "Exceptionally pure."
+        description: "Schovává se tu práskač."
     },{
-        name: "The g",
+        name: "Groove Grove",
         length: 100,
         thickness: 2,
-        description: "Exceptionally pure."
+        description: "GG."
     }
 ];
 export const MOUNTAIN_GEN_DATA=[
@@ -99,47 +99,52 @@ export const MOUNTAIN_GEN_DATA=[
         name: "Uprock",
         length: 5,
         thickness: 3,
-        description: "Local water source."
+        description: "Vrchní kámen."
     },{
-        name: "rockhard",
+        name: "Sinaj",
         length: 3,
         thickness: 2,
-        description: "Local diarrhea source."
+        description: "Na špici stojí divný pán s kamennými deskami."
     },{
-        name: "hugerock",
+        name: "Rockhard",
         length: 67,
         thickness: 2,
-        description: "Exceptionally pure."
+        description: "Pozůstatek seismické aktivity."
     },{
-        name: "hugorock",
+        name: "Kata",
         length: 4,
         thickness: 2,
-        description: "Exceptionally pure."
+        description: "Domov mnoha zvířátek."
     },{
-        name: "hugerock2",
+        name: "Indigo Peak",
         length: 20,
         thickness: 1,
-        description: "Exceptionally pure."
+        description: "zabil jsi mého otce, připrav se na smrt."
     },{
-        name: "hugerock3",
+        name: "Bi-montana",
         length: 30,
         thickness: 1,
-        description: "Exceptionally pure."
+        description: "Je tu pár hotelů."
     },{
-        name: "hugerock4",
+        name: "Big rock",
         length: 10,
         thickness: 2,
-        description: "Exceptionally pure."
+        description: "Velmi originální jméno."
     },{
-        name: "hugerock5",
+        name: "Overhang Summit",
         length: 35,
         thickness: 1,
-        description: "Exceptionally pure."
+        description: "Šikmá špice."
     },{
-        name: "hugecock",
+        name: "Mt. Ebott",
         length: 35,
         thickness: 2,
-        description: "Exceptionally pure."
+        description: "Huh? Cože?"
+    },{
+        name: "The Boulder",
+        length: 20,
+        thickness: 2,
+        description: "Nějací blázni po tom lezou."
     }
 ];export const INDIAN_GEN_DATA=[
     {
@@ -153,25 +158,25 @@ export const MOUNTAIN_GEN_DATA=[
         sizeY: 6,
         description: "Náčelník: Matonabbee"
     },{
-        name: "ShizzPeeze",
+        name: "Siouxové",
         sizeX:6,
         sizeY: 12,
-        description: "piss."
+        description: "Náčelník: Sedící býk."
     },{
-        name: "Clam Cove",
+        name: "Komanči",
         sizeX: 12,
         sizeY:11,
-        description: "Exceptionally pure."
+        description: "Náčelník: Quanah Parker."
     },{
-        name: "Clam Cove",
+        name: "Hunkpapové",
         sizeX: 7,
         sizeY:7,
-        description: "Exceptionally pure."
+        description: "Náčelník: Žluč."
     },{
-        name: "Clam Cove",
+        name: "Senecové",
         sizeX: 15,
         sizeY:8,
-        description: "Exceptionally pure."
+        description: "Náčelník: Cornplanter."
     }
 ];
 export const BISON_GEN_DATA=[

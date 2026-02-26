@@ -7,96 +7,253 @@ export const BUILDING_TEXTS = {
         ],
         sprite: [0, 1, "S"],
         spritePos: ["L", "C", "P"]
+        //unused
     },
     "sheriff": {
         text: [
-            "Místní vězení a úřad šerifa",
-            "Zdi pamatují nejednoho desperáta",
-            "Před budovou visí hledané listy"
+            "Jsi tu novej?",
+            "Sheriff Nadledvinka... A ty jsi?",
+            "Od železnice? No výborně-",
+            "Bál jsem se, že dorazíš, až když bude pozdě...",
+            "Jako JEDINÝ doopravdový Sheriff Rudé Skály tě budu muset chránit a varovat, zelenáči.",
+            "Mezi náma, kašlat na rudochy, ale nepotřebuju, aby mi sem přišli vykuchat manželku.",
+            "Takže navrhuji!",
+            "Nestav nic přes indiánská území a neznepřátel si ani jejich obyvatele, ani mě!",
+            "Někdy se zastav. Salut, Greenhorne!"
         ],
         sprite: [0, 1, 2],
         spritePos: ["L", "C", "P"]
     },
     "bank": {
         text: [
-            "Nejbezpečnější místo ve městě",
-            "Zde se ukládají peníze z vlaků",
-            "Těžké dubové dveře a ocelový trezor"
+            "Ovšem dobrý den...",
+            "Přišel jste si půjčit?",
+            "Samozřejmě že dorazil, konkurenci jsme zlikvidovali :D",
+            "Jaké blaho je ten monopol, není-liž pravda?",
+            "Představte si, mezi kolika lháři a podvodníky byste musel vybírat!",
+            "Kdybych tu nebyl já totiž, žeano!!!",
+            "Vrhneme se na věc?"
         ],
-        sprite: [0, 1, 0],
-        spritePos: ["L", "C", "P"]
+        afterTransaction: {
+            text: [
+                "Díky za vaše peníze!",
+                "Milujeme peníze.",
+                "Máme jich hodně. A to je dobře."
+            ],
+            sprite: [1, 1, 1],
+            spritePos: ["C", "C", "C"]
+        },
+        sprite: [0, 1, "S", 1,0,0,1],
+        spritePos: ["C", "C", "C", "C", "C", "C", "C"],
+        transaction: {
+            type: "bank",
+            cost: 0,
+            failText: "Uh-uh, transakce zrušena.",
+            questionSprite: "S",
+            questionSpritePos: "C",
+            successSprite: "S",
+            successSpritePos: "C",
+            failSprite: 1,
+            failSpritePos: "C",
+            question: "Kolik si půjčíme?",
+            bankOptions: {
+                maxLoan: 5000,
+                interestRate: 2,
+                repaymentTime:5
+            }
+        }
     },
     "graveyard": {
         text: [
-            "Poslední odpočinek místních obyvatel",
-            "Nápisy na náhrobcích vyprávějí příběhy",
-            "Stromy šumí nad starými hroby"
+            "Uff... Ufff...",
+            "Nohy bolí, ruce chřadnou... Nedostal já dlouho almužnu žádnou!",
+            "Tenhle malý hřbitov hnije, a mně koleno samou bolestí-",
+            "už roky a staletí, utrpením krev snad pije!",
+            "Stáří to je zlo a hrůza, fakt že jo-",
+            "metla, jež přebije kdejaká mužstva",
+            "Francouze, Turka i Bělorusa-",
+            "nebo",
+            "Jana Husa, Jana Žižku, Karla Husa,",
+            "ehh",
+            "...",
+            "Karla Žižku",
+            "fakt že jo!",
+            "ALmužničku? Vyměním za všelijaká moudra!"
         ],
-        sprite: [0, 1, 0],
-        spritePos: ["L", "C", "P"]
+        afterTransaction: {
+            text: [
+                "Nestavěl bych nějak blízko jezerům- stoletá voda spláchne koleje dobrákům i mizerům...",
+                "Půjčky,půjčky... Ředitel banky je silák. Zvedá jednoručky. Osobně ti vytrhá koleje, když nezaplatíš včas, haha!",
+                "V Evropě i v Koreji se obejdou bez kolejí (typu-T)! (knedlíky kynu-T!)",
+                "Pro kontakt s osobou daného města nemusíš mít aktivní kolejové spojení! (rýmová resignace)",
+                "Olda možná pije, ale ví kdy a která bije! Poslechni ho.",
+                "Dobré skutky občas taky něco stojí. Občas dost a občas víc."
+            ],
+            sprite: [0, 1, 1, 0, 1, 0],
+            spritePos: ["C", "C", "C", "C", "C", "C"]
+        },
+        sprite: [0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0],
+        spritePos: ["P", "P", "P", "P","C","C", "P", "P", "P", "P", "P", "P", "P", "C"],
+        transaction: {
+            cost: 67,
+            failText: "Nemáš dost peněz na příspěvek.",
+            questionSprite: 1,
+            questionSpritePos: "C",
+            failSprite: 0,
+            failSpritePos: "C",
+            question: "Vyslechneš si moudro??",
+            randomAfterText: true
+        }
     },
-    "bisons": {
+    "olda": {
         text: [
-            "Usedlost bývalého lovce bizonů",
-            "Stěny zdobí paroží a kůže",
-            "Vůně kouře a vydělané kůže"
+            "GYAHAHAHAHAHAHAH",
+            "-tady Olda-",
+            "...........",
+            "cítim z tebe....",
+            "hmmmm.....",
+            "DOBRODRUŽSTVÍ!!!",
+            "BAHAHAHAHAHAHAH!!!",
+            "c í t i m  t v o j e  p o h n o j e n ý  g a t ě",
+            "troubo! bahaahahaha!",
+            "jestliže děláš ty koleje... mohli bychom si navzájem pomoct!",
+            "protože tahle winchestrovka moc ráda střílí",
+            "moc ráda střílí a moc moc moc!",
+            "kdybys byl od tý dobroty a stavěl koleje kolem bizonů, mohli bychom z toho udělat velkou zábavu a trhnout velký prachy!",
+            "za malej příspěvek do toho s tebou milerád pujdu. co ty na to?",
+            "jeiltokpytoplatíto?!"
         ],
-        sprite: [0, 1, 2],
-        spritePos: ["L", "C", "P"]
+        afterTransaction: {
+            text: [
+                "výborně! a táta říkal,že to nikam nedotáhnu!",
+                "BAHAHAHAHA"
+            ],
+            sprite: [0, 0],
+            spritePos: ["C", "C"]
+        },
+        sprite: [0, 1, 0, 0, 0, 1,0,1,0,0,0,0,0,0,1],
+        spritePos: ["C", "C", "C","C","C", "C", "C","C","C", "C", "C","C","C", "C", "C"],
+        transaction: {
+            type: "unlock_bison",
+            cost: 100,
+            successText: "Stav koleje podél bizoních oblastí. NE PŘES! pro svůj podíl se kdykoli stav!",
+            failText: "Nemáš dostatek financí.",
+            question: "Uzavřít dohodu s Oldou?",
+            questionSprite: 1,
+            questionSpritePos: "C",
+            successSprite: 1,
+            successSpritePos: "C",
+            failSprite: 0,
+            failSpritePos: "C",
+        }
     },
     "gallery": {
         text: [
-            "Místní galerie a kulturní centrum",
-            "Obrazy krajin a portréty významných občanů",
-            "Schází se zde umělci z širokého okolí"
+            "Vítej! My jsme se už viděli! Pamatuješ?",
+            "To jsem ale tehdá ještě chytal motýly! Hahah! A ten vlak! Jak jel do Indianapolis!",
+            "Ne?",
+            "Neva... Stejně mě to oko ještě pořád bolí.",
+            "Jenom jedna fotka a zvěčním tvé sítě železnic mezi ostatními génii v galerii!"
         ],
-        sprite: [0, 1, 2],
-        spritePos: ["L", "C", "P"]
+        sprite: [0, 0, 0,0,"S"],
+        spritePos: ["P", "P","P","P", "C"]
     },
-    "hokynar": {
+    "shop": {
         text: [
-            "Obchod se vším, co potřebujete",
-            "Sudy, bedny a regály plné zboží",
-            "Vůně koření a sušeného masa"
+            "Vítej!!! Mám tu toho dost!"
         ],
-        sprite: [0, 1, 2],
-        spritePos: ["L", "C", "P"]
+        sprite: [0],
+        spritePos: ["L"]
     },
     "barber": {
         text: [
-            "Holičství a kadeřnictví v jednom",
-            "Pánové zde probírají novinky z města",
-            "Výloha s hřebeny a mastičkami"
+            "Takže- ostříhat?",
+            "Hele mlaďas. Mám pár pravidel-",
+            "1) Žádný kecy o tom, že mi smrdí ruce od cigára. Tobě smrdí haksny a stejně tě ostříhám.",
+            "Smrade",
+            "Zelenáči",
+            "Modráku",
+            "Žluťasi",
+            "Troubo",
+            "Výborně, už můžem začít."
         ],
         sprite: [0, 1, 2],
-        spritePos: ["L", "C", "P"]
+        spritePos: ["C", "C", "P"]
     },
     "marco": {
         text: [
-            "Obuvnictví mistra Marka",
-            "Regály plné bot všech velikostí",
-            "Vzorníky kůže na každém stole"
+            "Vítej v hadrech Švece Marca!",
+            "jen si vyper, co chceš!",
+            "chtěl jsem říct vyber, ale tvý nohy-",
+            "vyber a vyper- tak!",
+            "sorry",
+            "a někdy se zas stav, s těma tvejma známostma u železničářů bych pro tebe možná mohl někdy mít nějakej džab!",
+            "džeb?",
+            "džob!"
         ],
-        sprite: [0, 1, 2],
-        spritePos: ["L", "C", "P"]
-    },
-    "trains": {
+        sprite: [0, 1, 1, 0, 1,0,0,1],
+        spritePos: ["P", "P", "P", "P","P", "P", "P", "P"]
+    },"bussiness": {
+    text: [
+        "Znáš Teda?",
+        "To jsem já! Mám pro tebe exkluzivní nabídku!",
+        "Čekal jsem na tebe a ty tvoje vláčky!",
+        "Jen! na tebe! a ty tvoje vláčky!!",
+        "Co takhle-",
+        "odkupovat palivo ode mě? Mám pro tebe naprosto přírodní uhlí, které zaručí dvojnásobnej výkon lokomotiv! A to není všechno-",
+        "Občas i trojnásobnej! Naprosto přírodní!"
+    ],
+    afterTransaction: {
         text: [
-            "Depo a opravna vlaků",
-            "Sklad náhradních dílů a kol",
-            "Strojvedoucí zde probírají trasy"
+            "Dík za investici!",
         ],
-        sprite: [0, 1, 2],
-        spritePos: ["L", "C", "P"]
+        sprite: ["S"],
+        spritePos: ["C"]
+    },
+    sprite: [0, "S", 0, "S", 0, 0,"S"],
+    spritePos: ["C", "C", "C", "C", "C", "C", "C"],
+    transaction: {
+        type: "unlock_speed",
+        cost: 1500,
+        successText: "Investice přijata! Cestující cení novou rychlost vlaků a příroda brečí",
+        failText: "Nemáš dostatek financí.",
+        questionSprite: "S",
+        questionSpritePos: "C",
+        successSprite: "S",
+        successSpritePos: "C",
+        failSprite: 0,
+        failSpritePos: "C",
+        question: "Pořídit naprosto zdravotně nezávadné uhlí pro čtyřnásobný výkon lokomotiv?"
+    }
+},
+    "mech": {
+        text: [
+            "Nazdar synku! To jsem já, kvůli komu nemůžeš stavět T koleje, haha!",
+            "Chápu tvoje rozhořčení, ale vysvětli mi, proč bych ti prodával něco, díky čemu by sis už nepořídil tu dražší křižovatku??",
+            "To mi teda pověz, ahahahah! To teda jo!",
+            "Miluju kapitalismus!",
+            "nemáme s maželkou co jíst"
+        ],
+        sprite: [0, 0, 1, 0, "S"],
+        spritePos: ["L", "L","L", "L", "C"],
+        transaction: {
+            type: "unlock_tracks", 
+            cost: 1000,
+            successText: "Děkujeme za nákup! Nová lokomotiva brzy dorazí.",
+            failText: "Nemáš dost peněz, příteli.",
+            questionSprite: 0,
+            questionSpritePos: "C",
+            successSprite: "S",
+            question: "Pořídit naprosto přírodní uhlí pro dvojnásobný výkon lokomotiv?"
+        }
     },
     "church": {
         text: [
-            "Místní kostel a duchovní centrum",
-            "Barevné vitráže a staré lavice",
-            "Zvony zvoní každou neděli"
+            "Vítej synu!",
+            "Můžeš nám přispět? Pomodlím se za tebe."
         ],
-        sprite: [0, 1, 2],
-        spritePos: ["L", "C", "P"]
+        sprite: [0, 0],
+        spritePos: ["C", "C"]
     },
     "none": {
         text: [
@@ -107,7 +264,6 @@ export const BUILDING_TEXTS = {
     }
 };
 
-// Default text if building type not found
 export const DEFAULT_BUILDING_TEXT = {
     text: [
         "Běžná městská zástavba",

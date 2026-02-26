@@ -4,6 +4,6 @@ export const AREA_TYPES = {
     INDIANS: {type: "indians",color: 0xCD5C5C, buildOverColor: 0xffffff, buildOverInfo: "Vykopávat válečnou sekeru??"},
     BISONS: {type: "bisons",color: 0xB8860B, buildOverColor: 0xffaaaa, buildOverInfo : "Zruší veškerý příjem z této oblasti!"},
     ROCK: {type: "rock",color: 0x696969, buildOverColor: 0xfffaaa, buildOverCost: 200},
-    FOREST: {type: "forest",color: 0x006400, buildOverColor: 0xfffaaa, buildOverCost: 50},
+    FOREST: {type: "forest",color: 0x006400, buildOverColor: 0xfffaaa, buildOverCost: 40},
     LOCK: {type: "lock",color: 0x000000}
 }
