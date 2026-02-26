@@ -42,7 +42,7 @@ const addMoney = (amount) => money += amount;
 
 let unlockedCities = new Set();
 
-const getUnlockedCities = () => discoveredCities;
+const getUnlockedCities = () => unlockedCities;
 
 const unlockCity = (cityName) => {
     unlockedCities.add(cityName);
@@ -123,6 +123,14 @@ const { addLevel, addStations, spawnTrainsForConnectedRoutes } = createStationMa
 
 const { checkRouteConnections } = createRouteChecker(stationRenderer, railRenderer);
 
+function findCityByStation(stationX, stationY, areas) {
+    return areas.find(area => 
+        area.type?.type === "city" &&
+        stationX >= area.x - 1 && stationX <= area.x + area.sizeX &&
+        stationY >= area.y - 1 && stationY <= area.y + area.sizeY
+    );
+}
+
 railRenderer.setOnRailPlaceCheckConn(() => {
     const result = checkRouteConnections();
 
@@ -130,22 +138,22 @@ railRenderer.setOnRailPlaceCheckConn(() => {
     spawnTrainsForConnectedRoutes(connectedIndices);
 
     const stations = stationRenderer.getStations();
+    const areas = getAreas();
+
     connectedIndices.forEach(index => {
         const pair = stations.filter(s => s.index === index);
         if (pair.length === 2) {
-            const city1 = areas.find(area => 
-                area.type?.type === "city" &&
-                pair[0].x >= area.x && pair[0].x < area.x + area.sizeX &&
-                pair[0].y >= area.y && pair[0].y < area.y + area.sizeY
-            );
-            const city2 = areas.find(area => 
-                area.type?.type === "city" &&
-                pair[1].x >= area.x && pair[1].x < area.x + area.sizeX &&
-                pair[1].y >= area.y && pair[1].y < area.y + area.sizeY
-            );
+            const city1 = findCityByStation(pair[0].x, pair[0].y, areas);
+            const city2 = findCityByStation(pair[1].x, pair[1].y, areas);
             
-            if (city1) unlockCity(city1.name);
-            if (city2) unlockCity(city2.name);
+            if (city1) {
+                unlockCity(city1.name);
+                console.log(`Město odemčeno: ${city1.name}`);
+            }
+            if (city2) {
+                unlockCity(city2.name);
+                console.log(`Město odemčeno: ${city2.name}`);
+            }
         }
     });
 

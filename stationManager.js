@@ -42,10 +42,6 @@ export function createStationManager(stationRenderer, areaRenderer, drawGraphics
     
             [cityA, cityB].forEach(cityName => {
                 const cityArea = areas.find(a => a.name === cityName);
-
-                if (unlockCity) {
-                    unlockCity(cityName);
-                }
     
                 const distToLeft   = cityArea.x + halfW;
                 const distToRight  = halfW - (cityArea.x + cityArea.sizeX);

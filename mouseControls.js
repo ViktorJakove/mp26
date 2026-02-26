@@ -55,7 +55,7 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
                 cityInfoOverlay.showCityInfo(clickedCity);
                 return true;
             }
-
+            
             const stations = stationRenderer.getStations();
             
             const isConnected = stations.some(station => {
@@ -78,6 +78,12 @@ export function setupMouseControls(app, camera, getGridScale, cellSize, getPlace
                 }
                 return false;
             });
+    
+            if (isConnected) {
+                //projistotu
+                cityInfoOverlay.showCityInfo(clickedCity);
+                return true;
+            }
 
             if (isConnected) {
                 if (unlockCity) {
