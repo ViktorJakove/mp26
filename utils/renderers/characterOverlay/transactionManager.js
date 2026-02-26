@@ -80,14 +80,8 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
             btnContainer = new PIXI.Container();
         
             const yes = createButton("ANO", 0x27ae60, 0x2ecc71, () => {
-                console.log("Vybírám profit, aktuální storedProfit:", window.bisonProfitStore.getStoredProfit());
-                console.log("Aktuální peníze před výběrem:", getMoney());
                 
                 const withdrawn = window.bisonProfitStore.withdrawProfit(addMoney);
-                
-                console.log("Vybráno:", withdrawn);
-                console.log("Peníze po výběru:", getMoney());
-                console.log("StoredProfit po výběru:", window.bisonProfitStore.getStoredProfit());
                 
                 currentDesc.text = `Vyzvedl jsi $${withdrawn}!`;
                 
@@ -188,7 +182,6 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
                     
                     if (window.bisonManager) {
                         window.bisonManager.unlockBisonBuilding();
-                        console.log("Bison profit unlocked!");
                     }
                     
                     buildingState.set(key, { completed: true, questionShown: true });
@@ -316,7 +309,6 @@ function showSpeedUnlockTransaction(key, d, buildingState) {
             
             if (window.trainRenderer) {
                 window.trainRenderer.setTrainSpeedMultiplier(3);
-                console.log("Rychlost vlaku zvýšena na 3x!");
             }
             
             buildingState.set(key, { completed: true, questionShown: true });
@@ -403,7 +395,6 @@ function showTracksUnlockTransaction(key, d, buildingState) {
                 window.hudRenderer.unlockRailType("T_E");
                 window.hudRenderer.unlockRailType("T_S");
                 window.hudRenderer.unlockRailType("T_W");
-                console.log("Všechny T kolejnice odemčeny!");
             }
             
             buildingState.set(key, { completed: true, questionShown: true });

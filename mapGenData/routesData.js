@@ -1,9 +1,9 @@
 export const ROUTES_DATA =[
     [0,1],
     [1,2],
-    [2,3],/* */
+    [2,3],
     [0,3],
-    [0,4],
+    [0,4],/* */
     [1,4],/* */
     [3,5],
     [2,6],
@@ -28,9 +28,9 @@ export const ROUTES_DATA =[
 export const ROUTE_COUNT_DATA =[
     1,
     1,
+    1,
+    1,
     1, /*konec tutorialu -za svoje prachy */
-    1,
-    1,
     1, /*levelup*/
     3,/*infotext bisoni*/
     2,/*galerie*/
@@ -44,3 +44,5 @@ export const ROUTE_COUNT_DATA =[
     1,//koleje
     1,//kostel
 ]
+export const TUTORIAL_ROUTE_INDEXES =[0/*init tutorial*/,4/*za vlastní peníze*/,5/*levelup*/,10/*galerie*/];
+export const TUTORIAL_TEXTS =[["",""],[""],[""],[""]];

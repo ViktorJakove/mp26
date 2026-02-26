@@ -25,7 +25,6 @@ export function createBankManager(app, getMoney, addMoney, subMoney, onLoanExpir
         
         if (window.drawGraphics) window.drawGraphics();
         
-        console.log(`Odebrána kolej na pozici [${rail.x}, ${rail.y}] jako penalizace za dluh`);
         onLoanUpdate();
         return true;
     }
@@ -41,7 +40,6 @@ export function createBankManager(app, getMoney, addMoney, subMoney, onLoanExpir
             subMoney(currentMoney);
             remainingDebt = Math.max(0, totalDebt - currentMoney);
             loanAmount = remainingDebt;
-            console.log(`Zabaveno $${currentMoney} na splacení dluhu. Zbývá $${remainingDebt}`);
         }
         
         if (onLoanExpired) {
@@ -49,7 +47,6 @@ export function createBankManager(app, getMoney, addMoney, subMoney, onLoanExpir
         }
         
         if (remainingDebt > 0) {
-            console.log(`Zbývá splatit $${remainingDebt} penalizacemi za koleje (každá kolej = -$10)`);
             return remainingDebt;
         } else {
             loanActive = false;
@@ -236,7 +233,6 @@ export function createBankManager(app, getMoney, addMoney, subMoney, onLoanExpir
         loanActive = true;
         addMoney(borrowedAmount);
         
-        console.log(`Půjčka: Dostal $${borrowedAmount}, dluží $${totalDebt} (${bankOptions.interestRate * 100}% úrok)`);
         
         loanTimer.startTimer(totalDebt);
         
@@ -267,7 +263,6 @@ export function createBankManager(app, getMoney, addMoney, subMoney, onLoanExpir
             
             loanTimer.stopTimer();
             
-            console.log(`Dluh splacen: Vráceno $${repaymentAmount}`);
             
             loanAmount = 0;
             loanActive = false;
