@@ -175,5 +175,82 @@ export const CITY_GEN_DATA=[
         defenseLevel: 5,
         cathouseLevel: 0,
         description: "Posvátné místo"
-    }
+    },
+    {
+        name: "Wash Him Tom DC",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 3,
+        sizeY: 3,
+        building: "none",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "Lázně.(Otevře se mimo demo.)"
+    },
+    {
+        name: "Rasta-Pasta",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 5,
+        sizeY: 6,
+        building: "none",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "Město kouře.(Otevře se mimo demo.)"
+    },
+    {
+        name: "Sub-burps",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 5,
+        sizeY: 4,
+        building: "none",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "Domov nejlepší jídelny. Velké spoje na Rasta-Pasta.(Otevře se mimo demo.)"
+    },
+    {
+        name: "Mibombo",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 9,
+        sizeY: 2,
+        building: "none",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "Závodnická dráha.(Otevře se mimo demo.)"
+    },
+    {
+        name: "Condor's Nest",
+        peepsMin: 1,
+        peepsMax: 1,
+        sizeX: 1,
+        sizeY: 1,
+        building: "none",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "Pokladnice.(Otevře se mimo demo.)"
+    },
+    {
+        name: "Dirty Hollow",
+        peepsMin: 1,
+        peepsMax: 1,
+        sizeX: 2,
+        sizeY: 1,
+        building: "none",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "Pokladnice.(Otevře se mimo demo.)"
+    },
+    {
+        name: "Ermineland",
+        peepsMin: 150,
+        peepsMax: 400,
+        sizeX: 5,
+        sizeY: 3,
+        building: "none",
+        defenseLevel: 5,
+        cathouseLevel: 0,
+        description: "Domov pistolnice Ermíny.(Otevře se mimo demo.)"
+    },
 ]
