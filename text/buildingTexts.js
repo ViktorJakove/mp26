@@ -149,12 +149,14 @@ export const BUILDING_TEXTS = {
     },
     "gallery": {
         text: [
-            "Místní galerie a kulturní centrum",
-            "Obrazy krajin a portréty významných občanů",
-            "Schází se zde umělci z širokého okolí"
+            "Vítej! My jsme se už viděli! Pamatuješ?",
+            "To jsem ale tehdá ještě chytal motýly! Hahah! A ten vlak! Jak jel do Indianapolis!",
+            "Ne?",
+            "Neva... Stejně mě to oko ještě pořád bolí.",
+            "Jenom jedna fotka a zvěčním tvé sítě železnic mezi ostatními génii v galerii!"
         ],
-        sprite: [0, 0, "S"],
-        spritePos: ["P", "P", "C"]
+        sprite: [0, 0, 0,0,"S"],
+        spritePos: ["P", "P","P","P", "C"]
     },
     "shop": {
         text: [
@@ -165,42 +167,55 @@ export const BUILDING_TEXTS = {
     },
     "barber": {
         text: [
-            "Holičství a kadeřnictví v jednom",
-            "Pánové zde probírají novinky z města",
-            "Výloha s hřebeny a mastičkami"
+            "Takže- ostříhat?",
+            "Hele mlaďas. Mám pár pravidel-",
+            "1) Žádný kecy o tom, že mi smrdí ruce od cigára. Tobě smrdí haksny a stejně tě ostříhám.",
+            "Smrade",
+            "Zelenáči",
+            "Modráku",
+            "Žluťasi",
+            "Troubo",
+            "Výborně, už můžem začít."
         ],
         sprite: [0, 1, 2],
         spritePos: ["C", "C", "P"]
     },
     "marco": {
         text: [
-            "Obuvnictví mistra Marka",
-            "Regály plné bot všech velikostí",
-            "Vzorníky kůže na každém stole"
+            "Vítej v hadrech Švece Marca!",
+            "jen si vyper, co chceš!",
+            "chtěl jsem říct vyber, ale tvý nohy-",
+            "vyber a vyper- tak!",
+            "sorry",
+            "a někdy se zas stav, s těma tvejma známostma u železničářů bych pro tebe možná mohl někdy mít nějakej džab!",
+            "džeb?",
+            "džob!"
         ],
-        sprite: [0, 1, 0],
-        spritePos: ["C", "C", "C"]
+        sprite: [0, 1, 1, 0, 1,0,0,1],
+        spritePos: ["P", "P", "P", "P","P", "P", "P", "P"]
     },"bussiness": {
     text: [
-        "Depo a opravna vlaků",
-        "Sklad náhradních dílů a kol",
-        "Strojvedoucí zde probírají trasy"
+        "Znáš Teda?",
+        "To jsem já! Mám pro tebe exkluzivní nabídku!",
+        "Čekal jsem na tebe a ty tvoje vláčky!",
+        "Jen! na tebe! a ty tvoje vláčky!!",
+        "Co takhle-",
+        "odkupovat palivo ode mě? Mám pro tebe naprosto přírodní uhlí, které zaručí dvojnásobnej výkon lokomotiv! A to není všechno-",
+        "Občas i trojnásobnej! Naprosto přírodní!"
     ],
     afterTransaction: {
         text: [
-            "Děkujeme za investici!",
-            "Díky tvé pomoci můžeme modernizovat vybavení.",
-            "Přijď se podívat na novou lokomotivu!"
+            "Dík za investici!",
         ],
-        sprite: [0, "S", 0],
-        spritePos: ["C", "C", "C"]
+        sprite: ["S"],
+        spritePos: ["C"]
     },
-    sprite: [0, "S", 0],
-    spritePos: ["C", "C", "C"],
+    sprite: [0, "S", 0, "S", 0, 0,"S"],
+    spritePos: ["C", "C", "C", "C", "C", "C", "C"],
     transaction: {
         type: "unlock_speed",
-        cost: 300,
-        successText: "Investice přijata! Město ti děkuje.",
+        cost: 1500,
+        successText: "Investice přijata! Cestující cení novou rychlost vlaků a příroda brečí",
         failText: "Nemáš dostatek financí.",
         questionSprite: "S",
         questionSpritePos: "C",
@@ -208,7 +223,7 @@ export const BUILDING_TEXTS = {
         successSpritePos: "C",
         failSprite: 0,
         failSpritePos: "C",
-        question: "Pořídit naprosto zdravotně nezávadné uhlí pro dvojnásobný výkon lokomotiv?"
+        question: "Pořídit naprosto zdravotně nezávadné uhlí pro čtyřnásobný výkon lokomotiv?"
     }
 },
     "mech": {
