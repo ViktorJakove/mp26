@@ -228,15 +228,17 @@ export const BUILDING_TEXTS = {
 },
     "mech": {
         text: [
-            "Depo a opravna vlaků",
-            "Sklad náhradních dílů a kol",
-            "Strojvedoucí zde probírají trasy"
+            "Nazdar synku! To jsem já, kvůli komu nemůžeš stavět T koleje, haha!",
+            "Chápu tvoje rozhořčení, ale vysvětli mi, proč bych ti prodával něco, díky čemu by sis už nepořídil tu dražší křižovatku??",
+            "To mi teda pověz, ahahahah! To teda jo!",
+            "Miluju kapitalismus!",
+            "nemáme s maželkou co jíst"
         ],
-        sprite: [0, 1, "S"],
-        spritePos: ["L", "L", "C"],
+        sprite: [0, 0, 1, 0, "S"],
+        spritePos: ["L", "L","L", "L", "C"],
         transaction: {
             type: "unlock_tracks", 
-            cost: 500,
+            cost: 1000,
             successText: "Děkujeme za nákup! Nová lokomotiva brzy dorazí.",
             failText: "Nemáš dost peněz, příteli.",
             questionSprite: 0,
@@ -247,12 +249,11 @@ export const BUILDING_TEXTS = {
     },
     "church": {
         text: [
-            "Místní kostel a duchovní centrum",
-            "Barevné vitráže a staré lavice",
-            "Zvony zvoní každou neděli"
+            "Vítej synu!",
+            "Můžeš nám přispět? Pomodlím se za tebe."
         ],
-        sprite: [0, 0, 0],
-        spritePos: ["C", "C", "C"]
+        sprite: [0, 0],
+        spritePos: ["C", "C"]
     },
     "none": {
         text: [
