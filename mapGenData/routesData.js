@@ -3,7 +3,6 @@ export const ROUTES_DATA =[
     [1,2],
     [2,3],/* */
     [0,3],
-    [0,2],
     [0,4],
     [1,4],/* */
     [3,5],
@@ -30,7 +29,7 @@ export const ROUTE_COUNT_DATA =[
     1,
     1,
     1, /*konec tutorialu -za svoje prachy */
-    2,
+    1,
     1,
     1, /*levelup*/
     3,/*infotext bisoni*/

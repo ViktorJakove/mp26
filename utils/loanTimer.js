@@ -13,7 +13,6 @@ export function createLoanTimer(onTimeExpired, onTrackRemoved, onLoanUpdate) {
         loanAmount = amount;
         timeRemaining = TOTAL_LOAN_TIME;
         
-        console.log(`Časovač spuštěn: Dluh $${loanAmount}, čas 5 minut`);
         
         timerInterval = setInterval(() => {
             if (timeRemaining > 0) {
@@ -23,7 +22,6 @@ export function createLoanTimer(onTimeExpired, onTrackRemoved, onLoanUpdate) {
                 clearInterval(timerInterval);
                 timerInterval = null;
                 
-                console.log(`Čas vypršel pro dluh $${loanAmount}`);
                 
                 if (onTimeExpired) {
                     const remainingAfterSeizure = onTimeExpired(loanAmount);
@@ -55,7 +53,6 @@ export function createLoanTimer(onTimeExpired, onTrackRemoved, onLoanUpdate) {
                     
                     if (penaltyApplied) {
                         loanAmount = Math.max(0, loanAmount - 10);
-                        console.log(`Dluh snížen o $10, zbývá $${loanAmount}`);
 
                         if (window.bankManager && window.bankManager.setLoanAmount) {
                             window.bankManager.setLoanAmount(loanAmount);
@@ -63,7 +60,6 @@ export function createLoanTimer(onTimeExpired, onTrackRemoved, onLoanUpdate) {
                         onLoanUpdate();
                         
                         if (loanAmount <= 0) {
-                            console.log("Dluh plně splacen penalizacemi");
                             stopTimer();
                             return;
                         }

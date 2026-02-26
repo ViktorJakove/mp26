@@ -89,13 +89,6 @@ const bisonProfitStore = createBisonProfitStore();
 window.bisonProfitStore = bisonProfitStore;
 
 function onLoanExpired(expiredAmount, seizedMoney, remainingDebt) {
-    console.log(`Půjčka $${expiredAmount} vypršela! Zabaveno $${seizedMoney}, zbývá $${remainingDebt}`);
-    
-    if (remainingDebt <= 0) {
-        console.log("Dluh byl plně splacen zabavenými penězi");
-    } else {
-        console.log(`Pozor! Dluh $${remainingDebt} bude dále penalizován odebíráním kolejí každých 2-5 sekund.`);
-    }
     
     if (hudRenderer) hudRenderer.markDirty();
 }
@@ -153,6 +146,7 @@ railRenderer.setOnRailPlaceCheckConn(() => {
             if (city2 && !isCityUnlocked(city2.name)) {
                 unlockCity(city2.name);
             }
+            if(getLevel() === 0 && index === 5) {addLevel();console.log("Level up!")}
         }
     });
 

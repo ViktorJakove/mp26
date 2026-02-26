@@ -8,12 +8,8 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
     const LOCKED_RAIL_TYPES = new Set(["T_N", "T_E", "T_S", "T_W"]); //cross moc dulezitej
     
     function unlockRailType(typeId) {
-        console.log(`Odemkám kolejnice: ${typeId}`);
-        console.log(`Před odemčením - locked:`, Array.from(LOCKED_RAIL_TYPES));
         
         LOCKED_RAIL_TYPES.delete(typeId);
-        
-        console.log(`Po odemčení - locked:`, Array.from(LOCKED_RAIL_TYPES));
         
         // Zkontrolujeme, jestli vybraný typ je stále dostupný
         const availableTypes = TYPES_LIST.filter(type => {
@@ -23,7 +19,6 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
         
         const selected = availableTypes.find(t => t.id === selectedTypeId);
         if (!selected && availableTypes.length > 0) {
-            console.log(`Vybraný typ ${selectedTypeId} není dostupný, přepínám na ${availableTypes[0].id}`);
             selectedTypeId = availableTypes[0].id;
         }
         
@@ -180,14 +175,12 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
         
         // Pokud není dostupný (třeba byl zamčený), vybereme první dostupný
         if (!selected && availableTypes.length > 0) {
-            console.log(`Typ ${selectedTypeId} není dostupný, vybírám ${availableTypes[0].id}`);
             selectedTypeId = availableTypes[0].id;
             selected = availableTypes[0];
         }
         
         // Pokud stále nic není, vezmeme první z TYPES_LIST jako fallback
         if (!selected) {
-            console.warn('Žádné dostupné kolejnice!');
             selected = TYPES_LIST[0];
             if (selected) selectedTypeId = selected.id;
         }
@@ -302,8 +295,7 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
                 e.preventDefault();
                 
                 if (!isLocked) {
-                    console.log('Kliknuto na typ:', type.id || 'DESTROY');
-                    selectedTypeId = type.id || 'DESTROY'; // Uložíme ID, ne index
+                    selectedTypeId = type.id || 'DESTROY';
                     hudDirty = true;
                     draw();
                     if (onSelectCallback) onSelectCallback(type);
