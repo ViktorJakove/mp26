@@ -146,11 +146,11 @@ railRenderer.setOnRailPlaceCheckConn(() => {
             const city1 = findCityByStation(pair[0].x, pair[0].y, areas);
             const city2 = findCityByStation(pair[1].x, pair[1].y, areas);
             
-            if (city1) {
+            if (city1 && !isCityUnlocked(city1.name)) {
                 unlockCity(city1.name);
                 console.log(`Město odemčeno: ${city1.name}`);
             }
-            if (city2) {
+            if (city2 && !isCityUnlocked(city2.name)) {
                 unlockCity(city2.name);
                 console.log(`Město odemčeno: ${city2.name}`);
             }
