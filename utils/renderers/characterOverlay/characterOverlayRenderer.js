@@ -133,6 +133,37 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         }
     
         if (s?.completed) {
+            if (key === "graveyard" && textIdx === texts.length - 1) {
+                buildingState.set(key, { completed: false, questionShown: true });
+                ui.setTextIndex(texts.length - 2);
+                ui.setText(texts[texts.length - 2]);
+                updateSprite(ui.sprite, key, texts.length - 2, false, app, buildingState);
+                ui.setInstruction("Toto byl poslední text...");
+                
+                setTimeout(() => {
+                    if (!ui.sprite || !ui.desc || !ui.panel) {
+                        const targetX = getPos(key, texts.length - 2, false, app, buildingState);
+                        const targetY = app.screen.height / 5 * 2;
+                        const path = getPath(key, texts.length - 2, false, buildingState);
+                        
+                        ui.createSprite(path, targetX, targetY);
+                        
+                        if (!ui.panel) {
+                            const title = city.name;
+                            const description = texts[texts.length - 2];
+                            const instruction = "Klikni kamkoli pro další text...";
+                            ui.createPanel(title, description, instruction);
+                        }
+                    }
+                    
+                    transactionManager.updateUIElements(ui.panel, ui.desc, ui.instr, ui.sprite);
+                    transactionManager.setActive(true, key);
+                    transactionManager.showTransaction(key, buildingState);
+                }, 100);
+                
+                return;
+            }
+            
             if (textIdx === texts.length - 1) {
                 hide();
                 return;
