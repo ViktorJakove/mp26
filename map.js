@@ -61,7 +61,15 @@ const renderers = creatRenderers(
     getPlacementMode, 
     getRelations, 
     setRelations,
-    () => ({ isActive: false, formattedTime: "0:00" })
+    () => {
+        if (window.bankManager) {
+            return {
+                isActive: window.bankManager.isLoanActive ? window.bankManager.isLoanActive() : false,
+                formattedTime: window.bankManager.getFormattedTime ? window.bankManager.getFormattedTime() : "0:00"
+            };
+        }
+        return { isActive: false, formattedTime: "0:00" };
+    }
 );
 
 const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer, trainRenderer, hudRenderer } = renderers;
