@@ -1,28 +1,38 @@
 export const TUTORIAL_TEXTS = {
     0: {
         title: "Vítej ve hře!",
-        text: "Vítej v Pacifik železnici! Tvým úkolem je spojovat města železnicí.",
-        instruction: "Použij MEZERNÍK pro přepnutí do stavby kolejí."
+        texts: [
+            "Vítej v Pacifik železnici!",
+            "Tvým úkolem je spojovat města železnicí.",
+            "Použij MEZERNÍK pro přepnutí do stavby kolejí."
+        ],
+        instruction: "Klikni pro další text..."
     },
     4: {
         title: "První samostatná stavba",
-        text: "Výborně! Teď už stavíš za vlastní peníze. Dávej pozor na náklady - každá kolej stojí peníze.",
-        instruction: "Klikni na ikonku kolejnice vlevo pro výběr typu."
+        texts: [
+            "Výborně! Teď už stavíš za vlastní peníze.",
+            "Dávej pozor na náklady - každá kolej stojí peníze.",
+            "Nezapomeň hru uložit!."
+        ],
+        instruction: "Klikni pro další text..."
     },
     5: {
         title: "Level Up!",
-        text: "Skvěle! Otevřel jsi novou úroveň. Teď uvidíš na mapě nová města a překážky.",
-        instruction: "Prozkoumej novou oblast - jsou tu indiáni a bizoni!"
+        texts: [
+            "Skvěle! Otevřel jsi novou úroveň.",
+            "Teď uvidíš na mapě nová města a překážky.",
+            "Prozkoumej novou oblast - jsou tu indiáni a bizoni!"
+        ],
+        instruction: "Klikni pro další text..."
     },
     10: {
-        title: "Galerie odemčena",
-        text: "Odemkl jsi Galerii! Můžeš si prohlédnout svá díla a získat uznání.",
-        instruction: "Navštiv město s galerií a pokochej se svým dílem."
+        title: "Galerie odemčena!",
+        texts: [
+            "Odemkl jsi Galerii!",
+            "Můžeš si prohlédnout svá díla a získat uznání.",
+            "Navštiv město s galerií a pokochej se svým dílem."
+        ],
+        instruction: "Klikni pro další text..."
     }
-};
-
-export const DEFAULT_TUTORIAL_TEXT = {
-    title: "Nová stanice",
-    text: "Úspěšně jsi vytvořil nové železniční spojení!",
-    instruction: "Pokračuj ve stavbě..."
 };

@@ -13,8 +13,11 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
 
     let city = null;
     let onClose = null;
+    let currentTutorialTexts = null;
+    let currentTutorialInstruction = "";
     const buildingState = new Map();
     const firstOpenTracker = new Set();
+    const shownTutorials = new Set();
     
     const ui = createOverlayUI(app, container, () => handleClick());
     const shopManager = createShopManager(app, getMoney, subMoney, railRenderer, stationRenderer);
@@ -104,6 +107,22 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
 
     function handleClick() {
         if (!city || !ui.desc || transactionManager.isActive() || shopManager.shopContainer || isAnimating) return;
+        
+        if (city.building === "tutorial" && currentTutorialTexts) {
+            const textIdx = ui.getTextIndex();
+            
+            if (textIdx < currentTutorialTexts.length - 1) {
+                ui.incrementTextIndex();
+                ui.setText(currentTutorialTexts[ui.getTextIndex()]);
+                
+                if (ui.getTextIndex() === currentTutorialTexts.length - 1) {
+                    ui.setInstruction("Klikni pro zavření...");
+                }
+            } else {
+                hide();
+            }
+            return;
+        }
         
         const key = city.building;
         const texts = getTexts(key, buildingState);
@@ -216,9 +235,10 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         }
     }
 
-    container.showTutorial = (tutorialCity, instruction = "Klikni kamkoli pro pokračování...") => {
+    container.showTutorial = (tutorialCity, instruction = "Klikni pro další text...") => {
         city = tutorialCity;
-        const key = "tutorial";
+        currentTutorialTexts = tutorialCity.texts;
+        currentTutorialInstruction = instruction;
         
         container.removeChildren();
         ui.createBackground();
@@ -229,7 +249,8 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         const targetY = app.screen.height / 5 * 2;
         ui.createSprite(null, targetX, targetY);
         
-        const description = tutorialCity.description;
+        ui.setTextIndex(0);
+        const description = currentTutorialTexts[0];
         
         ui.createPanel(title, description, instruction);
         
@@ -252,6 +273,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
     function hide() {
         container.visible = false;
         city = null;
+        currentTutorialTexts = null;
         ui.destroy();
         transactionManager.destroyButtons();
         shopManager.hide();

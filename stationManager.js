@@ -28,14 +28,15 @@ export function createStationManager(stationRenderer, areaRenderer, drawGraphics
             
             const tutorial = TUTORIAL_TEXTS[routeIndex] || {
                 title: "Nová stanice",
-                text: "Úspěšně jsi vytvořil nové železniční spojení!",
+                texts: ["Úspěšně jsi vytvořil nové železniční spojení!"],
                 instruction: "Pokračuj ve stavbě..."
             };
             
             const tutorialCity = {
                 name: tutorial.title,
                 building: "tutorial",
-                description: tutorial.text,
+                texts: tutorial.texts,
+                description: tutorial.texts[0],
                 x: 0,
                 y: 0,
                 sizeX: 1,
