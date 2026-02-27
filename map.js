@@ -48,7 +48,6 @@ let unlockedCities = new Set();
 
 const getUnlockedCities = () => unlockedCities;
 
-// NEJPRVE renderers
 const renderers = creatRenderers(
     app, 
     camera, 
@@ -62,7 +61,7 @@ const renderers = creatRenderers(
     getPlacementMode, 
     getRelations, 
     setRelations,
-    () => ({ isActive: false, formattedTime: "0:00" }) //loan timer
+    () => ({ isActive: false, formattedTime: "0:00" })
 );
 
 const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer, trainRenderer, hudRenderer } = renderers;
@@ -94,8 +93,7 @@ bankManager.reset();
 
 const characterOverlay = createCharacterOverlay(app, getGridScale, railRenderer, stationRenderer, getMoney, subMoney, addMoney);
 
-const buildingSpritesManager = createBuildingSpritesManager(app, camera, getGridScale, cellSize, characterOverlay,getShiftPressed
-);
+const buildingSpritesManager = createBuildingSpritesManager(app, camera, getGridScale, cellSize, characterOverlay, getShiftPressed);
 
 const fgContainer = new PIXI.Container();
 fgContainer.zIndex = 10;
@@ -104,15 +102,26 @@ const { getHighlightedTile } = setupTileHighlight(app, camera, () => gridScale, 
 const drawGraphicsInstance = createDrawGraphics(app, camera, getGridScale, cellSize, getLevel, getHighlightedTile, getPlacementMode, getAreas, renderers, fgContainer);
 let drawGraphics = drawGraphicsInstance.drawGraphics;
 
-const { addLevel, addStations, spawnTrainsForConnectedRoutes } = createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel, setLevel, railRenderer, trainRenderer, (cityName) => {
-    if (unlockedCities.has(cityName)) return;
-    unlockedCities.add(cityName);
-    
-    const city = areas.find(a => a.name === cityName);
-    if (city && city.building !== "none") {
-        buildingSpritesManager.createSprite(city);
-    }
-},characterOverlay);
+const { addLevel, addStations, spawnTrainsForConnectedRoutes } = createStationManager(
+    stationRenderer, 
+    areaRenderer, 
+    drawGraphics, 
+    getAreas, 
+    getLevel, 
+    setLevel, 
+    railRenderer, 
+    trainRenderer, 
+    (cityName) => {
+        if (unlockedCities.has(cityName)) return;
+        unlockedCities.add(cityName);
+        
+        const city = areas.find(a => a.name === cityName);
+        if (city && city.building !== "none") {
+            buildingSpritesManager.createSprite(city);
+        }
+    },
+    characterOverlay
+);
 
 const { checkRouteConnections } = createRouteChecker(stationRenderer, railRenderer);
 

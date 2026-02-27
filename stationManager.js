@@ -8,7 +8,7 @@ import { TUTORIAL_TEXTS } from "./text/tutorialTexts.js";
 export function createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel, setLevel, railRenderer, trainRenderer, unlockCity, characterOverlay) {
     let stationLevel = 0;
     const colorGen = new ColorGenerator({ sat: 0.6, light: 0.43 });
-    const routeColors = new Map();//index, barva
+    const routeColors = new Map();
     
     const shownTutorials = new Set();
 
@@ -45,7 +45,7 @@ export function createStationManager(stationRenderer, areaRenderer, drawGraphics
             
             if (characterOverlay && characterOverlay.showTutorial) {
                 characterOverlay.showTutorial(tutorialCity, tutorial.instruction);
-            } else {//fallback
+            } else {
                 characterOverlay.showCityInfo(tutorialCity);
             }
         }
@@ -106,6 +106,8 @@ export function createStationManager(stationRenderer, areaRenderer, drawGraphics
                 stationIndex++;
             });
     
+            showTutorial(i);
+            
             if (stationTiles.length === 2 && trainRenderer) {
                 const path = railRenderer.getPath(
                     stationTiles[0].x, stationTiles[0].y,
@@ -116,8 +118,6 @@ export function createStationManager(stationRenderer, areaRenderer, drawGraphics
                         cityA: areas.find(a => a.name === cityA),
                         cityB: areas.find(a => a.name === cityB)
                     });
-                    
-                    showTutorial(i);
                 }
             }
         }
@@ -145,8 +145,6 @@ export function createStationManager(stationRenderer, areaRenderer, drawGraphics
 
                 const color = routeColors.get(routeIndex) ?? 0xffffff;
                 trainRenderer.addTrain(path, color, routeIndex, [a.peeps, b.peeps]);
-                
-                showTutorial(routeIndex);
             } else {
                 trainRenderer.removeTrainForRoute(routeIndex);
             }
