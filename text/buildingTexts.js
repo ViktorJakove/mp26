@@ -172,14 +172,14 @@ export const BUILDING_TEXTS = {
             "Hele mlaďas. Mám pár pravidel-",
             "1) Žádný kecy o tom, že mi smrdí ruce od cigára. Tobě smrdí haksny a stejně tě ostříhám.",
             "Smrade",
-            "Zelenáči",
-            "Modráku",
-            "Žluťasi",
-            "Troubo",
+            "Zelenáči,",
+            "Modráku,",
+            "Žluťasi,",
+            "Troubo,",
             "Výborně, už můžem začít."
         ],
-        sprite: [0, 1, 2],
-        spritePos: ["C", "C", "P"]
+        sprite: [0, 1, 1, 0, 0,0,0,1,"S"],
+        spritePos: ["C", "C", "C","C", "C", "C","C", "C", "C"]
     },
     "marco": {
         text: [
@@ -237,7 +237,7 @@ export const BUILDING_TEXTS = {
             "nemáme s maželkou co jíst"
         ],
         sprite: ["S", 0, 1, 0, 0, "S"],
-        spritePos: ["L", "L","L", "L", "L", "L"],
+        spritePos: ["L", "L","L", "L", "L", "C"],
         transaction: {
             type: "unlock_tracks", 
             cost: 1000,
