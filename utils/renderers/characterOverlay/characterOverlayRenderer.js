@@ -215,6 +215,38 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             }
         }
     }
+container.showTutorial = (tutorialCity, instruction = "Klikni kamkoli pro pokračování...") => {
+    city = tutorialCity;
+    const key = "tutorial";
+    
+    container.removeChildren();
+    ui.createBackground();
+    
+    const title = tutorialCity.name;
+    
+    const targetX = app.screen.width * 0.5;
+    const targetY = app.screen.height / 5 * 2;
+    ui.createSprite(null, targetX, targetY);
+    
+    const description = tutorialCity.description;
+    
+    ui.createPanel(title, description, instruction);
+    
+    if (ui.panel) {
+        const panelBg = ui.panel.children[0];
+        if (panelBg) {
+            panelBg.tint = 0x3498db;
+        }
+    }
+    
+    if (ui.desc) {
+        ui.desc.style.fill = 0xf1c40f;
+    }
+    
+    transactionManager.setActive(false, null);
+    container.visible = true;
+    ui.fadeIn();
+};
 
     function hide() {
         container.visible = false;
@@ -302,6 +334,8 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
             container.hitArea = new PIXI.Rectangle(0, 0, app.screen.width, app.screen.height);
         }
     };
+
+    
 
     window.addEventListener("resize", handleResize);
     

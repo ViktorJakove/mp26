@@ -112,7 +112,7 @@ const { addLevel, addStations, spawnTrainsForConnectedRoutes } = createStationMa
     if (city && city.building !== "none") {
         buildingSpritesManager.createSprite(city);
     }
-});
+},characterOverlay);
 
 const { checkRouteConnections } = createRouteChecker(stationRenderer, railRenderer);
 

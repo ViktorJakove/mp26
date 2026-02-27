@@ -1,13 +1,16 @@
 import { AREA_GEN_DATA } from "./mapGenData/areaGenData.js";
-import { ROUTES_DATA, ROUTE_COUNT_DATA } from "./mapGenData/routesData.js";
+import { ROUTES_DATA, ROUTE_COUNT_DATA, TUTORIAL_ROUTE_INDEXES } from "./mapGenData/routesData.js";
 import { CITY_GEN_DATA } from "./mapGenData/cityGenData.js";
 import { ColorGenerator } from "./utils/colorGenerator.js";
 import { generateAreas } from "./generateAreas.js";
+import { TUTORIAL_TEXTS } from "./text/tutorialTexts.js";
 
-export function createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel, setLevel, railRenderer, trainRenderer, unlockCity) {
+export function createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel, setLevel, railRenderer, trainRenderer, unlockCity, characterOverlay) {
     let stationLevel = 0;
     const colorGen = new ColorGenerator({ sat: 0.6, light: 0.43 });
     const routeColors = new Map();//index, barva
+    
+    const shownTutorials = new Set();
 
     function addLevel() {
         console.log("adding level");
@@ -17,6 +20,35 @@ export function createStationManager(stationRenderer, areaRenderer, drawGraphics
         setLevel(level);
         areaRenderer.markDirty();
         stationRenderer.markDirty();
+    }
+
+    function showTutorial(routeIndex) {
+        if (TUTORIAL_ROUTE_INDEXES.includes(routeIndex) && !shownTutorials.has(routeIndex)) {
+            shownTutorials.add(routeIndex);
+            
+            const tutorial = TUTORIAL_TEXTS[routeIndex] || {
+                title: "Nová stanice",
+                text: "Úspěšně jsi vytvořil nové železniční spojení!",
+                instruction: "Pokračuj ve stavbě..."
+            };
+            
+            const tutorialCity = {
+                name: tutorial.title,
+                building: "tutorial",
+                description: tutorial.text,
+                x: 0,
+                y: 0,
+                sizeX: 1,
+                sizeY: 1,
+                peeps: 0
+            };
+            
+            if (characterOverlay && characterOverlay.showTutorial) {
+                characterOverlay.showTutorial(tutorialCity, tutorial.instruction);
+            } else {//fallback
+                characterOverlay.showCityInfo(tutorialCity);
+            }
+        }
     }
 
     function addStations() {
@@ -79,10 +111,14 @@ export function createStationManager(stationRenderer, areaRenderer, drawGraphics
                     stationTiles[0].x, stationTiles[0].y,
                     stationTiles[1].x, stationTiles[1].y
                 );
-                if (path) trainRenderer.addTrain(path, routeColor, i, {
-                    cityA: areas.find(a => a.name === cityA),
-                    cityB: areas.find(a => a.name === cityB)
-                });
+                if (path) {
+                    trainRenderer.addTrain(path, routeColor, i, {
+                        cityA: areas.find(a => a.name === cityA),
+                        cityB: areas.find(a => a.name === cityB)
+                    });
+                    
+                    showTutorial(i);
+                }
             }
         }
     
@@ -109,11 +145,13 @@ export function createStationManager(stationRenderer, areaRenderer, drawGraphics
 
                 const color = routeColors.get(routeIndex) ?? 0xffffff;
                 trainRenderer.addTrain(path, color, routeIndex, [a.peeps, b.peeps]);
+                
+                showTutorial(routeIndex);
             } else {
                 trainRenderer.removeTrainForRoute(routeIndex);
             }
         }
     }
 
-    return { addLevel, addStations, spawnTrainsForConnectedRoutes};
+    return { addLevel, addStations, spawnTrainsForConnectedRoutes };
 }
