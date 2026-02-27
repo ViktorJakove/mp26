@@ -230,13 +230,14 @@ export const BUILDING_TEXTS = {
     "mech": {
         text: [
             "Nazdar synku! To jsem já, kvůli komu nemůžeš stavět T koleje, haha!",
-            "Chápu tvoje rozhořčení, ale vysvětli mi, proč bych ti prodával něco, díky čemu by sis už nepořídil tu dražší křižovatku??",
+            "Chápu tvoje rozhořčení, ale vysvětli mi, proč bych ti prodával něco, díky čemu by sis už třeba nikdy nepořídil dražší křižovatku??",
             "To mi teda pověz, ahahahah! To teda jo!",
+            "Leda že by sis zaplatil... To bychom si možná pokecali, co ty na to?",
             "Miluju kapitalismus!",
             "nemáme s maželkou co jíst"
         ],
-        sprite: [0, 0, 1, 0, "S"],
-        spritePos: ["L", "L","L", "L", "C"],
+        sprite: ["S", 0, 1, 0, 0, "S"],
+        spritePos: ["L", "L","L", "L", "L", "L"],
         transaction: {
             type: "unlock_tracks", 
             cost: 1000,
@@ -245,7 +246,7 @@ export const BUILDING_TEXTS = {
             questionSprite: 0,
             questionSpritePos: "C",
             successSprite: "S",
-            question: "Pořídit naprosto přírodní uhlí pro dvojnásobný výkon lokomotiv?"
+            question: "Odemknout nový typ kolejí?"
         }
     },
     "church": {
@@ -267,11 +268,9 @@ export const BUILDING_TEXTS = {
 
 export const DEFAULT_BUILDING_TEXT = {
     text: [
-        "Běžná městská zástavba",
-        "Žije zde pracovitý lid",
-        "Ulice plné života a obchodu"
+        "error"
     ],
-    sprite: [0, 1, 2]
+    sprite: [0]
 };
 /*export const TUTORIAL_TEXTS = {
     text:[ [
