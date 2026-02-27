@@ -1,5 +1,5 @@
 export function createBuildingSpritesManager(app, camera, getGridScale, cellSize, characterOverlay, getShiftPressed) {
-   const container = new PIXI.Container();
+    const container = new PIXI.Container();
     container.zIndex = 11;
     app.stage.addChild(container);
 
@@ -36,7 +36,6 @@ export function createBuildingSpritesManager(app, camera, getGridScale, cellSize
     function createSprite(city) {
         if (!city || city.building === "none" || citySprites.has(city.name)) return false;
         
-        
         const texture = getBuildingTexture(city.building);
         if (!texture) return false;
         
@@ -47,7 +46,7 @@ export function createBuildingSpritesManager(app, camera, getGridScale, cellSize
         
         //velikost
         const cityMinSize = Math.min(city.sizeX, city.sizeY);
-        const spriteSize = (cityMinSize * cellSize / 10 *9);
+        const spriteSize = (cityMinSize * cellSize / 10 * 9);
         
         const sprite = new PIXI.Sprite(texture);
         sprite.anchor.set(0.5);
@@ -67,6 +66,26 @@ export function createBuildingSpritesManager(app, camera, getGridScale, cellSize
             texture.once('update', setScale);
         }
         
+        //fadein
+        sprite.alpha = 0;
+        const startTime = Date.now();
+        const duration = 2000;
+        const targetAlpha = 0.9;
+
+        const animateFade = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            sprite.alpha = eased * targetAlpha;
+
+            if (progress < 1) {
+                requestAnimationFrame(animateFade);
+            } else {
+                sprite.alpha = targetAlpha;
+            }
+        };
+        animateFade();
+        
         sprite.interactive = true;
         sprite.cursor = "pointer";
         sprite.on('pointerdown', (e) => {
@@ -76,7 +95,6 @@ export function createBuildingSpritesManager(app, camera, getGridScale, cellSize
             }
         });
         
-        // Přidáme do kontejneru
         container.addChild(sprite);
         
         citySprites.set(city.name, { sprite, city, worldX, worldY });
