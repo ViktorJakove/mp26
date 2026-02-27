@@ -273,7 +273,7 @@ export const DEFAULT_BUILDING_TEXT = {
     ],
     sprite: [0, 1, 2]
 };
-export const TUTORIAL_TEXTS = {
+/*export const TUTORIAL_TEXTS = {
     text:[ [
         "goal, space, shift",
         "ouje"
@@ -285,4 +285,4 @@ export const TUTORIAL_TEXTS = {
     ],[
         "social",
     ]]
-};
+};*/
