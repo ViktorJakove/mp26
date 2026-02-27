@@ -245,9 +245,7 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         
         const title = tutorialCity.name;
         
-        const targetX = app.screen.width * 0.5;
-        const targetY = app.screen.height / 5 * 2;
-        ui.createSprite(null, targetX, targetY);
+        ui.createSprite(null, 0, 0, true);
         
         ui.setTextIndex(0);
         const description = currentTutorialTexts[0];

@@ -18,7 +18,12 @@ export function createOverlayUI(app, container, handleClick) {
         return bg;
     }
 
-    function createSprite(path, posX, posY) {
+    function createSprite(path, posX, posY, skipSprite = false) {
+        if (skipSprite) {
+            sprite = null;
+            return null;
+        }
+        
         const tex = path ? PIXI.Texture.from(path) : PIXI.Texture.WHITE;
         sprite = new PIXI.Sprite(tex);
         sprite.anchor.set(0.5);
@@ -39,8 +44,7 @@ export function createOverlayUI(app, container, handleClick) {
                 tex.once('update', setScale);
             }
         } else {
-            sprite.scale.set(100, 100);
-            sprite.tint = 0xff00ff;
+            sprite.visible = false;
         }
         
         sprite.interactive = true;
