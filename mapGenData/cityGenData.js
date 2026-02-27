@@ -16,7 +16,7 @@ export const CITY_GEN_DATA=[
         peepsMax: 10,
         sizeX: 2,
         sizeY: 1,
-        building: "olda", // temp -> none
+        building: "none", // temp -> none
         defenseLevel: 5,
         cathouseLevel: 0,
         description: "Jak již název napovídá..."

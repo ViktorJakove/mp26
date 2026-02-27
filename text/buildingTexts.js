@@ -273,3 +273,16 @@ export const DEFAULT_BUILDING_TEXT = {
     ],
     sprite: [0, 1, 2]
 };
+export const TUTORIAL_TEXTS = {
+    text:[ [
+        "goal, space, shift",
+        "ouje"
+    ],[
+        "za vlastni prachy",
+        "bahahaha",
+    ],[
+        "jsi ready na the real deal",
+    ],[
+        "social",
+    ]]
+};
