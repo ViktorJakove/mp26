@@ -451,14 +451,9 @@ export function createBankManager(app, getMoney, addMoney, subMoney, onLoanExpir
             }
         } else {
             const infoText = new PIXI.Text(
-                `Maximální půjčka: $${bankOptions.maxLoan}\n` +
-                `Vrátit budeš muset ${bankOptions.interestRate * 100}%!\n` +
+                `Maximální půjčka: $${bankOptions.maxLoan}, vrátit budeš muset ${bankOptions.interestRate * 100}%!\n` +
                 `Čas na splacení: 5 minut!\n` +
-                `\n⚠️ VAROVÁNÍ ⚠️\n` +
-                `• Po vypršení 5 minut přicházíš o VŠECHNY peníze\n` +
-                `• Následně začne zabavování KOLEJÍ každých 2-5 sekund (každá kolej sníží dluh o $10)\n` +
-                `• Zabavování pokračuje, dokud není dluh zcela splacen\n` +
-                `• Před novou půjčkou musíš splatit zbytek dluhu`,
+                `• Po vypršení 5 minut příjde exekuce`,
                 {
                     fontFamily: "Arial",
                     fontSize: 14,
@@ -481,14 +476,14 @@ export function createBankManager(app, getMoney, addMoney, subMoney, onLoanExpir
             });
             inputLabel.anchor.set(0.5);
             inputLabel.x = panelW / 2;
-            inputLabel.y = 240;
+            inputLabel.y = 190;
             uiContainer.addChild(inputLabel);
             
             const inputWidth = 200;
             const inputX = (panelW - inputWidth) / 2;
-            const inputY = 260;
+            const inputY = 210;
             
-            const confirmBtn = createButton("Půjčit", 0x27ae60, 0x2ecc71, panelW/2 - 75, 320, 150, 45, () => {
+            const confirmBtn = createButton("Půjčit", 0x27ae60, 0x2ecc71, panelW/2 - 75, 280, 150, 45, () => {
                 if (htmlInput) {
                     const amount = parseInt(htmlInput.value);
                     handleLoan(amount, panel, desc, instr, sprite, options, onComplete);
@@ -496,7 +491,7 @@ export function createBankManager(app, getMoney, addMoney, subMoney, onLoanExpir
             });
             uiContainer.addChild(confirmBtn);
             
-            const cancelBtn = createButton("Zrušit", 0x7f8c8d, 0x95a5a6, panelW/2 - 75, 380, 150, 40, () => {
+            const cancelBtn = createButton("Zrušit", 0x7f8c8d, 0x95a5a6, panelW/2 - 75, 330, 150, 40, () => {
                 removeHTMLInput();
                 destroyUI();
                 onComplete(true);

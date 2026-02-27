@@ -78,7 +78,7 @@ export const BUILDING_TEXTS = {
             "...",
             "Karla Žižku",
             "fakt že jo!",
-            "ALmužničku? Vyměním za všelijaká moudra!"
+            "Almužničku? Vyměním za všelijaká moudra!"
         ],
         afterTransaction: {
             text: [
@@ -87,10 +87,11 @@ export const BUILDING_TEXTS = {
                 "V Evropě i v Koreji se obejdou bez kolejí (typu-T)! (knedlíky kynu-T!)",
                 "Pro kontakt s osobou daného města nemusíš mít aktivní kolejové spojení! (rýmová resignace)",
                 "Olda možná pije, ale ví kdy a která bije! Poslechni ho.",
-                "Dobré skutky občas taky něco stojí. Občas dost a občas víc."
+                "Dobré skutky tady taky občas něco stojí. Občas dost a občas víc.",
+                "Upovídance můžeš umlčet pomocí Esc."
             ],
-            sprite: [0, 1, 1, 0, 1, 0],
-            spritePos: ["C", "C", "C", "C", "C", "C"]
+            sprite: [0, 1, 1, 0, 1, 0,0],
+            spritePos: ["C", "C", "C", "C", "C", "C", "C"]
         },
         sprite: [0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0],
         spritePos: ["P", "P", "P", "P","C","C", "P", "P", "P", "P", "P", "P", "P", "C"],
