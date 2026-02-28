@@ -83,7 +83,7 @@ window.bisonManager = bisonManager;
 const bisonProfitStore = createBisonProfitStore();
 window.bisonProfitStore = bisonProfitStore;
 
-const loadingOverLay = createLoadingOverlay(app);
+const loadingOverLay = createLoadingOverlay(app, getGridScale);
 
 function onLoanExpired(expiredAmount, seizedMoney, remainingDebt) {
     if (hudRenderer) hudRenderer.markDirty();
@@ -268,6 +268,7 @@ function mapZoom(zoomFactor, event) {
     hudRenderer.draw();
     characterOverlay.refresh();
     buildingSpritesManager.refresh();
+    loadingOverLay.refresh();
     
     drawGraphics();
 }
@@ -301,6 +302,7 @@ window.addEventListener("resize", () => {
             characterOverlay.refresh();
         }
     }
+    loadingOverLay.refresh();
 });
 
 const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, addStations, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } }, areaRenderer, pointerTextRenderer, resetDrag, stationRenderer, hudRenderer, characterOverlay);
