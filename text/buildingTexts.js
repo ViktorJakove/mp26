@@ -21,8 +21,8 @@ export const BUILDING_TEXTS = {
             "Nestav nic přes indiánská území a neznepřátel si ani jejich obyvatele, ani mě!",
             "Někdy se zastav. Salut, Greenhorne!"
         ],
-        sprite: [0, 1, 2],
-        spritePos: ["L", "C", "P"]
+        sprite: [0, 1, 1, 1, 0, 1, 0, 1, 1],
+        spritePos: ["L", "C", "P", "C", "L", "C", "C", "C", "C", "C"]
     },
     "bank": {
         text: [
