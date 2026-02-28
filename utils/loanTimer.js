@@ -4,7 +4,7 @@ export function createLoanTimer(onTimeExpired, onTrackRemoved, onLoanUpdate) {
     let timeRemaining = 0;
     let timerInterval = null;
     let trackPenaltyInterval = null;
-    const TOTAL_LOAN_TIME = 5 /* * 60*/; // 5 minut
+    const TOTAL_LOAN_TIME = 5  * 60; // 5 minut
 
     function startTimer(amount) {
         stopTimer();

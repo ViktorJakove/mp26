@@ -2,7 +2,7 @@ export function createApp(){
     const app = new PIXI.Application({
         resizeTo: window,
         autoDensity: true,
-        backgroundColor: 0xeeeeee,
+        backgroundColor: 0xF4E9D8,
         antialias: true
     });
     document.body.appendChild(app.view);

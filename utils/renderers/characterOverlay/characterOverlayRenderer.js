@@ -13,8 +13,11 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
 
     let city = null;
     let onClose = null;
+    let currentTutorialTexts = null;
+    let currentTutorialInstruction = "";
     const buildingState = new Map();
     const firstOpenTracker = new Set();
+    const shownTutorials = new Set();
     
     const ui = createOverlayUI(app, container, () => handleClick());
     const shopManager = createShopManager(app, getMoney, subMoney, railRenderer, stationRenderer);
@@ -105,6 +108,22 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
     function handleClick() {
         if (!city || !ui.desc || transactionManager.isActive() || shopManager.shopContainer || isAnimating) return;
         
+        if (city.building === "tutorial" && currentTutorialTexts) {
+            const textIdx = ui.getTextIndex();
+            
+            if (textIdx < currentTutorialTexts.length - 1) {
+                ui.incrementTextIndex();
+                ui.setText(currentTutorialTexts[ui.getTextIndex()]);
+                
+                if (ui.getTextIndex() === currentTutorialTexts.length - 1) {
+                    ui.setInstruction("Klikni pro zavření...");
+                }
+            } else {
+                hide();
+            }
+            return;
+        }
+        
         const key = city.building;
         const texts = getTexts(key, buildingState);
         const d = BUILDING_TEXTS[key];
@@ -133,6 +152,37 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         }
     
         if (s?.completed) {
+            if (key === "graveyard" && textIdx === texts.length - 1) {
+                buildingState.set(key, { completed: false, questionShown: true });
+                ui.setTextIndex(texts.length - 2);
+                ui.setText(texts[texts.length - 2]);
+                updateSprite(ui.sprite, key, texts.length - 2, false, app, buildingState);
+                ui.setInstruction("Toto byl poslední text...");
+                
+                setTimeout(() => {
+                    if (!ui.sprite || !ui.desc || !ui.panel) {
+                        const targetX = getPos(key, texts.length - 2, false, app, buildingState);
+                        const targetY = app.screen.height / 5 * 2;
+                        const path = getPath(key, texts.length - 2, false, buildingState);
+                        
+                        ui.createSprite(path, targetX, targetY);
+                        
+                        if (!ui.panel) {
+                            const title = city.name;
+                            const description = texts[texts.length - 2];
+                            const instruction = "Klikni kamkoli pro další text...";
+                            ui.createPanel(title, description, instruction);
+                        }
+                    }
+                    
+                    transactionManager.updateUIElements(ui.panel, ui.desc, ui.instr, ui.sprite);
+                    transactionManager.setActive(true, key);
+                    transactionManager.showTransaction(key, buildingState);
+                }, 100);
+                
+                return;
+            }
+            
             if (textIdx === texts.length - 1) {
                 hide();
                 return;
@@ -185,9 +235,43 @@ export function createCharacterOverlay(app, getGridScale, railRenderer, stationR
         }
     }
 
+    container.showTutorial = (tutorialCity, instruction = "Klikni pro další text...") => {
+        city = tutorialCity;
+        currentTutorialTexts = tutorialCity.texts;
+        currentTutorialInstruction = instruction;
+        
+        container.removeChildren();
+        ui.createBackground();
+        
+        const title = tutorialCity.name;
+        
+        ui.createSprite(null, 0, 0, true);
+        
+        ui.setTextIndex(0);
+        const description = currentTutorialTexts[0];
+        
+        ui.createPanel(title, description, instruction);
+        
+        if (ui.panel) {
+            const panelBg = ui.panel.children[0];
+            if (panelBg) {
+                panelBg.tint = 0x3498db;
+            }
+        }
+        
+        if (ui.desc) {
+            ui.desc.style.fill = 0xf1c40f;
+        }
+        
+        transactionManager.setActive(false, null);
+        container.visible = true;
+        ui.fadeIn();
+    };
+
     function hide() {
         container.visible = false;
         city = null;
+        currentTutorialTexts = null;
         ui.destroy();
         transactionManager.destroyButtons();
         shopManager.hide();

@@ -27,11 +27,11 @@ export function creatRenderers(
     window.pointerTextRenderer = pointerTextRenderer;
 
     // areas
-    const areaRenderer = createAreaRenderer(app, camera, getGridScale, cellSize);
+    const areaRenderer = createAreaRenderer(app, camera, getGridScale, cellSize, getPlacementMode);
     // stations
     const stationRenderer = createStationRenderer(app, camera, getGridScale, cellSize);
     // rails
-    const railRenderer = createRailRenderer(app, camera, getGridScale, cellSize, getAreas, getLevel, getMoney, addMoney, subMoney, getRelations, setRelations);
+    const railRenderer = createRailRenderer(app, camera, getGridScale, cellSize, getAreas, getLevel, getMoney, addMoney, subMoney, getRelations, setRelations,areaRenderer);
     // trains
     const trainRenderer = createTrainRenderer(app, camera, getGridScale, cellSize, addMoney, railRenderer.getBisonProfit);
 

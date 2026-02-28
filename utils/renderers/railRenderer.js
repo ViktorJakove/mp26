@@ -5,10 +5,12 @@ import { AREA_GEN_DATA } from "../../mapGenData/areaGenData.js";
 import { OPPOSITE } from "../../enums/railTypes.js"
 import { getBisonAdjacentTiles, countConnectedBisonRails , calcBisonProfitForPath} from "../bisonProfit.js";
 
-export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas,getLevel, getMoney, addMoney, subMoney, getRelations, setRelations) {
+export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas,getLevel, getMoney, addMoney, subMoney, getRelations, setRelations, areaRenderer) {
     const railContainer = new PIXI.Container();
     railContainer.zIndex = 3;
     app.stage.addChild(railContainer);
+
+    const areaRendererRef = areaRenderer;
 
     const rails = []; //x, y, sprite
     const occupiedTiles = new Map();
@@ -103,6 +105,8 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
     }
 
     function addRail(tileX, tileY, railType) {
+        removeAreaTile(tileX, tileY);
+        
         const buildOverCost = getBuildOverCost(tileX, tileY);
         const totalCost = railType.cost + buildOverCost;
         
@@ -110,21 +114,19 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
             return false;
         }
         if (isTileOccupied(tileX, tileY) || isTileBlocked(tileX,tileY) || isOutOfBounds(tileX,tileY) || !isCompatibleWithNeighbors(tileX,tileY,railType)) return false;
-
+    
         const rail = { x: tileX, y: tileY, type: railType };
         rails.push(rail);
         occupiedTiles.set(`${tileX},${tileY}`,rail);
-
+    
         railDirty = true;
-
+    
         if (setRelations && getRelations && isTileOnIndianArea(tileX, tileY)) {
             setRelations(getRelations() + 1);
         }
-
+    
         if (onRailPlaced) onRailPlaced();
-
-        //subMoney(totalCost);
-
+    
         return true;
     }
 
@@ -208,6 +210,109 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
         const profit = calcBisonProfitForPath(path, getAreas, occupiedTiles, window.bisonManager ? window.bisonManager.isBisonUnlocked() : false);
         return profit;
     }
+    function removeAreaTile(tileX, tileY) {
+        const areas = getAreas();
+        let areaRemoved = false;
+        
+        for (let i = areas.length - 1; i >= 0; i--) {
+            const area = areas[i];
+            
+            if (area.type !== AREA_TYPES.FOREST && area.type !== AREA_TYPES.ROCK) continue;
+            
+            const withinArea = tileX >= area.x && tileX < area.x + area.sizeX &&
+                               tileY >= area.y && tileY < area.y + area.sizeY;
+            
+            if (withinArea) {
+                if (area.sizeX === 1 && area.sizeY === 1) {
+                    areas.splice(i, 1);
+                    areaRemoved = true;
+                } else {
+                    const newAreas = splitAreaAtTile(area, tileX, tileY);
+                    areas.splice(i, 1);
+                    
+                    for (const newArea of newAreas) {
+                        if (newArea.sizeX > 0 && newArea.sizeY > 0) {
+                            areas.push(newArea);
+                        }
+                    }
+                    
+                    areaRemoved = true;
+                }
+                
+                if (areaRendererRef) {
+                    areaRendererRef.removeSpriteAt(tileX, tileY);
+                }
+            }
+        }
+        
+        if (areaRemoved && areaRendererRef) {
+            areaRendererRef.markDirty();
+        }
+        
+        return areaRemoved;
+    }
+    
+    function splitAreaAtTile(area, removeX, removeY) {
+        const result = [];
+        
+        if (removeX > area.x) {
+            result.push(new Area(
+                area.type,
+                area.x,
+                area.y,
+                removeX - area.x,
+                area.sizeY,
+                area.name,
+                0,
+                area.description || "",
+                ""
+            ));
+        }
+        
+        if (removeX + 1 < area.x + area.sizeX) {
+            result.push(new Area(
+                area.type,
+                removeX + 1,
+                area.y,
+                area.x + area.sizeX - (removeX + 1),
+                area.sizeY,
+                area.name,
+                0,
+                area.description || "",
+                ""
+            ));
+        }
+        
+        if (removeY > area.y) {
+            result.push(new Area(
+                area.type,
+                removeX,
+                area.y,
+                1,
+                removeY - area.y,
+                area.name,
+                0,
+                area.description || "",
+                ""
+            ));
+        }
+        
+        if (removeY + 1 < area.y + area.sizeY) {
+            result.push(new Area(
+                area.type,
+                removeX,
+                removeY + 1,
+                1,
+                area.y + area.sizeY - (removeY + 1),
+                area.name,
+                0,
+                area.description || "",
+                ""
+            ));
+        }
+        
+        return result;
+    }
 
-    return { addRail, removeRail, drawRails, isTileOccupied, markDirty, getRails, loadRails, areStationsConnected, getPath, setOnRailPlaceCheckConn, getBisonProfit };
+    return { addRail, removeRail, drawRails, isTileOccupied, markDirty, getRails, loadRails, areStationsConnected, getPath, setOnRailPlaceCheckConn, getBisonProfit, isCompatibleWithNeighbors};
 }

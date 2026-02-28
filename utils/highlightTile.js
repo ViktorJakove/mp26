@@ -1,8 +1,7 @@
 import { AREA_TYPES } from "../enums/areaTypes.js";
 import {updatePointerTextRenderer} from "./renderers/pointerTextRenderer.js";
 import {getShiftPressed} from "./shiftState.js";
-
-export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGraphics, areas, getPlacementMode, bisonManager) {
+export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGraphics, areas, getPlacementMode, bisonManager, railRenderer, getSelectedRailType) {
     let highlightedTile = null;
 
     app.view.addEventListener("mousemove", (event) => {
@@ -10,6 +9,7 @@ export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGrap
             const gridScale = getGridScale(); 
             const shiftPressed = getShiftPressed();
             const placementMode = getPlacementMode();
+            const selectedRailType = getSelectedRailType ? getSelectedRailType() : null;
 
             const mouseX = event.clientX - app.screen.width / 2;
             const mouseY = event.clientY - app.screen.height / 2;
@@ -22,6 +22,7 @@ export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGrap
 
             let obstacleInfo = "";
             let obstacle = null;
+            let isCompatible = true;
             
             const isOnBison = areas.some(area => 
                 area.type === AREA_TYPES.BISONS &&
@@ -58,17 +59,28 @@ export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGrap
                 return false;
             });
 
+            if (placementMode && selectedRailType && !selectedRailType.isDestroy && !isOccupied && !isOnBison) {
+                if (!railRenderer.isTileOccupied(tileX, tileY)) {
+                    
+                    isCompatible = railRenderer.isCompatibleWithNeighbors(tileX, tileY, selectedRailType);
+                    
+                    if (!isCompatible) {
+                        obstacleInfo = "Nekompatibilní spojení!";
+                    }
+                }
+            }
+
             updatePointerTextRenderer(obstacleInfo, event.clientX, event.clientY, getGridScale);
 
-            if (!isOccupied && !isOnBison) {
-                highlightedTile = { x: tileX, y: tileY, obstacle: obstacle};
-            } else if (isOnBison) {
+            if (!isOccupied && !isOnBison && isCompatible) {
+                highlightedTile = { x: tileX, y: tileY, obstacle: obstacle };
+            } else if (isOnBison || !isCompatible) {
                 highlightedTile = { 
                     x: tileX, 
                     y: tileY, 
                     obstacle: obstacle,
-                    isBison: true,
-                    buildOverColor:  0xffaa00
+                    isBison: isOnBison,
+                    buildOverColor: !isCompatible ? 0xff0000 : 0xffaa00
                 };
             } else {
                 highlightedTile = null;

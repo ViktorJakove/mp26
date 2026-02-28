@@ -11,7 +11,10 @@ import { createRouteChecker } from "./utils/routeChecker.js";
 import { createCharacterOverlay } from "./utils/renderers/characterOverlay/characterOverlayRenderer.js";
 import { createBankManager } from "./utils/bankManager.js";
 import { createBisonManager } from "./utils/bisonManager.js";
-import{createBisonProfitStore} from "./createBisonProfitStore.js";
+import { createBisonProfitStore } from "./createBisonProfitStore.js";
+import { createBuildingSpritesManager } from "./buildingSprites.js";
+import { getShiftPressed } from "./utils/shiftState.js";
+import { createLoadingOverlay } from "./utils/renderers/loadingOverLay.js";
 
 const app = createApp();
 app.stage.sortableChildren = true;
@@ -46,22 +49,6 @@ let unlockedCities = new Set();
 
 const getUnlockedCities = () => unlockedCities;
 
-const unlockCity = (cityName) => {
-    unlockedCities.add(cityName);
-};
-const isCityUnlocked = (cityName) => unlockedCities.has(cityName);
-
-function getLoanTimerInfo() {
-    if (window.bankManager) {
-        return {
-            isActive: window.bankManager.isLoanActive ? window.bankManager.isLoanActive() : false,
-            formattedTime: window.bankManager.getFormattedTime ? window.bankManager.getFormattedTime() : "0:00"
-        };
-    }
-    return { isActive: false, formattedTime: "0:00" };
-}
-
-//NEJPRVE renderers
 const renderers = creatRenderers(
     app, 
     camera, 
@@ -75,7 +62,15 @@ const renderers = creatRenderers(
     getPlacementMode, 
     getRelations, 
     setRelations,
-    getLoanTimerInfo
+    () => {
+        if (window.bankManager) {
+            return {
+                isActive: window.bankManager.isLoanActive ? window.bankManager.isLoanActive() : false,
+                formattedTime: window.bankManager.getFormattedTime ? window.bankManager.getFormattedTime() : "0:00"
+            };
+        }
+        return { isActive: false, formattedTime: "0:00" };
+    }
 );
 
 const { areaRenderer, stationRenderer, railRenderer, pointerTextRenderer, trainRenderer, hudRenderer } = renderers;
@@ -88,8 +83,9 @@ window.bisonManager = bisonManager;
 const bisonProfitStore = createBisonProfitStore();
 window.bisonProfitStore = bisonProfitStore;
 
+const loadingOverLay = createLoadingOverlay(app, getGridScale);
+
 function onLoanExpired(expiredAmount, seizedMoney, remainingDebt) {
-    
     if (hudRenderer) hudRenderer.markDirty();
 }
 
@@ -100,7 +96,7 @@ const bankManager = createBankManager(
     subMoney,
     onLoanExpired,
     railRenderer,
-    hudRenderer.markDirty
+    () => hudRenderer.markDirty()
 );
 
 window.bankManager = bankManager;
@@ -108,12 +104,37 @@ bankManager.reset();
 
 const characterOverlay = createCharacterOverlay(app, getGridScale, railRenderer, stationRenderer, getMoney, subMoney, addMoney);
 
+const buildingSpritesManager = createBuildingSpritesManager(app, camera, getGridScale, cellSize, characterOverlay, getShiftPressed, getPlacementMode);
+window.buildingSpritesManager = buildingSpritesManager;
+
 const fgContainer = new PIXI.Container();
 fgContainer.zIndex = 10;
-const { getHighlightedTile } = setupTileHighlight(app, camera, () => gridScale, cellSize, () => drawGraphics(), areas, getPlacementMode, bisonManager);
-const { drawGraphics } = createDrawGraphics(app, camera, getGridScale, cellSize, getLevel, getHighlightedTile, getPlacementMode, getAreas, renderers, fgContainer);
+const { getHighlightedTile } = setupTileHighlight(app, camera, () => gridScale, cellSize, () => drawGraphics(), areas, getPlacementMode, bisonManager, railRenderer, () => hudRenderer.getSelectedType(), characterOverlay, getUnlockedCities);
 
-const { addLevel, addStations, spawnTrainsForConnectedRoutes } = createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel, setLevel, railRenderer, trainRenderer, unlockCity);
+const drawGraphicsInstance = createDrawGraphics(app, camera, getGridScale, cellSize, getLevel, getHighlightedTile, getPlacementMode, getAreas, renderers, fgContainer);
+let drawGraphics = drawGraphicsInstance.drawGraphics;
+
+const { addLevel, addStations, spawnTrainsForConnectedRoutes } = createStationManager(
+    stationRenderer, 
+    areaRenderer, 
+    drawGraphics, 
+    getAreas, 
+    getLevel, 
+    setLevel, 
+    railRenderer, 
+    trainRenderer, 
+    (cityName) => {
+        if (unlockedCities.has(cityName)) return;
+        unlockedCities.add(cityName);
+        
+        const city = areas.find(a => a.name === cityName);
+        if (city && city.building !== "none") {
+            buildingSpritesManager.createSprite(city);
+        }
+    },
+    characterOverlay,
+    loadingOverLay
+);
 
 const { checkRouteConnections } = createRouteChecker(stationRenderer, railRenderer);
 
@@ -124,6 +145,8 @@ function findCityByStation(stationX, stationY, areas) {
         stationY >= area.y - 1 && stationY <= area.y + area.sizeY
     );
 }
+
+const isCityUnlocked = (cityName) => unlockedCities.has(cityName);
 
 railRenderer.setOnRailPlaceCheckConn(() => {
     const result = checkRouteConnections();
@@ -141,20 +164,43 @@ railRenderer.setOnRailPlaceCheckConn(() => {
             const city2 = findCityByStation(pair[1].x, pair[1].y, areas);
             
             if (city1 && !isCityUnlocked(city1.name)) {
-                unlockCity(city1.name);
+                if (!unlockedCities.has(city1.name)) {
+                    unlockedCities.add(city1.name);
+                    if (city1.building !== "none") {
+                        buildingSpritesManager.createSprite(city1);
+                    }
+                }
             }
             if (city2 && !isCityUnlocked(city2.name)) {
-                unlockCity(city2.name);
+                if (!unlockedCities.has(city2.name)) {
+                    unlockedCities.add(city2.name);
+                    if (city2.building !== "none") {
+                        buildingSpritesManager.createSprite(city2);
+                    }
+                }
             }
-            if(getLevel() === 0 && index === 5) {addLevel();console.log("Level up!")}
+            
+            if(getLevel() === 0 && index === 5) {
+                addLevel();
+                console.log("Level up!");
+            }
         }
     });
 
     const allConnected = result.length > 0 && result.every(r => r.connected);
     if (allConnected) addStations();
-})
+});
+
+const originalDrawGraphics = drawGraphics;
+function enhancedDrawGraphics() {
+    originalDrawGraphics();
+    buildingSpritesManager.updatePositions();
+}
+
+drawGraphics = enhancedDrawGraphics;
 
 drawGraphics();
+
 const { resetDrag } = setupMouseControls(
     app, 
     camera, 
@@ -168,9 +214,16 @@ const { resetDrag } = setupMouseControls(
     areas,
     stationRenderer,
     isCityUnlocked,
-    unlockCity
+    (cityName) => {
+        if (unlockedCities.has(cityName)) return;
+        unlockedCities.add(cityName);
+        
+        const city = areas.find(a => a.name === cityName);
+        if (city && city.building !== "none") {
+            buildingSpritesManager.createSprite(city);
+        }
+    }
 );
-
 document.addEventListener("keydown", (event) => {
     if (event.code === "Escape" && characterOverlay.isVisible()) {
         characterOverlay.hideOverlay();
@@ -215,6 +268,8 @@ function mapZoom(zoomFactor, event) {
     pointerTextRenderer.refresh(() => gridScale);
     hudRenderer.draw();
     characterOverlay.refresh();
+    buildingSpritesManager.refresh();
+    loadingOverLay.refresh();
     
     drawGraphics();
 }
@@ -240,6 +295,7 @@ window.addEventListener("resize", () => {
     railRenderer.markDirty();
     hudRenderer.markDirty();
     if (trainRenderer) trainRenderer.markDirty();
+    buildingSpritesManager.refresh();
     drawGraphics();
     if (characterOverlay.isVisible && characterOverlay.isVisible()) {
         const currentCity = characterOverlay.getCurrentCity ? characterOverlay.getCurrentCity() : null;
@@ -247,6 +303,7 @@ window.addEventListener("resize", () => {
             characterOverlay.refresh();
         }
     }
+    loadingOverLay.refresh();
 });
 
 const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGraphics, addLevel, addStations, { get placementMode() { return placementMode; }, set placementMode(value) { placementMode = value; } }, areaRenderer, pointerTextRenderer, resetDrag, stationRenderer, hudRenderer, characterOverlay);

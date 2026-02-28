@@ -1,22 +1,61 @@
 import { AREA_GEN_DATA } from "./mapGenData/areaGenData.js";
-import { ROUTES_DATA, ROUTE_COUNT_DATA } from "./mapGenData/routesData.js";
+import { ROUTES_DATA, ROUTE_COUNT_DATA, TUTORIAL_ROUTE_INDEXES } from "./mapGenData/routesData.js";
 import { CITY_GEN_DATA } from "./mapGenData/cityGenData.js";
 import { ColorGenerator } from "./utils/colorGenerator.js";
 import { generateAreas } from "./generateAreas.js";
+import { TUTORIAL_TEXTS } from "./text/tutorialTexts.js";
 
-export function createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel, setLevel, railRenderer, trainRenderer, unlockCity) {
+export function createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel, setLevel, railRenderer, trainRenderer, unlockCity, characterOverlay, loadingOverlay) {
     let stationLevel = 0;
     const colorGen = new ColorGenerator({ sat: 0.6, light: 0.43 });
-    const routeColors = new Map();//index, barva
+    const routeColors = new Map();
+    
+    const shownTutorials = new Set();
 
     function addLevel() {
-        console.log("adding level");
-        const areas = getAreas();
-        const level = getLevel() + 1;
-        areas.push(...generateAreas(level, areas[areas.length - 1]));
-        setLevel(level);
-        areaRenderer.markDirty();
-        stationRenderer.markDirty();
+        loadingOverlay.show();
+
+        setTimeout(() => {
+            console.log("adding level");
+            const areas = getAreas();
+            const level = getLevel() + 1;
+            areas.push(...generateAreas(level, areas[areas.length - 1]));
+            setLevel(level);
+            areaRenderer.markDirty();
+            stationRenderer.markDirty();
+
+            loadingOverlay.hide();
+        },100);
+    }
+
+    function showTutorial(routeIndex) {
+        if (TUTORIAL_ROUTE_INDEXES.includes(routeIndex) && !shownTutorials.has(routeIndex)) {
+            shownTutorials.add(routeIndex);
+            
+            const tutorial = TUTORIAL_TEXTS[routeIndex] || {
+                title: "Nová stanice",
+                texts: ["Úspěšně jsi vytvořil nové železniční spojení!"],
+                instruction: "Pokračuj ve stavbě..."
+            };
+            
+            const tutorialCity = {
+                name: tutorial.title,
+                building: "tutorial",
+                texts: tutorial.texts,
+                description: tutorial.texts[0],
+                x: 0,
+                y: 0,
+                sizeX: 1,
+                sizeY: 1,
+                peeps: 0
+            };
+            
+            if (characterOverlay && characterOverlay.showTutorial) {
+                characterOverlay.showTutorial(tutorialCity, tutorial.instruction);
+            } else {
+                characterOverlay.showCityInfo(tutorialCity);
+            }
+        }
     }
 
     function addStations() {
@@ -74,15 +113,19 @@ export function createStationManager(stationRenderer, areaRenderer, drawGraphics
                 stationIndex++;
             });
     
+            showTutorial(i);
+            
             if (stationTiles.length === 2 && trainRenderer) {
                 const path = railRenderer.getPath(
                     stationTiles[0].x, stationTiles[0].y,
                     stationTiles[1].x, stationTiles[1].y
                 );
-                if (path) trainRenderer.addTrain(path, routeColor, i, {
-                    cityA: areas.find(a => a.name === cityA),
-                    cityB: areas.find(a => a.name === cityB)
-                });
+                if (path) {
+                    trainRenderer.addTrain(path, routeColor, i, {
+                        cityA: areas.find(a => a.name === cityA),
+                        cityB: areas.find(a => a.name === cityB)
+                    });
+                }
             }
         }
     
@@ -115,5 +158,5 @@ export function createStationManager(stationRenderer, areaRenderer, drawGraphics
         }
     }
 
-    return { addLevel, addStations, spawnTrainsForConnectedRoutes};
+    return { addLevel, addStations, spawnTrainsForConnectedRoutes };
 }

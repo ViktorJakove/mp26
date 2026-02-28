@@ -21,8 +21,8 @@ export const BUILDING_TEXTS = {
             "Nestav nic přes indiánská území a neznepřátel si ani jejich obyvatele, ani mě!",
             "Někdy se zastav. Salut, Greenhorne!"
         ],
-        sprite: [0, 1, 2],
-        spritePos: ["L", "C", "P"]
+        sprite: [0, 1, 1, 1, 0, 1, 0, 1, 1],
+        spritePos: ["L", "C", "P", "C", "L", "C", "C", "C", "C", "C"]
     },
     "bank": {
         text: [
@@ -78,7 +78,7 @@ export const BUILDING_TEXTS = {
             "...",
             "Karla Žižku",
             "fakt že jo!",
-            "ALmužničku? Vyměním za všelijaká moudra!"
+            "Almužničku? Vyměním za všelijaká moudra!"
         ],
         afterTransaction: {
             text: [
@@ -87,10 +87,11 @@ export const BUILDING_TEXTS = {
                 "V Evropě i v Koreji se obejdou bez kolejí (typu-T)! (knedlíky kynu-T!)",
                 "Pro kontakt s osobou daného města nemusíš mít aktivní kolejové spojení! (rýmová resignace)",
                 "Olda možná pije, ale ví kdy a která bije! Poslechni ho.",
-                "Dobré skutky občas taky něco stojí. Občas dost a občas víc."
+                "Dobré skutky tady taky občas něco stojí. Občas dost a občas víc.",
+                "Upovídance můžeš umlčet pomocí Esc."
             ],
-            sprite: [0, 1, 1, 0, 1, 0],
-            spritePos: ["C", "C", "C", "C", "C", "C"]
+            sprite: [0, 1, 1, 0, 1, 0,0],
+            spritePos: ["C", "C", "C", "C", "C", "C", "C"]
         },
         sprite: [0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0],
         spritePos: ["P", "P", "P", "P","C","C", "P", "P", "P", "P", "P", "P", "P", "C"],
@@ -171,14 +172,14 @@ export const BUILDING_TEXTS = {
             "Hele mlaďas. Mám pár pravidel-",
             "1) Žádný kecy o tom, že mi smrdí ruce od cigára. Tobě smrdí haksny a stejně tě ostříhám.",
             "Smrade",
-            "Zelenáči",
-            "Modráku",
-            "Žluťasi",
-            "Troubo",
+            "Zelenáči,",
+            "Modráku,",
+            "Žluťasi,",
+            "Troubo,",
             "Výborně, už můžem začít."
         ],
-        sprite: [0, 1, 2],
-        spritePos: ["C", "C", "P"]
+        sprite: [0, 1, 1, 0, 0,0,0,1,"S"],
+        spritePos: ["C", "C", "C","C", "C", "C","C", "C", "C"]
     },
     "marco": {
         text: [
@@ -229,13 +230,14 @@ export const BUILDING_TEXTS = {
     "mech": {
         text: [
             "Nazdar synku! To jsem já, kvůli komu nemůžeš stavět T koleje, haha!",
-            "Chápu tvoje rozhořčení, ale vysvětli mi, proč bych ti prodával něco, díky čemu by sis už nepořídil tu dražší křižovatku??",
+            "Chápu tvoje rozhořčení, ale vysvětli mi, proč bych ti prodával něco, díky čemu by sis už třeba nikdy nepořídil dražší křižovatku??",
             "To mi teda pověz, ahahahah! To teda jo!",
+            "Leda že by sis zaplatil... To bychom si možná pokecali, co ty na to?",
             "Miluju kapitalismus!",
             "nemáme s maželkou co jíst"
         ],
-        sprite: [0, 0, 1, 0, "S"],
-        spritePos: ["L", "L","L", "L", "C"],
+        sprite: ["S", 0, 1, 0, 0, "S"],
+        spritePos: ["L", "L","L", "L", "L", "C"],
         transaction: {
             type: "unlock_tracks", 
             cost: 1000,
@@ -244,7 +246,7 @@ export const BUILDING_TEXTS = {
             questionSprite: 0,
             questionSpritePos: "C",
             successSprite: "S",
-            question: "Pořídit naprosto přírodní uhlí pro dvojnásobný výkon lokomotiv?"
+            question: "Odemknout nový typ kolejí?"
         }
     },
     "church": {
@@ -266,9 +268,20 @@ export const BUILDING_TEXTS = {
 
 export const DEFAULT_BUILDING_TEXT = {
     text: [
-        "Běžná městská zástavba",
-        "Žije zde pracovitý lid",
-        "Ulice plné života a obchodu"
+        "error"
     ],
-    sprite: [0, 1, 2]
+    sprite: [0]
 };
+/*export const TUTORIAL_TEXTS = {
+    text:[ [
+        "goal, space, shift",
+        "ouje"
+    ],[
+        "za vlastni prachy",
+        "bahahaha",
+    ],[
+        "jsi ready na the real deal",
+    ],[
+        "social",
+    ]]
+};*/
