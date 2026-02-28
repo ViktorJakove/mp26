@@ -31,7 +31,7 @@ export function creatRenderers(
     // stations
     const stationRenderer = createStationRenderer(app, camera, getGridScale, cellSize);
     // rails
-    const railRenderer = createRailRenderer(app, camera, getGridScale, cellSize, getAreas, getLevel, getMoney, addMoney, subMoney, getRelations, setRelations);
+    const railRenderer = createRailRenderer(app, camera, getGridScale, cellSize, getAreas, getLevel, getMoney, addMoney, subMoney, getRelations, setRelations,areaRenderer);
     // trains
     const trainRenderer = createTrainRenderer(app, camera, getGridScale, cellSize, addMoney, railRenderer.getBisonProfit);
 

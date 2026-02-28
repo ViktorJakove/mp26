@@ -96,10 +96,18 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
                  areaTop > dimensions.worldBottom);
     }
 
+    let needsForestRegen = false;
+
+    function markForestDirty() {
+        needsForestRegen = true;
+        forestSpritesGenerated = false;
+        areaDirty = true;
+    }
+
     function generateForestSprites(areas) {
-        if (forestSpritesGenerated) return;
+        if (forestSpritesGenerated && !needsForestRegen) return;
         
-        console.log("Generating forest sprites...");
+        forestSpritesData.length = 0;
         
         areas.forEach(area => {
             if (area.type !== FOREST) return;
@@ -108,8 +116,6 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             
             for (let x = area.x; x < area.x + area.sizeX; x++) {
                 for (let y = area.y; y < area.y + area.sizeY; y++) {
-                    //const spriteCount = 1 + Math.floor(Math.random() * 3);
-                    //const spriteCount = Math.random() < 0.8 ? 1 : 0;
                     const spriteCount = Math.random() < 0.8 ? 1 : (Math.random() < 0.33 ? 2: (Math.random() < 0.33 ? 4: 3));
                     
                     for (let i = 0; i < spriteCount; i++) {
@@ -134,11 +140,26 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             }
         });
         
-        //(spodní = vyšší Y = vykreslit později = nad horníma)
-        //forestSpritesData.sort((a, b) => a.worldY - b.worldY);
-        
         forestSpritesGenerated = true;
-        console.log(`Generated ${forestSpritesData.length} forest sprites`);
+        needsForestRegen = false;
+    }
+    function removeForestSpriteAt(tileX, tileY) {
+        const tileSize = cellSize;
+        const worldTileCenterX = (tileX + 0.5) * tileSize;
+        const worldTileCenterY = (tileY + 0.5) * tileSize;
+        const tolerance = tileSize * 0.8;
+        
+        for (let i = forestSpritesData.length - 1; i >= 0; i--) {
+            const sprite = forestSpritesData[i];
+            const dx = Math.abs(sprite.worldX - worldTileCenterX);
+            const dy = Math.abs(sprite.worldY - worldTileCenterY);
+            
+            if (dx < tolerance && dy < tolerance) {
+                forestSpritesData.splice(i, 1);
+            }
+        }
+        
+        areaDirty = true;
     }
 
     function updateForestSprites(dimensions) {
@@ -337,6 +358,7 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
     return {
         drawAreas,
         markDirty,
-        setShiftPressed
+        setShiftPressed,
+        removeForestSpriteAt
     };
 }
