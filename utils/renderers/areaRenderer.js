@@ -309,7 +309,12 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             returnGraphics(areaContainer.removeChildAt(0));
         }
         while (areaTextContainer.children.length > 0) {
-            returnText(areaTextContainer.removeChildAt(0));
+            const child = areaTextContainer.removeChildAt(0);
+            if (child instanceof PIXI.Text) {
+                returnText(child);
+            } else {
+                returnGraphics(child);
+            }
         }
         
         const visibleAreas = [];
@@ -389,6 +394,22 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
                 areaText.anchor.set(0.5);
                 areaText.scale.set(1 / gridScale, 1 / gridScale);
                 areaText.cursor = "help";
+
+                areaText.updateText(true);
+                const padding = 4;
+                const bounds = areaText.getLocalBounds();
+                const bg = getPooledGraphics();
+                bg.beginFill(0xFFFFFF, 0.6);
+                bg.drawRoundedRect(
+                    textPosition.textX + (bounds.x - padding) / gridScale,
+                    textPosition.textY + (bounds.y - padding) / gridScale,
+                    (bounds.width + padding * 2) / gridScale,
+                    (bounds.height + padding * 2) / gridScale,
+                    3
+                );
+                bg.endFill();
+                areaTextContainer.addChild(bg);
+                areaTextContainer.addChild(areaText);
                 
                 areaTextContainer.addChild(areaText);
             }
