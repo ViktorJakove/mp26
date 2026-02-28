@@ -2,36 +2,47 @@ export const TUTORIAL_TEXTS = {
     0: {
         title: "Vítej ve hře!",
         texts: [
-            "Vítej v Pacifik železnici!",
-            "Tvým úkolem je spojovat města železnicí.",
-            "Použij MEZERNÍK pro přepnutí do stavby kolejí."
+            "Vítej ve Wild Wild Rails!",
+            "Jednoduše řečeno - cílem hry je stát se nejfikanějším manažerem železnic divokého západu.",
+            "U měst se ti budou objevovat různě barené stanice, jež musíš propojit sadou kolejí. Kdyby jsi nemohl najít druhou stanici, můžeš si vždy zobrazit detaily všeho na mapě pomocí klávesy SHIFT.",
+            "Do stavěcího módu se dostaneš stisknutím MEZERNÍKU.",
+            "Aještě jedna věc, pokud se ti podaří dvě lokomotivy nabořit, vždycky můžesš kteroukoli poslat do depa tím, že na ni jednoduše klikneš.",
+            "Tak zatím naviděnou!"
         ],
         instruction: "Klikni pro další text..."
     },
-    4: {
-        title: "První samostatná stavba",
+    2: {
+        title: "Chraktery, obchody a vylepšení!",
         texts: [
-            "Výborně! Teď už stavíš za vlastní peníze.",
-            "Dávej pozor na náklady - každá kolej stojí peníze.",
-            "Nezapomeň hru uložit!."
+            "Výborně! Podařilo se ti propojit pár městeček. Nad jedním z nich se objeví ikona. Jakomile se něco takového objeví, můžeš s městem interagovat!",
+            "V Red Rocku se toho sice moc nedozvíš, ale můžeš si to alespoň zkusit!.",
+            "Zatím!."
+        ],
+        instruction: "Klikni pro další text..."
+    },
+    4:{
+        title: "Ukládání!",
+        texts: [
+            "Výborně! Vedeš si parádně. Nezapomeň si hru vpravo nahoře ukládat."
         ],
         instruction: "Klikni pro další text..."
     },
     5: {
         title: "Level Up!",
         texts: [
-            "Skvěle! Otevřel jsi novou úroveň.",
-            "Teď uvidíš na mapě nová města a překážky.",
-            "Prozkoumej novou oblast - jsou tu indiáni a bizoni!"
-        ],
+            "Skvěle! Mám pocit, že se můžeš vrhnout na tu doopravdovou výzvu.",
+            "Mapa se mnohonásobně zvětšila.",
+            "Prozkoumej toho co nejvíce, kdo ví co se kde skrývá!"
+        ], 
         instruction: "Klikni pro další text..."
     },
     10: {
-        title: "Galerie odemčena!",
+        title: "Galerie!",
         texts: [
-            "Odemkl jsi Galerii!",
-            "Můžeš si prohlédnout svá díla a získat uznání.",
-            "Navštiv město s galerií a pokochej se svým dílem."
+            "Za chvíli odemkneš Galerii!",
+            "Galerie je místo, kde se můžeš podívat na cizí mapy!",
+            "Pro vylepšení své vizáže mezi ostatními hráči navštiv obchodníky!",
+            "Salut!"
         ],
         instruction: "Klikni pro další text..."
     }

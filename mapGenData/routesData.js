@@ -45,4 +45,4 @@ export const ROUTE_COUNT_DATA =[
     1,//kostel
 ]
 //pridat nic mesta a mezi nima uname
-export const TUTORIAL_ROUTE_INDEXES =[0/*init tutorial*/,4/*za vlastní peníze*/,6/*levelup*/,11/*galerie*/];
+export const TUTORIAL_ROUTE_INDEXES =[0/*init tutorial*/,2/*chars*/,4/*saves*/,6/*levelup*/,11/*galerie*/];
