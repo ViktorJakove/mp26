@@ -1,6 +1,6 @@
 import { AREA_TYPES } from "../../enums/areaTypes.js";
 import { SCREEN_DIMENSIONS } from "../../screenDimensions.js";
-import { FOREST_SPRITES } from "../../enums/areaSprites.js";
+import { FOREST_SPRITES, GRAVE_SPRITES } from "../../enums/areaSprites.js";
 
 const { CITY, LAKE, INDIANS, BISONS, FOREST, ROCK, LOCK } = AREA_TYPES;
 
@@ -34,8 +34,12 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
     let forestSpritesGenerated = false;
 
     function getForestTexture() {
-        const randomIndex = Math.floor(Math.random() * FOREST_SPRITES.length);
-        const path = FOREST_SPRITES[randomIndex];
+        let path = null;
+        if (Math.random() < 0.01) path = GRAVE_SPRITES[Math.floor(Math.random() * GRAVE_SPRITES.length)];
+        else{
+            const randomIndex = Math.floor(Math.random() * FOREST_SPRITES.length);
+            path = FOREST_SPRITES[randomIndex];
+        }
         
         if (!textureCache.has(path)) {
             textureCache.set(path, PIXI.Texture.from(path));

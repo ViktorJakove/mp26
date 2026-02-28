@@ -5,3 +5,8 @@ export const FOREST_SPRITES = [
     "../../graphics/map/nature/ker0.png",
     "../../graphics/map/nature/ker1.png",
 ];
+export const GRAVE_SPRITES = [
+    "../../graphics/map/graves/rov0.png",
+    //"../../graphics/map/nature/rov1.png",
+    //"../../graphics/map/nature/rov2.png",
+];
