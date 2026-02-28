@@ -19,8 +19,12 @@ def login_view(request):
             UserProfile.objects.get_or_create(user=user)
             return redirect('/game/')
         else:
-            messages.error(request, 'Invalid username or password')
+            messages.error(request, 'Nesprávné přihlašovací údaje!!')
     
+    return render(request, 'accounts/login.html')
+
+def logout_view(request):
+    logout(request)
     return render(request, 'accounts/login.html')
 
 def register_view(request):
@@ -44,9 +48,9 @@ def register_view(request):
     
     return render(request, 'accounts/register.html')
 
-def logout_view(request):
-    logout(request)
-    return redirect('/')
+ #def logout_view(request):
+    #logout(request)
+    #return redirect('/')
 
 @login_required
 def profile_view(request):
