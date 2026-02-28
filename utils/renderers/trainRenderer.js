@@ -158,7 +158,12 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
             if (avgPeeps > VAGONS_PER_PEEPS[i]) getPeepIndex++;
         }
         for (let w = 0; w < getPeepIndex; w++) { 
-            wagons.push({ progress: -WAGON_OFFSET * (w + 1) }); 
+            wagons.push({ 
+                progress: -WAGON_OFFSET * (w + 1),
+                animOffset: 0,
+                animTime: Math.random() * 500,
+                animInterval: 200 + Math.random() * 200
+            }); 
         }
         
         trains.push({
@@ -185,7 +190,9 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         train.waiting = true;
         train.waitTimer = 0;
         train.direction = nearestEnd === 0 ? 1 : -1;
-        for (let w = 0; w < train.wagons.length; w++) train.wagons[w].progress = 0;
+        for (let w = 0; w < train.wagons.length; w++) {
+            train.wagons[w].progress = 0;
+        }
         train.snapToStation = true;
     }
 
@@ -279,8 +286,8 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
 
     function drawTrain(train, dimensions, spriteSize) {
         const { x: wx, y: wy } = getInterpolatedWorldPos(train);
-        const screenX = wx - dimensions.worldLeft;
-        const screenY = wy - dimensions.worldTop;
+        const screenX = wx - dimensions.worldLeft + cellSize / 2;
+        const screenY = wy - dimensions.worldTop + cellSize / 2;
 
         const locoDirection = getDirectionAtProgress(train.path, train.progress, train.direction);
         
@@ -294,8 +301,8 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         const sprite = getPooledTrainSprite();
         sprite.texture = texture;
         sprite.anchor.set(0.5);
-        sprite.x = screenX + cellSize / 2;
-        sprite.y = screenY + cellSize / 2;
+        sprite.x = screenX;
+        sprite.y = screenY;
         
         const scale = spriteSize / Math.max(texture.width, texture.height);
         sprite.scale.set(scale);
@@ -320,8 +327,6 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         for (const wagon of train.wagons) {
             const wagonProgress = train.progress + wagon.progress * train.direction;
             const { x: wwx, y: wwy } = getWagonWorldPos(train, wagonProgress);
-            const wsx = wwx - dimensions.worldLeft;
-            const wsy = wwy - dimensions.worldTop;
 
             const wagonDirection = getDirectionAtProgress(train.path, wagonProgress, train.direction);
             const texture = getWagonTexture(wagonDirection.axis);
@@ -329,8 +334,18 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
             const wagonSprite = getPooledTrainSprite();
             wagonSprite.texture = texture;
             wagonSprite.anchor.set(0.5);
-            wagonSprite.x = wsx + cellSize / 2;
-            wagonSprite.y = wsy + cellSize / 2;
+            
+            let wsx = wwx - dimensions.worldLeft + cellSize / 2;
+            let wsy = wwy - dimensions.worldTop + cellSize / 2;
+            
+            if (wagonDirection.axis === 'horizontal') {
+                wsy += wagon.animOffset;
+            } else {
+                wsx += wagon.animOffset;
+            }
+            
+            wagonSprite.x = wsx;
+            wagonSprite.y = wsy;
             
             const scale = spriteSize / Math.max(texture.width, texture.height);
             wagonSprite.scale.set(scale);
@@ -358,16 +373,30 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
     
     app.ticker.add(() => {
         let anyMoved = false;
+        const deltaTime = app.ticker.deltaMS;
 
         for (let i = 0; i < trains.length; i++) {
             const train = trains[i];
             const prevProgress = train.progress;
 
+            if (!train.waiting) {
+                for (const wagon of train.wagons) {
+                    wagon.animTime += deltaTime;
+                    
+                    if (wagon.animTime > wagon.animInterval) {
+                        wagon.animTime = 0;
+                        wagon.animInterval = 50 + Math.random() * 150;
+                        wagon.animOffset = (Math.random() * 8) - 4;
+                        anyMoved = true;
+                    }
+                }
+            }
+
             if (train.waiting) {
-                train.waitTimer += app.ticker.deltaMS;
+                train.waitTimer += deltaTime;
                 if(!train.snapToStation) {
                     for (const wagon of train.wagons) {
-                        const delta = train.speed / 1000 * app.ticker.deltaMS;
+                        const delta = train.speed / 1000 * deltaTime;
                         if (wagon.progress < 0) {
                             wagon.progress = Math.min(0, wagon.progress + delta);
                             anyMoved = true;
@@ -383,13 +412,15 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
                     train.waitTimer = 0;
                     if (!train.snapToStation) train.direction *= -1;
                     train.snapToStation = false;
-                    for (let w = 0; w < train.wagons.length; w++) train.wagons[w].progress = -WAGON_OFFSET * (w + 1);
+                    for (let w = 0; w < train.wagons.length; w++) {
+                        train.wagons[w].progress = -WAGON_OFFSET * (w + 1);
+                    }
                 } else continue;
             }
     
             if (blocked(train, i)) continue;
 
-            train.progress += train.direction * train.speed / 1000 * app.ticker.deltaMS;
+            train.progress += train.direction * train.speed / 1000 * deltaTime;
             if (train.progress !== prevProgress) anyMoved = true;
             
             if(train.waiting) continue;

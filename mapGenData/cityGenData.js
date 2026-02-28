@@ -1,8 +1,8 @@
 export const CITY_GEN_DATA=[
     {
         name: "Steamport",
-        peepsMin: 15,
-        peepsMax: 25,
+        peepsMin: 300,
+        peepsMax: 300,
         sizeX: 2,
         sizeY: 2,
         building: "none",
