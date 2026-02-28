@@ -185,10 +185,14 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
                         
                         const texture = getTextureForArea(area);
                         if (!texture) continue;
+
+                        
+                        let displacement = 0;
+                        if (area.type === CITY && area.building === "graveyard") displacement = 0.3;
                         
                         spritesData.push({
-                            worldX: (x) * tileSize + offsetX,
-                            worldY: (y) * tileSize + offsetY,
+                            worldX: (x + displacement) * tileSize + offsetX,
+                            worldY: (y + displacement) * tileSize + offsetY,
                             texture,
                             baseY: y,
                             scale: scale,

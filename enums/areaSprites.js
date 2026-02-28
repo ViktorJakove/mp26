@@ -7,18 +7,30 @@ export const FOREST_SPRITES = [
 ];
 export const GRAVE_SPRITES = [
     "../../graphics/map/graves/rov0.png",
-    //"../../graphics/map/nature/rov1.png",
-    //"../../graphics/map/nature/rov2.png",
+    "../../graphics/map/graves/rov1.png",
+    "../../graphics/map/graves/rov2.png",
+    "../../graphics/map/graves/rov3.png",
 ];
 export const ROCK_SPRITES = [
     "../../graphics/map/graves/rov0.png",
 ];
 
 export const CITY_SPRITES = [
-    /*"../../graphics/map/city/city0.png",
-    "../../graphics/map/city/city1.png",
-    "../../graphics/map/city/city2.png",
-    "../../graphics/map/city/city3.png",*/
+    "../../graphics/map/city/cart.png",
+    "../../graphics/map/city/church.png",
+    "../../graphics/map/city/flag.png",
+    "../../graphics/map/city/guns.png",
+    "../../graphics/map/city/gunshop.png",
+    "../../graphics/map/city/hilfenex.png",
+    "../../graphics/map/city/house.png",
+    "../../graphics/map/city/house1.png",
+    "../../graphics/map/city/house2.png",
+    "../../graphics/map/city/mkz.png",
+    "../../graphics/map/city/morgue.png",
+    "../../graphics/map/city/rope.png",
+    "../../graphics/map/city/saloon.png",
+    "../../graphics/map/city/shop.png",
+    "../../graphics/map/city/wellwellwell.png",
 ];
 export const LAKE_SPRITES = [
     /*"../../graphics/map/lake/lake0.png",
@@ -27,4 +39,12 @@ export const LAKE_SPRITES = [
 ];
 export const RANDOM_SPRITES = [
     "../../graphics/map/graves/rov0.png",
+    "../../graphics/map/graves/rov1.png",
+    "../../graphics/map/city/cart.png",
+    "../../graphics/map/nature/strom0.png",
+    "../../graphics/map/city/wellwellwell.png",
+    "../../graphics/map/city/house1.png",
+    "../../graphics/map/city/rope.png",
+    "../../graphics/map/city/mkz.png",
+    "../../graphics/map/city/cart.png",
 ];
