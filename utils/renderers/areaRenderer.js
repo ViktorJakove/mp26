@@ -251,7 +251,7 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             
             sprite.x = screenX;
             sprite.y = screenY;
-            sprite.alpha = 0.8;
+            sprite.alpha = 0.9;
             sprite.scale.set(spriteData.scale);
             sprite.visible = true;
             
