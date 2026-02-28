@@ -27,32 +27,36 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
     
     let trainTextureH = null;
     let wagonTextureH = null;
-    let trainTextureV = null;
+    let trainTextureVD = null;
+    let trainTextureVU = null;
     let wagonTextureV = null;
     
     const TRAIN_SPRITE_H_PATH = "../../graphics/train/loco_h.png";
     const WAGON_SPRITE_H_PATH = "../../graphics/train/wagon_h.png";
-    const TRAIN_SPRITE_V_PATH = "../../graphics/train/loco_v_d.png";
+    const TRAIN_SPRITE_V_D_PATH = "../../graphics/train/loco_v_d.png";
+    const TRAIN_SPRITE_V_U_PATH = "../../graphics/train/loco_v_u.png";
     const WAGON_SPRITE_V_PATH = "../../graphics/train/wagon_v.png";
 
-    
     function initTextures() {
         trainTextureH = PIXI.Texture.from(TRAIN_SPRITE_H_PATH);
         wagonTextureH = PIXI.Texture.from(WAGON_SPRITE_H_PATH);
-        trainTextureV = PIXI.Texture.from(TRAIN_SPRITE_V_PATH);
+        trainTextureVD = PIXI.Texture.from(TRAIN_SPRITE_V_D_PATH);
+        trainTextureVU = PIXI.Texture.from(TRAIN_SPRITE_V_U_PATH);
         wagonTextureV = PIXI.Texture.from(WAGON_SPRITE_V_PATH);
     }
     initTextures();
 
-    function getTrainTexture(direction) {
-        return direction === 'vertical' ? trainTextureV : trainTextureH;
+    function getTrainTexture(axis, isUp) {
+        if (axis === 'vertical') {
+            return isUp ? trainTextureVU : trainTextureVD;
+        }
+        return trainTextureH;
     }
 
-    function getWagonTexture(direction) {
-        return direction === 'vertical' ? wagonTextureV : wagonTextureH;
+    function getWagonTexture(axis) {
+        return axis === 'vertical' ? wagonTextureV : wagonTextureH;
     }
 
-    
     function getMovementDirection(prevTile, nextTile) {
         if (!prevTile || !nextTile) return 'horizontal';
         
@@ -62,29 +66,38 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         return Math.abs(dy) > Math.abs(dx) ? 'vertical' : 'horizontal';
     }
 
-    function getDirectionAtProgress(path, progress) {
-        if (path.length < 2) return { axis: 'horizontal', isFlipped: false };
+    function getDirectionAtProgress(path, progress, travelDirection) {
+        if (path.length < 2) return { axis: 'horizontal', isFlipped: false, isUp: false };
         
         const currentIdx = Math.min(Math.floor(progress), path.length - 2);
-        const nextIdx = currentIdx + 1;
+        let nextIdx = currentIdx + 1;
         
         if (currentIdx < 0 || nextIdx >= path.length) {
-            return { axis: 'horizontal', isFlipped: false };
+            return { axis: 'horizontal', isFlipped: false, isUp: false };
         }
         
-        const currentTile = path[currentIdx];
-        const nextTile = path[nextIdx];
+        let currentTile = path[currentIdx];
+        let nextTile = path[nextIdx];
+        
+        if (travelDirection === -1) {
+            currentTile = path[nextIdx];
+            nextTile = path[currentIdx];
+        }
+        
         const axis = getMovementDirection(currentTile, nextTile);
         
         let isFlipped = false;
+        let isUp = false;
+        
         if (axis === 'horizontal') {
             isFlipped = nextTile.x < currentTile.x;
+        } else {
+            isUp = nextTile.y < currentTile.y;
         }
         
-        return { axis, isFlipped };
+        return { axis, isFlipped, isUp };
     }
 
-    
     function getInterpolatedWorldPos(train) {
         const { path, progress } = train;
         const floorIdx = Math.min(Math.floor(progress), path.length - 2);
@@ -114,7 +127,6 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         };
     }
 
-    
     function getPooledTrainSprite() {
         return trainSpritePool.pop() || new PIXI.Sprite();
     }
@@ -134,7 +146,6 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         return (r << 16) | (g << 8) | b;
     }
 
-    
     function addTrain(path, color, routeIndex, routeCities = []) {
         if (!path) return;
         
@@ -187,7 +198,6 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         if (idx !== -1) trains.splice(idx, 1);
     }
 
-    
     function blocked(train, trainIndex) {
         let nextProgressIndex;
         if (train.direction === 1) {
@@ -235,9 +245,8 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         addMoney(Math.round(profit));
     }
 
-    
     function areTexturesReady() {
-        return trainTextureH.valid && wagonTextureH.valid && trainTextureV.valid && wagonTextureV.valid;
+        return trainTextureH.valid && wagonTextureH.valid && trainTextureVD.valid && trainTextureVU.valid && wagonTextureV.valid;
     }
 
     function drawTrains() {
@@ -248,7 +257,6 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         if (trains.length === 0) return;
 
         if (!areTexturesReady()) {
-            //načtení textur
             const checkTextures = () => {
                 if (areTexturesReady()) {
                     drawTrains();
@@ -274,14 +282,14 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         const screenX = wx - dimensions.worldLeft;
         const screenY = wy - dimensions.worldTop;
 
-        const locoDirection = getDirectionAtProgress(train.path, train.progress);
+        const locoDirection = getDirectionAtProgress(train.path, train.progress, train.direction);
         
         drawLocomotive(train, screenX, screenY, spriteSize, locoDirection);
         drawWagons(train, dimensions, spriteSize);
     }
 
     function drawLocomotive(train, screenX, screenY, spriteSize, direction) {
-        const texture = getTrainTexture(direction.axis);
+        const texture = getTrainTexture(direction.axis, direction.isUp);
         
         const sprite = getPooledTrainSprite();
         sprite.texture = texture;
@@ -292,7 +300,7 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         const scale = spriteSize / Math.max(texture.width, texture.height);
         sprite.scale.set(scale);
         
-        if (direction.isFlipped) {
+        if (direction.axis === 'horizontal' && direction.isFlipped) {
             sprite.scale.x = -Math.abs(sprite.scale.x);
         }
         
@@ -315,7 +323,7 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
             const wsx = wwx - dimensions.worldLeft;
             const wsy = wwy - dimensions.worldTop;
 
-            const wagonDirection = getDirectionAtProgress(train.path, wagonProgress);
+            const wagonDirection = getDirectionAtProgress(train.path, wagonProgress, train.direction);
             const texture = getWagonTexture(wagonDirection.axis);
 
             const wagonSprite = getPooledTrainSprite();
@@ -327,7 +335,7 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
             const scale = spriteSize / Math.max(texture.width, texture.height);
             wagonSprite.scale.set(scale);
             
-            if (wagonDirection.isFlipped) {
+            if (wagonDirection.axis === 'horizontal' && wagonDirection.isFlipped) {
                 wagonSprite.scale.x = -Math.abs(wagonSprite.scale.x);
             }
             
