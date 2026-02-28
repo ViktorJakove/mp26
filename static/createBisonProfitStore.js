@@ -20,10 +20,14 @@ export function createBisonProfitStore() {
     function getStoredProfit() {
         return storedProfit;
     }
+    function setStoredProfit(amount) {
+        storedProfit = amount;
+    }
     
     return {
         addProfit,
         withdrawProfit,
-        getStoredProfit
+        getStoredProfit,
+        setStoredProfit
     };
 }

@@ -182,8 +182,8 @@
             </div>
             
             <div class="button-group">
-                <a href="/" class="back-button">Back to Game</a>
-                <a href="/accounts/logout/" class="logout-button">Logout</a>
+                <a href="/" class="back-button">Zpátky do hry!</a>
+                <a href="/accounts/logout/" class="logout-button">Odhlásit se</a>
             </div>
             
             <div class="save-indicator" id="saveIndicator"></div>
@@ -191,9 +191,8 @@
     </div>
     
     <script>
-        // Auto-save game when leaving profile
         window.addEventListener('beforeunload', function() {
-            // Trigger game save
+            //trigger game save
             if (window.opener && window.opener.saveGame) {
                 window.opener.saveGame();
             }

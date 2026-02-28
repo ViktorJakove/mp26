@@ -68,7 +68,7 @@ class UserProfile(models.Model):
             'areas': json.loads(self.areas_json) if self.areas_json else [],
             'rails': json.loads(self.rails_json) if self.rails_json else [],
             'stations': json.loads(self.stations_json) if self.stations_json else [],
-            'unlocked_cities': set(json.loads(self.unlocked_cities_json)) if self.unlocked_cities_json else set(),
+            'unlocked_cities': list(json.loads(self.unlocked_cities_json)) if self.unlocked_cities_json else [],
             'purchased_items': json.loads(self.purchased_items_json) if self.purchased_items_json else {},
             'building_state': json.loads(self.building_state_json) if self.building_state_json else {},
             'loan_amount': self.loan_amount,

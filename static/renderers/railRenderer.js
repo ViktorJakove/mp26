@@ -193,7 +193,7 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
         occupiedTiles.clear();
         for (const r of data) {
             const type = railTypesMap[r.typeId];
-            if(!type) continue;
+            if (!type) continue;
             const rail = { x: r.x, y: r.y, type };
             rails.push(rail);
             occupiedTiles.set(`${r.x},${r.y}`, rail);

@@ -118,7 +118,6 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
             }
         }
 
-        // === PROFIL BUTTON (pouze pro přihlášené) ===
         const profileBtnContainer = new PIXI.Container();
         
         // Profile button (vždy, protože hru vidí jen přihlášení)
@@ -133,7 +132,7 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
             window.open('/accounts/profile/', '_blank');
         });
         
-        const profileText = new PIXI.Text("👤 Profile", {
+        const profileText = new PIXI.Text("👤 Profil", {
             fontFamily: "Arial",
             fontSize: 14,
             fill: 0xffffff,
