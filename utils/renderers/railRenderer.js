@@ -313,6 +313,14 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
         
         return result;
     }
+    function getOccupiedTiles() {
+        const tiles = [];
+        for (const [key, rail] of occupiedTiles.entries()) {
+            const [x, y] = key.split(',').map(Number);
+            tiles.push({ x, y, type: rail.type });
+        }
+        return tiles;
+    }
 
-    return { addRail, removeRail, drawRails, isTileOccupied, markDirty, getRails, loadRails, areStationsConnected, getPath, setOnRailPlaceCheckConn, getBisonProfit, isCompatibleWithNeighbors};
+    return { addRail, removeRail, drawRails, isTileOccupied, markDirty, getRails, loadRails, areStationsConnected, getPath, setOnRailPlaceCheckConn, getBisonProfit, isCompatibleWithNeighbors,getOccupiedTiles};
 }

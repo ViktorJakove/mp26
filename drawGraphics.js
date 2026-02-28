@@ -21,26 +21,37 @@ export function createDrawGraphics(app, camera, getGridScale, cellSize, getLevel
 
     function drawGrid() {
         grid.clear();
-        if (!getPlacementMode()) return;
-
+        
         const dimensions = SCREEN_DIMENSIONS(app, camera, getGridScale(), cellSize);
-
-        //grid lines
-        grid.lineStyle(1, 0x999999);
-        for (let worldX = dimensions.startX; worldX <= dimensions.worldRight + cellSize; worldX += cellSize) {
-            const screenX = worldX - dimensions.worldLeft;
-            grid.moveTo(screenX, 0);
-            grid.lineTo(screenX, dimensions.screenHeight);
+    
+        const occupiedTiles = railRenderer.getOccupiedTiles ? railRenderer.getOccupiedTiles() : [];
+        
+        occupiedTiles.forEach(tile => {
+            const screenX = tile.x * cellSize - dimensions.worldLeft;
+            const screenY = tile.y * cellSize - dimensions.worldTop;
+            
+            grid.beginFill(0x000000, 0.5);
+            grid.drawRect(screenX, screenY, cellSize, cellSize);
+            grid.endFill();
+        });
+    
+        if (getPlacementMode()) {
+            grid.lineStyle(1, 0x999999);
+            for (let worldX = dimensions.startX; worldX <= dimensions.worldRight + cellSize; worldX += cellSize) {
+                const screenX = worldX - dimensions.worldLeft;
+                grid.moveTo(screenX, 0);
+                grid.lineTo(screenX, dimensions.screenHeight);
+            }
+            for (let worldY = dimensions.startY; worldY <= dimensions.worldBottom + cellSize; worldY += cellSize) {
+                const screenY = worldY - dimensions.worldTop;
+                grid.moveTo(0, screenY);
+                grid.lineTo(dimensions.screenWidth, screenY);
+            }
+    
+            drawHighlight(dimensions);
         }
-        for (let worldY = dimensions.startY; worldY <= dimensions.worldBottom + cellSize; worldY += cellSize) {
-            const screenY = worldY - dimensions.worldTop;
-            grid.moveTo(0, screenY);
-            grid.lineTo(dimensions.screenWidth, screenY);
-        }
-
-        //highlight
-        drawHighlight(dimensions);
-        //pointer infotext
+    
+        // pointer infotext
         pointerTextRenderer.refresh(getGridScale);
     }
 
