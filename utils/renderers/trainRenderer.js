@@ -17,12 +17,31 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         }
     }
 
-    const TRAIN_SPEED = 3; /*3*/ 
-    const TRAIN_SIZE = 0.6;
-    const STATION_WAIT_TIME = 3500; //ms
-    const WAGON_OFFSET = 0.75;
+    const TRAIN_SPEED = 3;
+    const TRAIN_SIZE = 1.4;
+    const STATION_WAIT_TIME = 3500;
+    const WAGON_OFFSET = 1.4;
 
     let avgPeeps = 0;
+    let trainTexture = null;
+    let wagonTexture = null;
+    
+    const TRAIN_SPRITE_PATH = "../../graphics/train/loco_h.png";
+    const WAGON_SPRITE_PATH = "../../graphics/train/wagon_h.png";
+
+    function getTrainTexture() {
+        if (!trainTexture) {
+            trainTexture = PIXI.Texture.from(TRAIN_SPRITE_PATH);
+        }
+        return trainTexture;
+    }
+
+    function getWagonTexture() {
+        if (!wagonTexture) {
+            wagonTexture = PIXI.Texture.from(WAGON_SPRITE_PATH);
+        }
+        return wagonTexture;
+    }
 
     function addTrain(path, color, routeIndex, routeCities = []) {
         if (!path) return;
@@ -52,6 +71,7 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
             routeCities
         });
     }
+    
     function hasTrainForRoute(routeIndex) {
         return trains.some(t => t.routeIndex === routeIndex);
     }
@@ -169,8 +189,6 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         if (anyMoved && trains.length > 0) drawTrains();
     });
 
-    
-
     function getWagonWorldPos(train, wagonProgress) {
         const clampedProgress = Math.max(0, Math.min(wagonProgress, train.path.length - 1));
         const index = Math.floor(clampedProgress);
@@ -186,49 +204,63 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
         };
     }
 
-    const trainGraphicsPool = [];
-    let lastTrainPositions = [];
+    const trainSpritePool = [];
 
-    function getPooledTrainGraphic() {
-        return trainGraphicsPool.pop() || new PIXI.Graphics();
+    function getPooledTrainSprite() {
+        return trainSpritePool.pop() || new PIXI.Sprite();
     }
-    function returnTrainGraphic(g) {
-        g.clear();
-        trainGraphicsPool.push(g);
+
+    function returnTrainSprite(sprite) {
+        sprite.texture = PIXI.Texture.EMPTY;
+        sprite.interactive = false;
+        sprite.cursor = 'default';
+        sprite.removeAllListeners();
+        trainSpritePool.push(sprite);
     }
 
     function drawTrains() {
         while (trainContainer.children.length > 0) {
-            returnTrainGraphic(trainContainer.removeChildAt(0));
+            returnTrainSprite(trainContainer.removeChildAt(0));
         }
 
         if (trains.length === 0) return;
 
         const gridScale = getGridScale();
         const dimensions = SCREEN_DIMENSIONS(app, camera, gridScale, cellSize);
-        const offset = cellSize * (1 - TRAIN_SIZE) / 2;
-        const size = cellSize * TRAIN_SIZE;
+        const spriteSize = cellSize * TRAIN_SIZE;
+        
+        const locoTexture = getTrainTexture();
+        const wagonTexture = getWagonTexture();
+        
+        if (!locoTexture.valid || !wagonTexture.valid) {
+            if (!locoTexture.valid) locoTexture.once('update', drawTrains);
+            if (!wagonTexture.valid) wagonTexture.once('update', drawTrains);
+            return;
+        }
 
         for (const train of trains) {
             const { x: wx, y: wy } = getInterpolatedWorldPos(train);
             const screenX = wx - dimensions.worldLeft;
             const screenY = wy - dimensions.worldTop;
 
-            const g = getPooledTrainGraphic();
-            g.beginFill(train.color, 1);
-            g.drawRect(screenX + offset, screenY + offset, size, size);
-            g.endFill();
-
-            //klikaci
-            g.interactive = true;
-            g.cursor = 'pointer';
-            g.removeAllListeners();
-            g.on('pointerdown', (e) => {
-            e.stopPropagation();
-            resetTrainToStation(train);
+            const trainSprite = getPooledTrainSprite();
+            trainSprite.texture = locoTexture;
+            trainSprite.anchor.set(0.5);
+            trainSprite.x = screenX + cellSize / 2;
+            trainSprite.y = screenY + cellSize / 2;
+            
+            const scale = spriteSize / Math.max(locoTexture.width, locoTexture.height);
+            trainSprite.scale.set(scale);
+            trainSprite.tint = getTintedColor(train.color, 0.6);
+            
+            trainSprite.interactive = true;
+            trainSprite.cursor = 'pointer';
+            trainSprite.on('pointerdown', (e) => {
+                e.stopPropagation();
+                resetTrainToStation(train);
             });
 
-            trainContainer.addChild(g);
+            trainContainer.addChild(trainSprite);
 
             for (const wagon of train.wagons) {
                 const wagonProgress = train.progress + wagon.progress * train.direction;
@@ -236,23 +268,32 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
                 const wsx = wwx - dimensions.worldLeft;
                 const wsy = wwy - dimensions.worldTop;
 
-                const wg = getPooledTrainGraphic();
-                wg.beginFill(train.color, 0.75);
-                wg.drawRect(wsx + offset, wsy + offset, size, size);
-                wg.endFill();
+                const wagonSprite = getPooledTrainSprite();
+                wagonSprite.texture = wagonTexture;
+                wagonSprite.anchor.set(0.5);
+                wagonSprite.x = wsx + cellSize / 2;
+                wagonSprite.y = wsy + cellSize / 2;
+                
+                wagonSprite.scale.set(scale);
+                wagonSprite.tint = getTintedColor(train.color, 0.7);
 
-                //klikaci
-                wg.interactive = true;
-                wg.cursor = 'pointer';
-                wg.removeAllListeners();
-                wg.on('pointerdown', (e) => {
+                wagonSprite.interactive = true;
+                wagonSprite.cursor = 'pointer';
+                wagonSprite.on('pointerdown', (e) => {
                     e.stopPropagation();
                     resetTrainToStation(train);
                 });
 
-                trainContainer.addChild(wg);
+                trainContainer.addChild(wagonSprite);
             }
         }
+    }
+
+    function getTintedColor(color, tintAmount) {
+        const r = ((color >> 16) & 0xFF) * (1 - tintAmount) + 255 * tintAmount;
+        const g = ((color >> 8) & 0xFF) * (1 - tintAmount) + 255 * tintAmount;
+        const b = (color & 0xFF) * (1 - tintAmount) + 255 * tintAmount;
+        return (r << 16) | (g << 8) | b;
     }
 
     function getInterpolatedWorldPos(train) {
