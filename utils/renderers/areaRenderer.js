@@ -1,6 +1,6 @@
 import { AREA_TYPES } from "../../enums/areaTypes.js";
 import { SCREEN_DIMENSIONS } from "../../screenDimensions.js";
-import { FOREST_SPRITES, ROCK_SPRITES, GRAVE_SPRITES } from "../../enums/areaSprites.js";
+import { FOREST_SPRITES, ROCK_SPRITES, CITY_SPRITES, LAKE_SPRITES, GRAVE_SPRITES } from "../../enums/areaSprites.js";
 
 const { CITY, LAKE, INDIANS, BISONS, FOREST, ROCK, LOCK } = AREA_TYPES;
 
@@ -45,9 +45,15 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
         } else if (areaType === ROCK) {
             const randomIndex = Math.floor(Math.random() * ROCK_SPRITES.length);
             path = ROCK_SPRITES[randomIndex];
+        } else if (areaType === CITY) {
+            const randomIndex = Math.floor(Math.random() * CITY_SPRITES.length);
+            path = CITY_SPRITES[randomIndex];
+        } else if (areaType === LAKE) {
+            const randomIndex = Math.floor(Math.random() * LAKE_SPRITES.length);
+            path = LAKE_SPRITES[randomIndex];
         }
         
-        if (!path) return null;
+        if (!path) {console.log("error");return null;}
         
         if (!textureCache.has(path)) {
             textureCache.set(path, PIXI.Texture.from(path));
