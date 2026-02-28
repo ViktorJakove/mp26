@@ -1,6 +1,6 @@
-
 import { AREA_TYPES } from "../../enums/areaTypes.js";
 import { SCREEN_DIMENSIONS } from "../../screenDimensions.js";
+import { FOREST_SPRITES } from "../../enums/areaSprites.js";
 
 const { CITY, LAKE, INDIANS, BISONS, FOREST, ROCK, LOCK } = AREA_TYPES;
 
@@ -10,16 +10,51 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
     areaContainer.zIndex = 1;
     const areaTextContainer = new PIXI.Container();
     areaTextContainer.zIndex = 11;
+    const forestSpriteContainer = new PIXI.Container();
+    forestSpriteContainer.zIndex = 2;
+    forestSpriteContainer.sortableChildren = true;
+    
     app.stage.addChild(areaContainer);
+    app.stage.addChild(forestSpriteContainer);
     app.stage.addChild(areaTextContainer);
 
     //pooly/cache
     const graphicsPool = [];
     const textPool = [];
+    const textureCache = new Map();
+    
     let lastCameraPos = { x: 0, y: 0 };
     let lastGridScale = 1;
     let areaDirty = true;
     let shiftPressed = false;
+
+    // Cache -static, generované jednou
+    const forestSpritesData = []; // pole spritu se souřadnicemi
+    const forestSpritesPool = []; //PIXI sprity
+    let forestSpritesGenerated = false;
+
+    function getForestTexture() {
+        const randomIndex = Math.floor(Math.random() * FOREST_SPRITES.length);
+        const path = FOREST_SPRITES[randomIndex];
+        
+        if (!textureCache.has(path)) {
+            textureCache.set(path, PIXI.Texture.from(path));
+        }
+        return textureCache.get(path);
+    }
+
+    function getPooledForestSprite() {
+        return forestSpritesPool.pop() || new PIXI.Sprite();
+    }
+
+    function returnForestSprite(sprite) {
+        sprite.texture = PIXI.Texture.EMPTY;
+        sprite.alpha = 1;
+        sprite.x = 0;
+        sprite.y = 0;
+        sprite.visible = false;
+        forestSpritesPool.push(sprite);
+    }
 
     function getPooledGraphics() {
         return graphicsPool.pop() || new PIXI.Graphics();
@@ -56,6 +91,94 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
                  areaBottom < dimensions.worldTop || 
                  areaTop > dimensions.worldBottom);
     }
+
+    function generateForestSprites(areas) {
+        if (forestSpritesGenerated) return;
+        
+        console.log("Generating forest sprites...");
+        
+        areas.forEach(area => {
+            if (area.type !== FOREST) return;
+            
+            const tileSize = cellSize;
+            
+            for (let x = area.x; x < area.x + area.sizeX; x++) {
+                for (let y = area.y; y < area.y + area.sizeY; y++) {
+                    //const spriteCount = 1 + Math.floor(Math.random() * 3);
+                    //const spriteCount = Math.random() < 0.8 ? 1 : 0;
+                    const spriteCount = Math.random() < 0.8 ? 1 : (Math.random() < 0.33 ? 2: (Math.random() < 0.33 ? 4: 3));
+                    
+                    for (let i = 0; i < spriteCount; i++) {
+                        const offsetX = (Math.random() - 0.5) * (tileSize * 0.8);
+                        const offsetY = (Math.random() - 0.5) * (tileSize * 0.8);
+                        
+                        const scale = 0.2 + Math.random() * 0.3;
+                        
+                        const texture = getForestTexture();
+                        
+                        forestSpritesData.push({
+                            worldX: (x) * tileSize + offsetX,
+                            worldY: (y) * tileSize + offsetY,
+                            texture,
+                            baseY: y,
+                            scale: scale,
+                            width: texture.width * scale,
+                            height: texture.height * scale
+                        });
+                    }
+                }
+            }
+        });
+        
+        //(spodní = vyšší Y = vykreslit později = nad horníma)
+        //forestSpritesData.sort((a, b) => a.worldY - b.worldY);
+        
+        forestSpritesGenerated = true;
+        console.log(`Generated ${forestSpritesData.length} forest sprites`);
+    }
+
+    function updateForestSprites(dimensions) {
+        while (forestSpriteContainer.children.length > 0) {
+            returnForestSprite(forestSpriteContainer.removeChildAt(0));
+        }
+        for (const spriteData of forestSpritesData) {
+            const screenX = spriteData.worldX - dimensions.worldLeft;
+            const screenY = spriteData.worldY - dimensions.worldTop;
+            
+            const margin = 50;
+            if (screenX + spriteData.width + margin < 0 || 
+                screenX - margin > dimensions.screenWidth || 
+                screenY + spriteData.height + margin < 0 || 
+                screenY - margin > dimensions.screenHeight) {
+                continue;
+            }
+
+            const sprite = getPooledForestSprite();
+            
+            if (spriteData.texture.valid) {
+                sprite.texture = spriteData.texture;
+            } else {
+                sprite.texture = PIXI.Texture.EMPTY;
+                spriteData.texture.once('update', () => {
+                    if (sprite.parent) {
+                        sprite.texture = spriteData.texture;
+                    }
+                });
+            }
+            
+            sprite.x = screenX;
+            sprite.y = screenY;
+            sprite.alpha = 0.8;
+            sprite.scale.set(spriteData.scale);
+            sprite.visible = true;
+            
+            
+            sprite.zIndex = sprite.y + sprite.height;
+
+            forestSpriteContainer.addChild(sprite);
+        }
+    }
+
     //text v snake areach
     function getGroupTextPosition(groupAreas, dimensions) {
         const minX = Math.min(...groupAreas.map(part => part.x));
@@ -99,6 +222,10 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             return;
         }
         
+        if (!forestSpritesGenerated) {
+            generateForestSprites(areas);
+        }
+        
         //navrat do poolu
         while (areaContainer.children.length > 0) {
             returnGraphics(areaContainer.removeChildAt(0));
@@ -138,6 +265,8 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             areaContainer.addChild(areaGraphics);
         });
         
+        updateForestSprites(dimensions);
+        
         //upravit na ikonku (text kdyz shift) TEMPPP
         if (!shiftPressed) {
             lastCameraPos = { x: camera.x, y: camera.y };
@@ -171,7 +300,7 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             
             if (textPosition) {
                 const textContent = ((area.type === BISONS) ? "bizoni" : area.name) + 
-                                  ((area.type === CITY /*|| area.type === BISONS*/) ? '\n' + "populace : " + area.peeps : "");
+                                  ((area.type === CITY) ? '\n' + "populace : " + area.peeps : "");
                 
                 const areaText = getPooledText();
                 areaText.text = textContent;
