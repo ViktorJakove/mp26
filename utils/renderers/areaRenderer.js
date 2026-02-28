@@ -340,9 +340,9 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize, getPlace
         visibleAreas.forEach((area) => {
             const areaGraphics = getPooledGraphics();
             
-            let alpha = 0.375;
+            let alpha = 0.375; 
             
-            if (shiftPressed ||getPlacementMode()) {
+            if (getPlacementMode()) {
                 alpha = 0.55;
             }
             

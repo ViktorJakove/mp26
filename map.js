@@ -15,8 +15,14 @@ import { createBisonProfitStore } from "./createBisonProfitStore.js";
 import { createBuildingSpritesManager } from "./buildingSprites.js";
 import { getShiftPressed } from "./utils/shiftState.js";
 import { createLoadingOverlay } from "./utils/renderers/loadingOverLay.js";
+import { createSaveLoadButtons } from "./utils/saveLoadButtons.js";
+import { createWelcomeScreen } from "./welcomeScreen.js";
 
 const app = createApp();
+
+// Hide the canvas initially until game starts
+app.view.style.display = 'none';
+
 app.stage.sortableChildren = true;
 
 const camera = createCamera();
@@ -32,7 +38,6 @@ let money = 1000;
 let relations = 1;
 
 let areas = [];
-areas = generateAreas(level, null);
 
 const getGridScale = () => gridScale;
 const getPlacementMode = () => placementMode;
@@ -109,9 +114,8 @@ window.buildingSpritesManager = buildingSpritesManager;
 
 const fgContainer = new PIXI.Container();
 fgContainer.zIndex = 10;
-const { getHighlightedTile } = setupTileHighlight(app, camera, () => gridScale, cellSize, () => drawGraphics(), areas, getPlacementMode, bisonManager, railRenderer, () => hudRenderer.getSelectedType(), characterOverlay, getUnlockedCities);
 
-const drawGraphicsInstance = createDrawGraphics(app, camera, getGridScale, cellSize, getLevel, getHighlightedTile, getPlacementMode, getAreas, renderers, fgContainer);
+const drawGraphicsInstance = createDrawGraphics(app, camera, getGridScale, cellSize, getLevel, () => null, getPlacementMode, getAreas, renderers, fgContainer);
 let drawGraphics = drawGraphicsInstance.drawGraphics;
 
 const { addLevel, addStations, spawnTrainsForConnectedRoutes } = createStationManager(
@@ -199,8 +203,6 @@ function enhancedDrawGraphics() {
 
 drawGraphics = enhancedDrawGraphics;
 
-drawGraphics();
-
 const { resetDrag } = setupMouseControls(
     app, 
     camera, 
@@ -224,6 +226,7 @@ const { resetDrag } = setupMouseControls(
         }
     }
 );
+
 document.addEventListener("keydown", (event) => {
     if (event.code === "Escape" && characterOverlay.isVisible()) {
         characterOverlay.hideOverlay();
@@ -311,3 +314,114 @@ const keyboardMapMovement = keyboardControls(camera, zoomSpeed, gridScale, mapZo
 app.ticker.add(() => {
     keyboardMapMovement();
 });
+
+// Initialize game state
+function initGame(isNewGame = true) {
+    if (isNewGame) {
+        areas = generateAreas(0, null);
+        money = 1000;
+        level = 0;
+        relations = 1;
+        unlockedCities = new Set();
+        placementMode = false;
+        camera.x = 0;
+        camera.y = 0;
+        gridScale = initScale;
+        
+        // Clear renderers
+        if (railRenderer) {
+            railRenderer.getRails().forEach(r => railRenderer.removeRail(r.x, r.y, false));
+        }
+        if (trainRenderer) trainRenderer.clearTrains();
+        if (stationRenderer) stationRenderer.loadStations([]);
+        if (buildingSpritesManager) buildingSpritesManager.clearAll();
+        if (bankManager) bankManager.reset();
+        if (bisonProfitStore) {
+            // Reset bison profit
+            while (bisonProfitStore.getStoredProfit() > 0) {
+                bisonProfitStore.withdrawProfit(() => {});
+            }
+        }
+        
+        areaRenderer.markDirty();
+        stationRenderer.markDirty();
+        railRenderer.markDirty();
+        hudRenderer.markDirty();
+    }
+    
+    // Setup tile highlight after areas are loaded
+    const { getHighlightedTile } = setupTileHighlight(
+        app, camera, () => gridScale, cellSize, () => drawGraphics(), 
+        areas, getPlacementMode, bisonManager, railRenderer, 
+        () => hudRenderer.getSelectedType(), characterOverlay, getUnlockedCities
+    );
+    
+    // Update drawGraphics with the new getHighlightedTile function
+    const newDrawGraphicsInstance = createDrawGraphics(
+        app, camera, getGridScale, cellSize, getLevel, 
+        getHighlightedTile, getPlacementMode, getAreas, renderers, fgContainer
+    );
+    window.drawGraphics = newDrawGraphicsInstance.drawGraphics;
+    
+    // Reapply enhanced draw
+    const newOriginalDraw = window.drawGraphics;
+    window.drawGraphics = function() {
+        newOriginalDraw();
+        buildingSpritesManager.updatePositions();
+    };
+    
+    // Show canvas and draw
+    app.view.style.display = 'block';
+    window.drawGraphics();
+}
+
+// Create save/load buttons (always visible)
+const saveLoadButtons = createSaveLoadButtons(
+    app, 
+    getGridScale, 
+    {
+        getMoney,
+        getLevel,
+        getAreas,
+        getRelations,
+        getPlacementMode,
+        getUnlockedCities,
+        getGridScale,
+        get camera() { return camera; }
+    },
+    {
+        setMoney: (value) => money = value,
+        setLevel: (value) => level = value,
+        setAreas: (newAreas) => { areas = newAreas; },
+        setRelations: (value) => relations = value,
+        setUnlockedCities: (citiesSet) => { unlockedCities = citiesSet; },
+        setPlacementMode: (value) => placementMode = value,
+        setCamera: (x, y) => { camera.x = x; camera.y = y; }
+    },
+    {
+        railRenderer,
+        stationRenderer,
+        trainRenderer,
+        areaRenderer,
+        hudRenderer,
+        buildingSpritesManager,
+        characterOverlay,
+        bisonProfitStore,
+        bisonManager,
+        bankManager
+    },
+    () => window.drawGraphics ? window.drawGraphics() : drawGraphics()
+);
+
+// Create welcome screen (separate window)
+const welcomeScreen = createWelcomeScreen(
+    // New Game
+    () => {
+        initGame(true);
+    },
+    // Load Game
+    () => {
+        app.view.style.display = 'block';
+        saveLoadButtons.loadGame();
+    }
+);
