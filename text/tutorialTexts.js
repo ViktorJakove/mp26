@@ -21,11 +21,11 @@ export const TUTORIAL_TEXTS = {
         instruction: "Klikni pro další text..."
     },
     4:{
-        title: "Ukládání!",
+        title: "Pozor!",
         texts: [
-            "Výborně! Vedeš si parádně. Nezapomeň si hru vpravo nahoře ukládat."
+            "Nezapomeň, že mnoho fíčur otevřeš pouze rozhovory s postavami, nehledě na to jak škaredé ti mohou připadat."
         ],
-        instruction: "Klikni pro další text..."
+        instruction: "Klikni... Čte tohle někdo vůbec?"
     },
     5: {
         title: "Level Up!",
@@ -39,10 +39,10 @@ export const TUTORIAL_TEXTS = {
     10: {
         title: "Galerie!",
         texts: [
-            "Za chvíli odemkneš Galerii!",
-            "Galerie je místo, kde se můžeš podívat na cizí mapy!",
-            "Pro vylepšení své vizáže mezi ostatními hráči navštiv obchodníky!",
-            "Salut!"
+            "Galerie je bohužel mechanika, jež se do dema nedostala...",
+            "Galerie je místo, kde se můžeš podívat na cizí mapy! (mohl by ses)",
+            "Pro vylepšení své vizáže mezi ostatními hráči navštiv obchodníky! (mohl bys)",
+            "Salut! (salut!)"
         ],
         instruction: "Klikni pro další text..."
     }
