@@ -238,6 +238,17 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
                 g.moveTo(x + ICON_SIZE - 10, y + 10);
                 g.lineTo(x + 10, y + ICON_SIZE - 10);
                 leftBarContainer.addChild(g);
+                const sellLabel = new PIXI.Text("PRODAT", {
+                    fontFamily: "Arial",
+                    fontSize: 12,
+                    fill: 0xff6666,
+                    align: "center",
+                    fontWeight: "bold",
+                });
+                sellLabel.anchor.set(0.5, 0);
+                sellLabel.x = x + ICON_SIZE / 2;
+                sellLabel.y = y + ICON_SIZE + 2;
+                leftBarContainer.addChild(sellLabel);
             } else {
                 try {
                     const sprite = new PIXI.Sprite(PIXI.Texture.from(type.texture));
