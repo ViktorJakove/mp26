@@ -1,5 +1,5 @@
 export const AREA_TYPES = {
-    CITY: {type: "city", color: 0xff0000, getSpriteCount: () => Math.random() < 0.8 ? 1 : (Math.random() < 0.33 ? 2: (Math.random() < 0.33 ? 0: 3)), minSpriteSize: 0.3,maxSpriteSize: 0.4},
+    CITY: {type: "city", color: 0xff0000, getSpriteCount: () => Math.random() < 0.9 ? 1 : 0, minSpriteSize: 0.3,maxSpriteSize: 0.4},
     LAKE: {type: "lake", color: 0x00ffff,getSpriteCount: () => Math.random() < 0.8 ? 1 : 0, minSpriteSize: 0.3,maxSpriteSize: 0.4},
     INDIANS: {type: "indians",color: 0xCD5C5C, buildOverColor: 0xffffff, buildOverInfo: "Vykopávat válečnou sekeru??"},
     BISONS: {type: "bisons",color: 0xB8860B, buildOverColor: 0xffaaaa, buildOverInfo : "Zruší veškerý příjem z této oblasti!"},

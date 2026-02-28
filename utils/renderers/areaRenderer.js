@@ -19,7 +19,6 @@ const GRAVEYARD_CONFIG = {
 };
 
 export function createAreaRenderer(app, camera, getGridScale, cellSize) {
-    // Kontejnery
     const areaContainer = new PIXI.Container();
     areaContainer.zIndex = 1;
     const areaTextContainer = new PIXI.Container();
@@ -83,16 +82,10 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             return getOrCreateTexture(path);
         }
         
-        // Normální výběr z konfigurace oblasti
         const randomIndex = Math.floor(Math.random() * config.sprites.length);
         const path = config.sprites[randomIndex];
         return getOrCreateTexture(path);
-    }
-
-    /**
-     * Pomocná funkce pro získání textury z cache
-     */
-    function getOrCreateTexture(path) {
+    }function getOrCreateTexture(path) {
         if (!path) return null;
         
         if (!textureCache.has(path)) {
@@ -101,7 +94,6 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
         return textureCache.get(path);
     }
 
-    // Pool funkce
     function getPooledSprite() {
         return spritesPool.pop() || new PIXI.Sprite();
     }
@@ -166,7 +158,7 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
         
         areas.forEach(area => {
             // Pouze FOREST, ROCK a města s buildingem "graveyard" generují sprity
-            if (area.type !== FOREST && area.type !== ROCK && !isGraveyard(area)) return;
+            if (area.type !== FOREST && area.type !== ROCK && area.type !== LAKE && area.type !== CITY) return;
             
             const config = getSpriteConfigForArea(area);
             if (!config) return;
@@ -313,7 +305,6 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             generateSprites(areas);
         }
         
-        // Vyčistíme kontejnery
         while (areaContainer.children.length > 0) {
             returnGraphics(areaContainer.removeChildAt(0));
         }
@@ -337,7 +328,6 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             }
         });
         
-        // Vykreslení barevných ploch
         visibleAreas.forEach((area) => {
             const areaGraphics = getPooledGraphics();
             areaGraphics.beginFill(area.type.color, 0.55);
@@ -350,7 +340,6 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             areaContainer.addChild(areaGraphics);
         });
         
-        // Vykreslení spriteů
         updateSprites(dimensions);
         
         // Texty pouze když je shift pressed
