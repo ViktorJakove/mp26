@@ -51,6 +51,9 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
                     if (!spacePressed) {
                         spacePressed = true;
                         placementModeObj.placementMode = !placementModeObj.placementMode;
+                        if (window.buildingSpritesManager && window.buildingSpritesManager.updateAlphas) {
+                            window.buildingSpritesManager.updateAlphas();
+                        }
                         hudRenderer.draw()
                         pointerTextRenderer.togglePointerText(placementModeObj.placementMode);
                         resetDrag();
@@ -101,6 +104,9 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
                 case "Space":
                     spacePressed = false;
                     areaRenderer.placementModeRedraw();
+                    if (window.buildingSpritesManager && window.buildingSpritesManager.updateAlphas) {
+                        window.buildingSpritesManager.updateAlphas();
+                    }
                     drawGraphics();
                     break;
                 case "ShiftLeft":

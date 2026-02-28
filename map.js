@@ -104,7 +104,8 @@ bankManager.reset();
 
 const characterOverlay = createCharacterOverlay(app, getGridScale, railRenderer, stationRenderer, getMoney, subMoney, addMoney);
 
-const buildingSpritesManager = createBuildingSpritesManager(app, camera, getGridScale, cellSize, characterOverlay, getShiftPressed);
+const buildingSpritesManager = createBuildingSpritesManager(app, camera, getGridScale, cellSize, characterOverlay, getShiftPressed, getPlacementMode);
+window.buildingSpritesManager = buildingSpritesManager;
 
 const fgContainer = new PIXI.Container();
 fgContainer.zIndex = 10;

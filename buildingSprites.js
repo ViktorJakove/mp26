@@ -1,4 +1,4 @@
-export function createBuildingSpritesManager(app, camera, getGridScale, cellSize, characterOverlay, getShiftPressed) {
+export function createBuildingSpritesManager(app, camera, getGridScale, cellSize, characterOverlay, getShiftPressed, getPlacementMode) {
     const container = new PIXI.Container();
     container.zIndex = 11;
     app.stage.addChild(container);
@@ -6,6 +6,22 @@ export function createBuildingSpritesManager(app, camera, getGridScale, cellSize
     //cache
     const textureCache = new Map();
     const citySprites = new Map();
+
+    let lastPlacementMode = false;
+
+    function updateAlphas() {
+        const currentPlacementMode = getPlacementMode ? getPlacementMode() : false;
+        
+        if (currentPlacementMode !== lastPlacementMode) {
+            lastPlacementMode = currentPlacementMode;
+            
+            const targetAlpha = currentPlacementMode ? 0.9 : 0.5; // Buildmode = 0.9, normal = 0.4
+            
+            for (const [_, data] of citySprites) {
+                data.sprite.alpha = targetAlpha;
+            }
+        }
+    }
 
     function getScreenPosition(worldX, worldY) {
         const gridScale = getGridScale();
@@ -70,7 +86,7 @@ export function createBuildingSpritesManager(app, camera, getGridScale, cellSize
         sprite.alpha = 0;
         const startTime = Date.now();
         const duration = 2000;
-        const targetAlpha = 0.9;
+        const targetAlpha = getPlacementMode ? (getPlacementMode() ? 0.9 : 0.4) : 0.9;
 
         const animateFade = () => {
             const elapsed = Date.now() - startTime;
@@ -139,6 +155,7 @@ export function createBuildingSpritesManager(app, camera, getGridScale, cellSize
 
     function refresh() {
         updatePositions();
+        updateAlphas();
     }
 
     return {
@@ -148,6 +165,7 @@ export function createBuildingSpritesManager(app, camera, getGridScale, cellSize
         updatePositions,
         hasSprite,
         clearAll,
-        refresh
+        refresh,
+        updateAlphas
     };
 }
