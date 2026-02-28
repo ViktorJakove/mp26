@@ -94,8 +94,10 @@
             try {
                 const response = await fetch('/accounts/profile/', { method: 'HEAD' });
                 if (response.ok) {
+                    // Uživatel je přihlášený
                     window.location.href = '/game/';
                 } else {
+                    // Uživatel není přihlášený
                     document.querySelector('.spinner').style.display = 'none';
                     document.querySelector('p').textContent = 'You need to login to play';
                     document.getElementById('login-link').style.display = 'block';

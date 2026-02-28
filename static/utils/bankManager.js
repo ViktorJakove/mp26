@@ -237,7 +237,7 @@ export function createBankManager(app, getMoney, addMoney, subMoney, onLoanExpir
         loanTimer.startTimer(totalDebt);
         
         if (sprite && options?.successSprite !== undefined) {
-            const successPath = `../../graphics/chars/bank/bank${options.successSprite}.png`;
+            const successPath = `/static/graphics/chars/bank/bank${options.successSprite}.png`;
             const tex = PIXI.Texture.from(successPath);
             sprite.texture = tex;
             
@@ -268,7 +268,7 @@ export function createBankManager(app, getMoney, addMoney, subMoney, onLoanExpir
             loanActive = false;
             
             if (sprite) {
-                const normalPath = "../../graphics/chars/bank/bank1.png";
+                const normalPath = "/static/graphics/chars/bank/bank1.png";
                 const tex = PIXI.Texture.from(normalPath);
                 sprite.texture = tex;
             }

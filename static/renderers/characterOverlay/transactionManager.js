@@ -37,7 +37,7 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
             }
         
             if (d.transaction.questionSprite !== undefined) {
-                const path = `../../graphics/chars/${key}/${key}${d.transaction.questionSprite}.png`;
+                const path = `/static/graphics/chars/${key}/${key}${d.transaction.questionSprite}.png`;
                 const tex = PIXI.Texture.from(path);
                 
                 const update = () => {
@@ -151,7 +151,7 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
     function showBisonUnlockTransaction(key, d, buildingState) {
         if (currentInstr) currentInstr.visible = false;
         
-        const path = `../../graphics/chars/${key}/${key}${d.transaction.questionSprite}.png`;
+        const path = `/static/graphics/chars/${key}/${key}${d.transaction.questionSprite}.png`;
         const tex = PIXI.Texture.from(path);
         
         const update = () => {
@@ -273,7 +273,7 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
     function showBankTransaction(key, d, buildingState) {
         if (currentInstr) currentInstr.visible = false;
         
-        const path = `../../graphics/chars/${key}/${key}${d.transaction.questionSprite}.png`;
+        const path = `/static/graphics/chars/${key}/${key}${d.transaction.questionSprite}.png`;
         const tex = PIXI.Texture.from(path);
         
         const update = () => {
@@ -317,7 +317,7 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
     function showSpeedUnlockTransaction(key, d, buildingState) {
         if (currentInstr) currentInstr.visible = false;
         
-        const path = `../../graphics/chars/${key}/${key}${d.transaction.questionSprite}.png`;
+        const path = `/static/graphics/chars/${key}/${key}${d.transaction.questionSprite}.png`;
         const tex = PIXI.Texture.from(path);
         const update = () => {
             if (currentSprite) {
@@ -400,7 +400,7 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
     function showTracksUnlockTransaction(key, d, buildingState) {
         if (currentInstr) currentInstr.visible = false;
         
-        const path = `../../graphics/chars/${key}/${key}${d.transaction.questionSprite}.png`;
+        const path = `/static/graphics/chars/${key}/${key}${d.transaction.questionSprite}.png`;
         const tex = PIXI.Texture.from(path);
         const update = () => {
             if (currentSprite) {
@@ -493,7 +493,7 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
             spriteValue = d.transaction.successSprite;
         }
         
-        const path = `../../graphics/chars/${key}/${key}${spriteValue}.png`;
+        const path = `/static/graphics/chars/${key}/${key}${spriteValue}.png`;
         const tex = PIXI.Texture.from(path);
         
         const update = () => {
@@ -522,7 +522,7 @@ export function createTransactionManager(app, panel, desc, instr, sprite, railRe
     function updateFailSprite(key, d) {
         if (!currentSprite) return;
         
-        const path = `../../graphics/chars/${key}/${key}${d.transaction.failSprite}.png`;
+        const path = `/static/graphics/chars/${key}/${key}${d.transaction.failSprite}.png`;
         const tex = PIXI.Texture.from(path);
         
         const update = () => {

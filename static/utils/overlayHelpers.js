@@ -9,7 +9,7 @@ export function getPath(key, idx, after, buildingState) {
     if (!arr || arr[idx] === undefined) return null;
     
     const spriteValue = arr[idx];
-    return `../../graphics/chars/${key}/${key}${spriteValue}.png`;
+    return `/static/graphics/chars/${key}/${key}${spriteValue}.png`;
 }
 
 export function getPos(key, idx, after, app, buildingState) {

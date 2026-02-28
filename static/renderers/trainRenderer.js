@@ -31,11 +31,11 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
     let trainTextureVU = null;
     let wagonTextureV = null;
     
-    const TRAIN_SPRITE_H_PATH = "../../graphics/train/loco_h.png";
-    const WAGON_SPRITE_H_PATH = "../../graphics/train/wagon_h.png";
-    const TRAIN_SPRITE_V_D_PATH = "../../graphics/train/loco_v_d.png";
-    const TRAIN_SPRITE_V_U_PATH = "../../graphics/train/loco_v_u.png";
-    const WAGON_SPRITE_V_PATH = "../../graphics/train/wagon_v.png";
+    const TRAIN_SPRITE_H_PATH = "/static/graphics/train/loco_h.png";
+    const WAGON_SPRITE_H_PATH = "/static/graphics/train/wagon_h.png";
+    const TRAIN_SPRITE_V_D_PATH = "/static/graphics/train/loco_v_d.png";
+    const TRAIN_SPRITE_V_U_PATH = "/static/graphics/train/loco_v_u.png";
+    const WAGON_SPRITE_V_PATH = "/static/graphics/train/wagon_v.png";
 
     function initTextures() {
         trainTextureH = PIXI.Texture.from(TRAIN_SPRITE_H_PATH);

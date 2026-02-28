@@ -42,7 +42,7 @@ export function createBuildingSpritesManager(app, camera, getGridScale, cellSize
         
         const cacheKey = `building_${buildingName}`;
         if (!textureCache.has(cacheKey)) {
-            const path = `../../graphics/icons/${buildingName}.png`;
+            const path = `/static/graphics/icons/${buildingName}.png`;
             const texture = PIXI.Texture.from(path);
             textureCache.set(cacheKey, texture);
         }

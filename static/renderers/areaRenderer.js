@@ -342,7 +342,7 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize, getPlace
             
             let alpha = 0.375;
             
-            if (shiftPressed ||getPlacementMode()) {
+            if (/*shiftPressed ||*/getPlacementMode()) {
                 alpha = 0.55;
             }
             
