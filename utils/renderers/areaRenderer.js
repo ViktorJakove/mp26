@@ -18,7 +18,7 @@ const GRAVEYARD_CONFIG = {
     getSpriteCount: () => 5
 };
 
-export function createAreaRenderer(app, camera, getGridScale, cellSize) {
+export function createAreaRenderer(app, camera, getGridScale, cellSize, getPlacementMode) {
     const areaContainer = new PIXI.Container();
     areaContainer.zIndex = 1;
     const areaTextContainer = new PIXI.Container();
@@ -115,7 +115,11 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
         if (shiftPressed !== value) {
             shiftPressed = value;
             areaDirty = true;
+            markDirty();
         }
+    }
+    function placementModeRedraw() {
+        markDirty();
     }
 
     function returnGraphics(graphics) {
@@ -335,7 +339,14 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
         
         visibleAreas.forEach((area) => {
             const areaGraphics = getPooledGraphics();
-            areaGraphics.beginFill(area.type.color, 0.55);
+            
+            let alpha = 0.375;
+            
+            if (shiftPressed ||getPlacementMode()) {
+                alpha = 0.55;
+            }
+            
+            areaGraphics.beginFill(area.type.color, alpha);
             
             const screenX = (area.x * cellSize) - dimensions.worldLeft;
             const screenY = (area.y * cellSize) - dimensions.worldTop;
@@ -428,6 +439,7 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
         drawAreas,
         markDirty,
         setShiftPressed,
-        removeSpriteAt
+        removeSpriteAt,
+        placementModeRedraw
     };
 }

@@ -27,7 +27,7 @@ export function creatRenderers(
     window.pointerTextRenderer = pointerTextRenderer;
 
     // areas
-    const areaRenderer = createAreaRenderer(app, camera, getGridScale, cellSize);
+    const areaRenderer = createAreaRenderer(app, camera, getGridScale, cellSize, getPlacementMode);
     // stations
     const stationRenderer = createStationRenderer(app, camera, getGridScale, cellSize);
     // rails

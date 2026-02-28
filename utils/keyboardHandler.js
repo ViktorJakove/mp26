@@ -54,6 +54,7 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
                         hudRenderer.draw()
                         pointerTextRenderer.togglePointerText(placementModeObj.placementMode);
                         resetDrag();
+                        areaRenderer.placementModeRedraw();
                         drawGraphics();
                     }
                     event.preventDefault();
@@ -67,6 +68,7 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
                         if (stationRenderer)stationRenderer.setShiftPressed(true);
                         pointerTextRenderer.refresh(() => gridScale);
                         keysDown.add(event.code);
+                        areaRenderer.setShiftPressed(true);
                         drawGraphics();
                     }
                     event.preventDefault();
@@ -98,6 +100,7 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
             switch (event.code) {
                 case "Space":
                     spacePressed = false;
+                    areaRenderer.placementModeRedraw();
                     drawGraphics();
                     break;
                 case "ShiftLeft":
@@ -108,6 +111,7 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
                     if (stationRenderer)stationRenderer.setShiftPressed(false);
                     pointerTextRenderer.refresh(() => gridScale);
                     pointerTextRenderer.clearText();
+                    areaRenderer.setShiftPressed(false);
                     drawGraphics();
                     break;
             }
