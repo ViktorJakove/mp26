@@ -4,9 +4,9 @@ export const TUTORIAL_TEXTS = {
         texts: [
             "Vítej ve Wild Wild Rails!",
             "Jednoduše řečeno - cílem hry je stát se nejfikanějším manažerem železnic divokého západu.",
-            "U měst se ti budou objevovat různě barené stanice, jež musíš propojit sadou kolejí. Kdyby jsi nemohl najít druhou stanici, můžeš si vždy zobrazit detaily všeho na mapě pomocí klávesy SHIFT.",
+            "U měst se budou postupně objevovat různě velmi stanice, jež musíš propojit sadou kolejí. Kdyby jsi nemohl najít druhou stanici, můžeš si vždy zobrazit detaily všeho na mapě pomocí klávesy SHIFT.",
             "Do stavěcího módu se dostaneš stisknutím MEZERNÍKU.",
-            "Aještě jedna věc, pokud se ti podaří dvě lokomotivy nabořit, vždycky můžesš kteroukoli poslat do depa tím, že na ni jednoduše klikneš.",
+            "A ještě jedna věc, pokud se ti podaří dvě lokomotivy nabořit, vždycky můžeš kteroukoli poslat do depa tím, že na ni jednoduše klikneš.",
             "Tak zatím naviděnou!"
         ],
         instruction: "Klikni pro další text..."
@@ -23,7 +23,7 @@ export const TUTORIAL_TEXTS = {
     4:{
         title: "Ukládání!",
         texts: [
-            "Výborně! Vedeš si parádně. Nezapomeň si hru vpravo nahoře ukládat."
+            "Výborně! Vedeš si parádně. Neboj se dát si pauz, hra se ukládá sama."
         ],
         instruction: "Klikni pro další text..."
     },

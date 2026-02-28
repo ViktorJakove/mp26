@@ -118,6 +118,41 @@ export function createHUDRenderer(app, getGridScale, getMoney, getPlacementMode,
             }
         }
 
+        // === PROFIL BUTTON (pouze pro přihlášené) ===
+        const profileBtnContainer = new PIXI.Container();
+        
+        // Profile button (vždy, protože hru vidí jen přihlášení)
+        const profileBtn = new PIXI.Graphics();
+        profileBtn.beginFill(0x28a745, 0.9);
+        profileBtn.lineStyle(2, 0x2ecc71);
+        profileBtn.drawRoundedRect(0, 0, 100, TOP_BAR_H - 8, 6);
+        profileBtn.endFill();
+        profileBtn.interactive = true;
+        profileBtn.cursor = "pointer";
+        profileBtn.on('pointerdown', () => {
+            window.open('/accounts/profile/', '_blank');
+        });
+        
+        const profileText = new PIXI.Text("👤 Profile", {
+            fontFamily: "Arial",
+            fontSize: 14,
+            fill: 0xffffff,
+            fontWeight: "bold",
+        });
+        profileText.anchor.set(0.5);
+        profileText.x = 50;
+        profileText.y = (TOP_BAR_H - 8) / 2;
+        profileBtn.addChild(profileText);
+        
+        profileBtn.x = w - 110;
+        profileBtn.y = 4;
+        profileBtnContainer.addChild(profileBtn);
+        
+        profileBtnContainer.x = 0;
+        profileBtnContainer.y = 0;
+        topBarContainer.addChild(profileBtnContainer);
+        // === KONEC PROFIL BUTTON ===
+
         topBarContainer.scale.set(1 / gridScale);
         topBarContainer.x = 0;
         topBarContainer.y = 0;

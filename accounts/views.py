@@ -16,9 +16,8 @@ def login_view(request):
         
         if user is not None:
             login(request, user)
-            # Create profile if it doesn't exist
             UserProfile.objects.get_or_create(user=user)
-            return redirect('/')
+            return redirect('/game/')
         else:
             messages.error(request, 'Invalid username or password')
     

@@ -1,10 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Train Game</title>
-    {% load static %}
+    <title>Login - Train Game</title>
     <style>
         body {
             margin: 0;
@@ -17,102 +14,119 @@
             align-items: center;
         }
         
-        .loading-container {
+        .login-container {
             background: white;
             padding: 40px;
             border-radius: 10px;
-            text-align: center;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            max-width: 400px;
+            width: 320px;
         }
         
         h2 {
+            text-align: center;
             color: #333;
-            margin-bottom: 20px;
-        }
-        
-        p {
-            color: #666;
             margin-bottom: 30px;
         }
         
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #667eea;
-            border-radius: 50%;
-            margin: 0 auto 20px;
-            animation: spin 1s linear infinite;
+        .form-group {
+            margin-bottom: 20px;
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
         }
         
-        .error {
-            color: #e74c3c;
-            margin-top: 20px;
-            display: none;
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
         }
         
-        .login-link {
-            margin-top: 20px;
-            display: none;
+        input:focus {
+            outline: none;
+            border-color: #667eea;
         }
         
-        .login-link a {
-            display: inline-block;
-            padding: 10px 20px;
+        button {
+            width: 100%;
+            padding: 12px;
             background: #667eea;
             color: white;
-            text-decoration: none;
+            border: none;
             border-radius: 5px;
+            font-size: 16px;
             font-weight: bold;
+            cursor: pointer;
             transition: background 0.3s;
         }
         
-        .login-link a:hover {
+        button:hover {
             background: #5a67d8;
+        }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .register-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .messages {
+            margin-bottom: 20px;
+        }
+        
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #fcc;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <div class="loading-container" id="loading-container">
-        <h2>Train Game</h2>
-        <div class="spinner"></div>
-        <p>Checking authentication...</p>
-        <div class="error" id="error-message"></div>
-        <div class="login-link" id="login-link">
-            <a href="/accounts/login/">Go to Login</a>
+    <div class="login-container">
+        <h2>Login to Train Game</h2>
+        
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="error">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" name="username" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        
+        <div class="register-link">
+            Don't have an account? <a href="/accounts/register/">Register</a>
         </div>
     </div>
-
-    <script>
-        async function checkAuth() {
-            try {
-                const response = await fetch('/accounts/profile/', { method: 'HEAD' });
-                if (response.ok) {
-                    // Uživatel je přihlášený
-                    window.location.href = '/game/';
-                } else {
-                    // Uživatel není přihlášený
-                    document.querySelector('.spinner').style.display = 'none';
-                    document.querySelector('p').textContent = 'You need to login to play';
-                    document.getElementById('login-link').style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Auth check failed:', error);
-                document.querySelector('.spinner').style.display = 'none';
-                document.querySelector('p').textContent = 'Connection error';
-                document.getElementById('error-message').textContent = 'Could not connect to server';
-                document.getElementById('error-message').style.display = 'block';
-                document.getElementById('login-link').style.display = 'block';
-            }
-        }
-
-        checkAuth();
-    </script>
 </body>
 </html>
