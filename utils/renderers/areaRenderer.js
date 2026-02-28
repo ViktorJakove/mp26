@@ -4,8 +4,20 @@ import { FOREST_SPRITES, ROCK_SPRITES, CITY_SPRITES, LAKE_SPRITES, GRAVE_SPRITES
 
 const { CITY, LAKE, INDIANS, BISONS, FOREST, ROCK, LOCK } = AREA_TYPES;
 
+// --- Nová mapa pro přiřazení spriteů k typům oblastí ---
+const AREA_SPRITE_MAP = {
+    [FOREST.type]: FOREST_SPRITES,
+    [ROCK.type]: ROCK_SPRITES,
+    [CITY.type]: CITY_SPRITES,
+    [LAKE.type]: LAKE_SPRITES,
+};
+
+// Speciální případ pro hřbitov v lese - můžeme to mít jako samostatnou konstantu
+const GRAVE_SPRITE_ARRAY = GRAVE_SPRITES;
+// ----------------------------------------------------
+
 export function createAreaRenderer(app, camera, getGridScale, cellSize) {
-    //kontejnery
+    // ... (zbytek kódu zůstává stejný - kontejnery, pool atd.) ...
     const areaContainer = new PIXI.Container();
     areaContainer.zIndex = 1;
     const areaTextContainer = new PIXI.Container();
@@ -18,7 +30,6 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
     app.stage.addChild(spriteContainer);
     app.stage.addChild(areaTextContainer);
 
-    //pooly/cache
     const graphicsPool = [];
     const textPool = [];
     const textureCache = new Map();
@@ -32,34 +43,45 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
     const spritesPool = [];
     let spritesGenerated = false;
 
+    /**
+     * Získá náhodnou texturu pro daný typ oblasti.
+     * Tato funkce nahrazuje původní dlouhý if-else blok.
+     */
     function getTextureForArea(areaType) {
-        let path = null;
-        
-        if (areaType === FOREST) {
-            if (Math.random() < 0.01) {
-                path = GRAVE_SPRITES[Math.floor(Math.random() * GRAVE_SPRITES.length)];
-            } else {
-                const randomIndex = Math.floor(Math.random() * FOREST_SPRITES.length);
-                path = FOREST_SPRITES[randomIndex];
-            }
-        } else if (areaType === ROCK) {
-            const randomIndex = Math.floor(Math.random() * ROCK_SPRITES.length);
-            path = ROCK_SPRITES[randomIndex];
-        } else if (areaType === CITY) {
-            const randomIndex = Math.floor(Math.random() * CITY_SPRITES.length);
-            path = CITY_SPRITES[randomIndex];
-        } else if (areaType === LAKE) {
-            const randomIndex = Math.floor(Math.random() * LAKE_SPRITES.length);
-            path = LAKE_SPRITES[randomIndex];
+        // 1. Speciální případ: Hřbitov v lese (1% šance)
+        if (areaType === FOREST && Math.random() < 0.01 && GRAVE_SPRITE_ARRAY.length > 0) {
+            const path = GRAVE_SPRITE_ARRAY[Math.floor(Math.random() * GRAVE_SPRITE_ARRAY.length)];
+            return getOrCreateTexture(path);
         }
-        
-        if (!path) {console.log("error");return null;}
+
+        // 2. Najdi pole spriteů pro daný typ oblasti v naší mapě
+        const spriteArray = AREA_SPRITE_MAP[areaType.type]; // Použijeme areaType.type jako klíč
+
+        // 3. Pokud pole existuje a není prázdné, vyber náhodný sprite
+        if (spriteArray && spriteArray.length > 0) {
+            const randomIndex = Math.floor(Math.random() * spriteArray.length);
+            const path = spriteArray[randomIndex];
+            return getOrCreateTexture(path);
+        }
+
+        // 4. Fallback pro případ, že typ oblasti nemá definované sprity
+        // console.warn(`No sprites defined for area type: ${areaType.type}`);
+        return null;
+    }
+
+    /**
+     * Pomocná funkce pro získání textury z cache nebo její vytvoření.
+     */
+    function getOrCreateTexture(path) {
+        if (!path) return null;
         
         if (!textureCache.has(path)) {
             textureCache.set(path, PIXI.Texture.from(path));
         }
         return textureCache.get(path);
     }
+
+    // ... (zbytek kódu zůstává stejný - getPooledSprite, returnSprite atd.) ...
 
     function getPooledSprite() {
         return spritesPool.pop() || new PIXI.Sprite();
@@ -137,7 +159,7 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
                         const offsetX = (Math.random() - 0.5) * (tileSize * 0.8);
                         const offsetY = (Math.random() - 0.5) * (tileSize * 0.8);
                         
-                        const scale = area.type.minSpriteSize + Math.random() * (area.type.maxSpriteSize- area.type.minSpriteSize);
+                        const scale = area.type.minSpriteSize + Math.random() * (area.type.maxSpriteSize - area.type.minSpriteSize);
                         
                         const texture = getTextureForArea(area.type);
                         if (!texture) continue;
@@ -220,7 +242,6 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
         }
     }
 
-    //text v snake areach
     function getGroupTextPosition(groupAreas, dimensions) {
         const minX = Math.min(...groupAreas.map(part => part.x));
         const maxX = Math.max(...groupAreas.map(part => part.x + part.sizeX));
