@@ -15,12 +15,10 @@ import { createBisonProfitStore } from "./createBisonProfitStore.js";
 import { createBuildingSpritesManager } from "./buildingSprites.js";
 import { getShiftPressed } from "./utils/shiftState.js";
 import { createLoadingOverlay } from "./utils/renderers/loadingOverLay.js";
-import { createSaveLoadButtons } from "./utils/saveLoadButtons.js";
 import { createWelcomeScreen } from "./welcomeScreen.js";
 
 const app = createApp();
 
-// Hide the canvas initially until game starts
 app.view.style.display = 'none';
 
 app.stage.sortableChildren = true;
@@ -315,7 +313,6 @@ app.ticker.add(() => {
     keyboardMapMovement();
 });
 
-// Initialize game state
 function initGame(isNewGame = true) {
     if (isNewGame) {
         areas = generateAreas(0, null);
@@ -328,7 +325,6 @@ function initGame(isNewGame = true) {
         camera.y = 0;
         gridScale = initScale;
         
-        // Clear renderers
         if (railRenderer) {
             railRenderer.getRails().forEach(r => railRenderer.removeRail(r.x, r.y, false));
         }
@@ -337,7 +333,6 @@ function initGame(isNewGame = true) {
         if (buildingSpritesManager) buildingSpritesManager.clearAll();
         if (bankManager) bankManager.reset();
         if (bisonProfitStore) {
-            // Reset bison profit
             while (bisonProfitStore.getStoredProfit() > 0) {
                 bisonProfitStore.withdrawProfit(() => {});
             }
@@ -347,81 +342,53 @@ function initGame(isNewGame = true) {
         stationRenderer.markDirty();
         railRenderer.markDirty();
         hudRenderer.markDirty();
+
+        console.log("jeho prvni nadr");
+        addStations();
     }
     
-    // Setup tile highlight after areas are loaded
     const { getHighlightedTile } = setupTileHighlight(
         app, camera, () => gridScale, cellSize, () => drawGraphics(), 
         areas, getPlacementMode, bisonManager, railRenderer, 
         () => hudRenderer.getSelectedType(), characterOverlay, getUnlockedCities
     );
     
-    // Update drawGraphics with the new getHighlightedTile function
     const newDrawGraphicsInstance = createDrawGraphics(
         app, camera, getGridScale, cellSize, getLevel, 
         getHighlightedTile, getPlacementMode, getAreas, renderers, fgContainer
     );
     window.drawGraphics = newDrawGraphicsInstance.drawGraphics;
     
-    // Reapply enhanced draw
     const newOriginalDraw = window.drawGraphics;
     window.drawGraphics = function() {
         newOriginalDraw();
         buildingSpritesManager.updatePositions();
     };
-    
-    // Show canvas and draw
+
     app.view.style.display = 'block';
     window.drawGraphics();
 }
 
-// Create save/load buttons (always visible)
-const saveLoadButtons = createSaveLoadButtons(
-    app, 
-    getGridScale, 
+const spriteButtons = [
     {
-        getMoney,
-        getLevel,
-        getAreas,
-        getRelations,
-        getPlacementMode,
-        getUnlockedCities,
-        getGridScale,
-        get camera() { return camera; }
+        path: '../../graphics/corp/instagram.webp',
+        alt: 'Instagram',
+        onClick: () => {
+            window.open('https://www.instagram.com/viktorjakove/', '_blank');
+        }
     },
     {
-        setMoney: (value) => money = value,
-        setLevel: (value) => level = value,
-        setAreas: (newAreas) => { areas = newAreas; },
-        setRelations: (value) => relations = value,
-        setUnlockedCities: (citiesSet) => { unlockedCities = citiesSet; },
-        setPlacementMode: (value) => placementMode = value,
-        setCamera: (x, y) => { camera.x = x; camera.y = y; }
-    },
-    {
-        railRenderer,
-        stationRenderer,
-        trainRenderer,
-        areaRenderer,
-        hudRenderer,
-        buildingSpritesManager,
-        characterOverlay,
-        bisonProfitStore,
-        bisonManager,
-        bankManager
-    },
-    () => window.drawGraphics ? window.drawGraphics() : drawGraphics()
-);
+        path: '../../graphics/corp/itch.png',
+        alt: 'itch.io',
+        onClick: () => {
+            window.open('https://bagr-viktor.itch.io/', '_blank');
+        }
+    }
+];
 
-// Create welcome screen (separate window)
 const welcomeScreen = createWelcomeScreen(
-    // New Game
     () => {
         initGame(true);
     },
-    // Load Game
-    () => {
-        app.view.style.display = 'block';
-        saveLoadButtons.loadGame();
-    }
+    spriteButtons
 );

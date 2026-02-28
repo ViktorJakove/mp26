@@ -162,7 +162,7 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize, getPlace
         
         areas.forEach(area => {
             // Pouze FOREST, ROCK a města s buildingem "graveyard" generují sprity
-            if (area.type !== FOREST && area.type !== ROCK && area.type !== LAKE && area.type !== CITY) return;
+            if (area.type !== FOREST && area.type !== LAKE && area.type !== CITY) return;
             
             const config = getSpriteConfigForArea(area);
             if (!config) return;

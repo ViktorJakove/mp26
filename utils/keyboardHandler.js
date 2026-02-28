@@ -76,14 +76,6 @@ export function keyboardControls(camera, zoomSpeed, gridScale, mapZoom, drawGrap
                     }
                     event.preventDefault();
                     return;
-                case "KeyP":
-                    if (!keysDown.has("KeyP")) addLevel();
-                    event.preventDefault();
-                    return;
-                case "KeyO":
-                    if (!keysDown.has("KeyO")) addStations();
-                    event.preventDefault();
-                    return;
             }
             
             keysDown.add(event.code);
