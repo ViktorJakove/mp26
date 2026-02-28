@@ -1,6 +1,6 @@
 import { AREA_TYPES } from "../../enums/areaTypes.js";
 import { SCREEN_DIMENSIONS } from "../../screenDimensions.js";
-import { FOREST_SPRITES, GRAVE_SPRITES } from "../../enums/areaSprites.js";
+import { FOREST_SPRITES, ROCK_SPRITES, GRAVE_SPRITES } from "../../enums/areaSprites.js";
 
 const { CITY, LAKE, INDIANS, BISONS, FOREST, ROCK, LOCK } = AREA_TYPES;
 
@@ -10,12 +10,12 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
     areaContainer.zIndex = 1;
     const areaTextContainer = new PIXI.Container();
     areaTextContainer.zIndex = 11;
-    const forestSpriteContainer = new PIXI.Container();
-    forestSpriteContainer.zIndex = 2;
-    forestSpriteContainer.sortableChildren = true;
+    const spriteContainer = new PIXI.Container();
+    spriteContainer.zIndex = 2;
+    spriteContainer.sortableChildren = true;
     
     app.stage.addChild(areaContainer);
-    app.stage.addChild(forestSpriteContainer);
+    app.stage.addChild(spriteContainer);
     app.stage.addChild(areaTextContainer);
 
     //pooly/cache
@@ -28,18 +28,26 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
     let areaDirty = true;
     let shiftPressed = false;
 
-    // Cache -static, generované jednou
-    const forestSpritesData = []; // pole spritu se souřadnicemi
-    const forestSpritesPool = []; //PIXI sprity
-    let forestSpritesGenerated = false;
+    const spritesData = [];
+    const spritesPool = [];
+    let spritesGenerated = false;
 
-    function getForestTexture() {
+    function getTextureForArea(areaType) {
         let path = null;
-        if (Math.random() < 0.01) path = GRAVE_SPRITES[Math.floor(Math.random() * GRAVE_SPRITES.length)];
-        else{
-            const randomIndex = Math.floor(Math.random() * FOREST_SPRITES.length);
-            path = FOREST_SPRITES[randomIndex];
+        
+        if (areaType === FOREST) {
+            if (Math.random() < 0.01) {
+                path = GRAVE_SPRITES[Math.floor(Math.random() * GRAVE_SPRITES.length)];
+            } else {
+                const randomIndex = Math.floor(Math.random() * FOREST_SPRITES.length);
+                path = FOREST_SPRITES[randomIndex];
+            }
+        } else if (areaType === ROCK) {
+            const randomIndex = Math.floor(Math.random() * ROCK_SPRITES.length);
+            path = ROCK_SPRITES[randomIndex];
         }
+        
+        if (!path) return null;
         
         if (!textureCache.has(path)) {
             textureCache.set(path, PIXI.Texture.from(path));
@@ -47,17 +55,17 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
         return textureCache.get(path);
     }
 
-    function getPooledForestSprite() {
-        return forestSpritesPool.pop() || new PIXI.Sprite();
+    function getPooledSprite() {
+        return spritesPool.pop() || new PIXI.Sprite();
     }
 
-    function returnForestSprite(sprite) {
+    function returnSprite(sprite) {
         sprite.texture = PIXI.Texture.EMPTY;
         sprite.alpha = 1;
         sprite.x = 0;
         sprite.y = 0;
         sprite.visible = false;
-        forestSpritesPool.push(sprite);
+        spritesPool.push(sprite);
     }
 
     function getPooledGraphics() {
@@ -96,37 +104,39 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
                  areaTop > dimensions.worldBottom);
     }
 
-    let needsForestRegen = false;
+    let needsSpriteRegen = false;
 
-    function markForestDirty() {
-        needsForestRegen = true;
-        forestSpritesGenerated = false;
+    function markSpriteDirty() {
+        needsSpriteRegen = true;
+        spritesGenerated = false;
         areaDirty = true;
     }
 
-    function generateForestSprites(areas) {
-        if (forestSpritesGenerated && !needsForestRegen) return;
+    function generateSprites(areas) {
+        if (spritesGenerated && !needsSpriteRegen) return;
         
-        forestSpritesData.length = 0;
+        spritesData.length = 0;
         
         areas.forEach(area => {
-            if (area.type !== FOREST) return;
+            if (area.type !== FOREST && area.type !== ROCK) return;
             
             const tileSize = cellSize;
+            const getSpriteCount = area.type.getSpriteCount || (() => 0);
             
             for (let x = area.x; x < area.x + area.sizeX; x++) {
                 for (let y = area.y; y < area.y + area.sizeY; y++) {
-                    const spriteCount = Math.random() < 0.8 ? 1 : (Math.random() < 0.33 ? 2: (Math.random() < 0.33 ? 4: 3));
+                    const spriteCount = getSpriteCount();
                     
                     for (let i = 0; i < spriteCount; i++) {
                         const offsetX = (Math.random() - 0.5) * (tileSize * 0.8);
                         const offsetY = (Math.random() - 0.5) * (tileSize * 0.8);
                         
-                        const scale = 0.2 + Math.random() * 0.3;
+                        const scale = area.type.minSpriteSize + Math.random() * (area.type.maxSpriteSize- area.type.minSpriteSize);
                         
-                        const texture = getForestTexture();
+                        const texture = getTextureForArea(area.type);
+                        if (!texture) continue;
                         
-                        forestSpritesData.push({
+                        spritesData.push({
                             worldX: (x) * tileSize + offsetX,
                             worldY: (y) * tileSize + offsetY,
                             texture,
@@ -140,33 +150,34 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             }
         });
         
-        forestSpritesGenerated = true;
-        needsForestRegen = false;
+        spritesGenerated = true;
+        needsSpriteRegen = false;
     }
-    function removeForestSpriteAt(tileX, tileY) {
+    
+    function removeSpriteAt(tileX, tileY) {
         const tileSize = cellSize;
         const worldTileCenterX = (tileX + 0.5) * tileSize;
         const worldTileCenterY = (tileY + 0.5) * tileSize;
         const tolerance = tileSize * 0.8;
         
-        for (let i = forestSpritesData.length - 1; i >= 0; i--) {
-            const sprite = forestSpritesData[i];
+        for (let i = spritesData.length - 1; i >= 0; i--) {
+            const sprite = spritesData[i];
             const dx = Math.abs(sprite.worldX - worldTileCenterX);
             const dy = Math.abs(sprite.worldY - worldTileCenterY);
             
             if (dx < tolerance && dy < tolerance) {
-                forestSpritesData.splice(i, 1);
+                spritesData.splice(i, 1);
             }
         }
         
         areaDirty = true;
     }
 
-    function updateForestSprites(dimensions) {
-        while (forestSpriteContainer.children.length > 0) {
-            returnForestSprite(forestSpriteContainer.removeChildAt(0));
+    function updateSprites(dimensions) {
+        while (spriteContainer.children.length > 0) {
+            returnSprite(spriteContainer.removeChildAt(0));
         }
-        for (const spriteData of forestSpritesData) {
+        for (const spriteData of spritesData) {
             const screenX = spriteData.worldX - dimensions.worldLeft;
             const screenY = spriteData.worldY - dimensions.worldTop;
             
@@ -178,7 +189,7 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
                 continue;
             }
 
-            const sprite = getPooledForestSprite();
+            const sprite = getPooledSprite();
             
             if (spriteData.texture.valid) {
                 sprite.texture = spriteData.texture;
@@ -197,10 +208,9 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             sprite.scale.set(spriteData.scale);
             sprite.visible = true;
             
-            
             sprite.zIndex = sprite.y + sprite.height;
 
-            forestSpriteContainer.addChild(sprite);
+            spriteContainer.addChild(sprite);
         }
     }
 
@@ -214,7 +224,6 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
         const centerX = (minX + maxX) / 2;
         const centerY = (minY + maxY) / 2;
         
-        //najit guye nibliz stredu
         let closestTile = groupAreas[0];
         let closestDistance = Infinity;
         
@@ -239,7 +248,6 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
         const gridScale = getGridScale();
         const dimensions = SCREEN_DIMENSIONS(app, camera, gridScale, cellSize);
         
-        //musim renderovat tyto?
         const cameraChanged = camera.x !== lastCameraPos.x || camera.y !== lastCameraPos.y;
         const scaleChanged = gridScale !== lastGridScale;
         
@@ -247,11 +255,10 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             return;
         }
         
-        if (!forestSpritesGenerated) {
-            generateForestSprites(areas);
+        if (!spritesGenerated) {
+            generateSprites(areas);
         }
         
-        //navrat do poolu
         while (areaContainer.children.length > 0) {
             returnGraphics(areaContainer.removeChildAt(0));
         }
@@ -260,10 +267,8 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
         }
         
         const visibleAreas = [];
-        //pro snakes - optimalizace
         const areaGroups = new Map();
         
-        //skupina viditelnych
         Object.values(areas).forEach((area) => {
             if (area.type === LOCK || !isAreaVisible(area, dimensions)) return;
             
@@ -277,7 +282,6 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             }
         });
         
-        //draw
         visibleAreas.forEach((area) => {
             const areaGraphics = getPooledGraphics();
             areaGraphics.beginFill(area.type.color, 0.55);
@@ -290,9 +294,8 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             areaContainer.addChild(areaGraphics);
         });
         
-        updateForestSprites(dimensions);
+        updateSprites(dimensions);
         
-        //upravit na ikonku (text kdyz shift) TEMPPP
         if (!shiftPressed) {
             lastCameraPos = { x: camera.x, y: camera.y };
             lastGridScale = gridScale;
@@ -300,7 +303,6 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             return;
         }
         
-        //text pro viditelny
         const processedNames = new Set();
         
         visibleAreas.forEach((area) => {
@@ -350,7 +352,6 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
         areaDirty = false;
     }
 
-    //dirty = neni potreba vykreslit
     function markDirty() {
         areaDirty = true;
     }
@@ -359,6 +360,6 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
         drawAreas,
         markDirty,
         setShiftPressed,
-        removeForestSpriteAt
+        removeSpriteAt
     };
 }

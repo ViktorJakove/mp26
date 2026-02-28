@@ -105,7 +105,7 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
     }
 
     function addRail(tileX, tileY, railType) {
-        removeForestOrRockTile(tileX, tileY);
+        removeAreaTile(tileX, tileY);
         
         const buildOverCost = getBuildOverCost(tileX, tileY);
         const totalCost = railType.cost + buildOverCost;
@@ -210,7 +210,7 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
         const profit = calcBisonProfitForPath(path, getAreas, occupiedTiles, window.bisonManager ? window.bisonManager.isBisonUnlocked() : false);
         return profit;
     }
-    function removeForestOrRockTile(tileX, tileY) {
+    function removeAreaTile(tileX, tileY) {
         const areas = getAreas();
         let areaRemoved = false;
         
@@ -239,8 +239,8 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
                     areaRemoved = true;
                 }
                 
-                if (area.type === AREA_TYPES.FOREST && areaRendererRef) {
-                    areaRendererRef.removeForestSpriteAt(tileX, tileY);
+                if (areaRendererRef) {
+                    areaRendererRef.removeSpriteAt(tileX, tileY);
                 }
             }
         }
