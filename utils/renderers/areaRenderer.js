@@ -4,7 +4,6 @@ import { FOREST_SPRITES, ROCK_SPRITES, CITY_SPRITES, LAKE_SPRITES, GRAVE_SPRITES
 
 const { CITY, LAKE, INDIANS, BISONS, FOREST, ROCK, LOCK } = AREA_TYPES;
 
-// --- Nová mapa pro přiřazení spriteů k typům oblastí ---
 const AREA_SPRITE_MAP = {
     [FOREST.type]: FOREST_SPRITES,
     [ROCK.type]: ROCK_SPRITES,
@@ -12,12 +11,9 @@ const AREA_SPRITE_MAP = {
     [LAKE.type]: LAKE_SPRITES,
 };
 
-// Speciální případ pro hřbitov v lese - můžeme to mít jako samostatnou konstantu
 const GRAVE_SPRITE_ARRAY = GRAVE_SPRITES;
-// ----------------------------------------------------
 
 export function createAreaRenderer(app, camera, getGridScale, cellSize) {
-    // ... (zbytek kódu zůstává stejný - kontejnery, pool atd.) ...
     const areaContainer = new PIXI.Container();
     areaContainer.zIndex = 1;
     const areaTextContainer = new PIXI.Container();
@@ -43,35 +39,21 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
     const spritesPool = [];
     let spritesGenerated = false;
 
-    /**
-     * Získá náhodnou texturu pro daný typ oblasti.
-     * Tato funkce nahrazuje původní dlouhý if-else blok.
-     */
     function getTextureForArea(areaType) {
-        // 1. Speciální případ: Hřbitov v lese (1% šance)
         if (areaType === FOREST && Math.random() < 0.01 && GRAVE_SPRITE_ARRAY.length > 0) {
             const path = GRAVE_SPRITE_ARRAY[Math.floor(Math.random() * GRAVE_SPRITE_ARRAY.length)];
             return getOrCreateTexture(path);
         }
 
-        // 2. Najdi pole spriteů pro daný typ oblasti v naší mapě
-        const spriteArray = AREA_SPRITE_MAP[areaType.type]; // Použijeme areaType.type jako klíč
+        const spriteArray = AREA_SPRITE_MAP[areaType.type];
 
-        // 3. Pokud pole existuje a není prázdné, vyber náhodný sprite
         if (spriteArray && spriteArray.length > 0) {
             const randomIndex = Math.floor(Math.random() * spriteArray.length);
             const path = spriteArray[randomIndex];
             return getOrCreateTexture(path);
         }
-
-        // 4. Fallback pro případ, že typ oblasti nemá definované sprity
-        // console.warn(`No sprites defined for area type: ${areaType.type}`);
         return null;
     }
-
-    /**
-     * Pomocná funkce pro získání textury z cache nebo její vytvoření.
-     */
     function getOrCreateTexture(path) {
         if (!path) return null;
         
@@ -80,8 +62,6 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
         }
         return textureCache.get(path);
     }
-
-    // ... (zbytek kódu zůstává stejný - getPooledSprite, returnSprite atd.) ...
 
     function getPooledSprite() {
         return spritesPool.pop() || new PIXI.Sprite();
