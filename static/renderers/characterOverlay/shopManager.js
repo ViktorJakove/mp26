@@ -1,4 +1,4 @@
-import { SHOP_ITEMS, BARBER_ITEMS, MARCO_ITEMS } from "../../../enums/shopItems.js";
+import { SHOP_ITEMS, BARBER_ITEMS, MARCO_ITEMS } from "../../enums/shopItems.js";
 
 export function createShopManager(app, getMoney, subMoney, railRenderer, stationRenderer) {
     const SHOP_ITEMS_MAP = {

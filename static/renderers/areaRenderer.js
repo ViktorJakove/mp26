@@ -1,6 +1,6 @@
-import { AREA_TYPES } from "../../enums/areaTypes.js";
-import { SCREEN_DIMENSIONS } from "../../screenDimensions.js";
-import { FOREST_SPRITES, ROCK_SPRITES, CITY_SPRITES, LAKE_SPRITES, GRAVE_SPRITES, RANDOM_SPRITES } from "../../enums/areaSprites.js";
+import { AREA_TYPES } from "../enums/areaTypes.js";
+import { SCREEN_DIMENSIONS } from "../screenDimensions.js";
+import { FOREST_SPRITES, ROCK_SPRITES, CITY_SPRITES, LAKE_SPRITES, GRAVE_SPRITES, RANDOM_SPRITES } from "../enums/areaSprites.js";
 
 const { CITY, LAKE, INDIANS, BISONS, FOREST, ROCK, LOCK } = AREA_TYPES;
 

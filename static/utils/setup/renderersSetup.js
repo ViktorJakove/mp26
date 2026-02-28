@@ -1,9 +1,9 @@
-import { createAreaRenderer } from "../renderers/areaRenderer.js";
-import { createStationRenderer } from "../renderers/stationRenderer.js";
-import { createRailRenderer } from "../renderers/railRenderer.js";
-import { createPointerTextRenderer } from "../renderers/pointerTextRenderer.js";
-import { createTrainRenderer } from "../renderers/trainRenderer.js";
-import { createHUDRenderer } from "../renderers/hudRenderer.js";
+import { createAreaRenderer } from "../../renderers/areaRenderer.js";
+import { createStationRenderer } from "../../renderers/stationRenderer.js";
+import { createRailRenderer } from "../../renderers/railRenderer.js";
+import { createPointerTextRenderer } from "../../renderers/pointerTextRenderer.js";
+import { createTrainRenderer } from "../../renderers/trainRenderer.js";
+import { createHUDRenderer } from "../../renderers/hudRenderer.js";
 
 // init - PŘIDÁME PARAMETR getLoanTimerInfo
 export function creatRenderers(

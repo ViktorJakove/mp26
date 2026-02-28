@@ -1,8 +1,8 @@
-import { BUILDING_TEXTS } from "../../../text/buildingTexts.js";
+import { BUILDING_TEXTS } from "../../text/buildingTexts.js";
 import { createOverlayUI } from "./overlayUI.js";
 import { createShopManager } from "./shopManager.js";
 import { createTransactionManager } from "./transactionManager.js";
-import { getPath, getPos, getTexts, getStart, updateSprite } from "../../overlayHelpers.js";
+import { getPath, getPos, getTexts, getStart, updateSprite } from "../../utils/overlayHelpers.js";
 
 export function createCharacterOverlay(app, getGridScale, railRenderer, stationRenderer, getMoney, subMoney, addMoney) {
     let isAnimating = false;

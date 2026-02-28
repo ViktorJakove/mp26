@@ -8,13 +8,13 @@ import { createDrawGraphics } from "./drawGraphics.js";
 import { setupMouseControls } from "./mouseControls.js";
 import { createStationManager } from "./stationManager.js";
 import { createRouteChecker } from "./utils/routeChecker.js";
-import { createCharacterOverlay } from "./utils/renderers/characterOverlay/characterOverlayRenderer.js";
+import { createCharacterOverlay } from "./renderers/characterOverlay/characterOverlayRenderer.js";
 import { createBankManager } from "./utils/bankManager.js";
 import { createBisonManager } from "./utils/bisonManager.js";
 import { createBisonProfitStore } from "./createBisonProfitStore.js";
 import { createBuildingSpritesManager } from "./buildingSprites.js";
 import { getShiftPressed } from "./utils/shiftState.js";
-import { createLoadingOverlay } from "./utils/renderers/loadingOverLay.js";
+import { createLoadingOverlay } from "./renderers/loadingOverLay.js";
 
 const app = createApp();
 app.stage.sortableChildren = true;

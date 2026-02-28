@@ -1,9 +1,9 @@
-import { SCREEN_DIMENSIONS } from "../../screenDimensions.js";
-import { createRailPathfinder } from "../railPathfinder.js";
-import { AREA_TYPES } from "../../enums/areaTypes.js";
-import { AREA_GEN_DATA } from "../../mapGenData/areaGenData.js";
-import { OPPOSITE } from "../../enums/railTypes.js"
-import { getBisonAdjacentTiles, countConnectedBisonRails , calcBisonProfitForPath} from "../bisonProfit.js";
+import { SCREEN_DIMENSIONS } from "../screenDimensions.js";
+import { createRailPathfinder } from "../utils/railPathfinder.js";
+import { AREA_TYPES } from "../enums/areaTypes.js";
+import { AREA_GEN_DATA } from "../mapGenData/areaGenData.js";
+import { OPPOSITE } from "../enums/railTypes.js"
+import { getBisonAdjacentTiles, countConnectedBisonRails , calcBisonProfitForPath} from "../utils/bisonProfit.js";
 
 export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas,getLevel, getMoney, addMoney, subMoney, getRelations, setRelations, areaRenderer) {
     const railContainer = new PIXI.Container();

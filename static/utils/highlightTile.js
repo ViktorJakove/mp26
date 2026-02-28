@@ -1,5 +1,5 @@
 import { AREA_TYPES } from "../enums/areaTypes.js";
-import {updatePointerTextRenderer} from "./renderers/pointerTextRenderer.js";
+import {updatePointerTextRenderer} from "../renderers/pointerTextRenderer.js";
 import {getShiftPressed} from "./shiftState.js";
 export function setupTileHighlight(app, camera, getGridScale, cellSize, drawGraphics, areas, getPlacementMode, bisonManager, railRenderer, getSelectedRailType) {
     let highlightedTile = null;

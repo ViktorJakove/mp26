@@ -1,5 +1,5 @@
-import { SCREEN_DIMENSIONS } from "../../screenDimensions.js";
-import { VAGONS_PER_PEEPS } from "../../enums/wagonsPerPeeps.js";
+import { SCREEN_DIMENSIONS } from "../screenDimensions.js";
+import { VAGONS_PER_PEEPS } from "../enums/wagonsPerPeeps.js";
 
 export function createTrainRenderer(app, camera, getGridScale, cellSize, addMoney, calcBisonProfitForPath) {
     const trainContainer = new PIXI.Container();

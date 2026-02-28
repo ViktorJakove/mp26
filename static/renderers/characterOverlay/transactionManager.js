@@ -1,4 +1,4 @@
-import { BUILDING_TEXTS } from "../../../text/buildingTexts.js";
+import { BUILDING_TEXTS } from "../../text/buildingTexts.js";
 
 export function createTransactionManager(app, panel, desc, instr, sprite, railRenderer, stationRenderer, getMoney, subMoney, addMoney, hideOverlay) {
     let trans = { active: false, key: null };
