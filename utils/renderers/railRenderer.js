@@ -126,6 +126,8 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
         }
     
         if (onRailPlaced) onRailPlaced();
+
+        subMoney(totalCost);
     
         return true;
     }

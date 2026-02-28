@@ -114,7 +114,7 @@ function tryGeneration(level, lockArea){
 
         let snakePlaced = false;
         let snakeAttempts = 0;
-        const maxSnakeAttempts = area.length*3; // how many times we retry whole snake
+        const maxSnakeAttempts = area.length*3;
     
         while (!snakePlaced && snakeAttempts < maxSnakeAttempts) {
             snakeAttempts++;
@@ -123,8 +123,8 @@ function tryGeneration(level, lockArea){
             let y = getRandom(-areaHeight / 2 + 1, areaHeight / 2 - 1);
             let lastDir = null;
     
-            const tempParts = [];           // store tiles for this attempt
-            const tempOccupied = new Set(); // local collision set
+            const tempParts = [];
+            const tempOccupied = new Set();
             let failed = false;
     
             for (let i = 0; i < area.length; i++) {

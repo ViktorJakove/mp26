@@ -1,6 +1,6 @@
 import { AREA_TYPES } from "../../enums/areaTypes.js";
 import { SCREEN_DIMENSIONS } from "../../screenDimensions.js";
-import { FOREST_SPRITES, ROCK_SPRITES, CITY_SPRITES, LAKE_SPRITES, GRAVE_SPRITES, RANDOM_SPRITES } from "../../enums/areaSprites.js";
+import { FOREST_SPRITES, ROCK_SPRITES, CITY_SPRITES, LAKE_SPRITES, GRAVE_SPRITES, RANDOM_SPRITES, BISON_SPRITES } from "../../enums/areaSprites.js";
 
 const { CITY, LAKE, INDIANS, BISONS, FOREST, ROCK, LOCK } = AREA_TYPES;
 
@@ -9,6 +9,7 @@ const AREA_SPRITE_MAP = {
     [ROCK.type]: ROCK_SPRITES,
     [CITY.type]: CITY_SPRITES,
     [LAKE.type]: LAKE_SPRITES,
+    [BISONS.type]: BISON_SPRITES,
 };
 
 const GRAVEYARD_CONFIG = {
@@ -161,8 +162,8 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize, getPlace
         spritesData.length = 0;
         
         areas.forEach(area => {
-            // Pouze FOREST, ROCK a města s buildingem "graveyard" generují sprity
-            if (area.type !== FOREST && area.type !== LAKE && area.type !== CITY) return;
+            // Pouze FOREST, BISON a města s buildingem "graveyard" generují sprity
+            if (area.type !== FOREST && area.type !== LAKE && area.type !== CITY && area.type !== BISONS) return;
             
             const config = getSpriteConfigForArea(area);
             if (!config) return;

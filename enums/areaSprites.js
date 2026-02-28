@@ -37,6 +37,12 @@ export const LAKE_SPRITES = [
     "../../graphics/map/lake/lake1.png",
     "../../graphics/map/lake/lake2.png",*/
 ];
+export const BISON_SPRITES = [
+    "../../graphics/map/fauna/bison0.png",
+    "../../graphics/map/fauna/bison1.png",
+    "../../graphics/map/fauna/bison2.png",
+    "../../graphics/map/fauna/bison3.png",
+];
 export const RANDOM_SPRITES = [
     "../../graphics/map/graves/rov0.png",
     "../../graphics/map/graves/rov1.png",
@@ -47,4 +53,5 @@ export const RANDOM_SPRITES = [
     "../../graphics/map/city/rope.png",
     "../../graphics/map/city/mkz.png",
     "../../graphics/map/city/cart.png",
+    "../../graphics/map/fauna/bison1.png",
 ];

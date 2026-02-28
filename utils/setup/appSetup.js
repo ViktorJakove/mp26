@@ -10,6 +10,11 @@ export function createApp(){
     document.body.style.overflow = "hidden";
     document.documentElement.style.margin = "0";
     document.documentElement.style.overflow = "hidden";
+
+    app.view.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        return false;
+    });
     
     app.stage.sortableChildren = true;
     app.stage.interactive = true;
