@@ -19,7 +19,7 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
     }
 
     const TRAIN_SPEED = 3;
-    const TRAIN_SIZE = 1.4;
+    const TRAIN_SIZE = 1.2;
     const STATION_WAIT_TIME = 3500;
     const WAGON_OFFSET = 1.4;
 
@@ -319,7 +319,7 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
             e.stopPropagation();
             resetTrainToStation(train);
         });
-
+        sprite.zIndex = screenY + (texture.height * scale);
         trainContainer.addChild(sprite);
     }
 
@@ -362,7 +362,7 @@ export function createTrainRenderer(app, camera, getGridScale, cellSize, addMone
                 e.stopPropagation();
                 resetTrainToStation(train);
             });
-
+            wagonSprite.zIndex = wsy + (texture.height * scale);
             trainContainer.addChild(wagonSprite);
         }
     }
