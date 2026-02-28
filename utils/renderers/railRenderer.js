@@ -314,5 +314,5 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
         return result;
     }
 
-    return { addRail, removeRail, drawRails, isTileOccupied, markDirty, getRails, loadRails, areStationsConnected, getPath, setOnRailPlaceCheckConn, getBisonProfit };
+    return { addRail, removeRail, drawRails, isTileOccupied, markDirty, getRails, loadRails, areStationsConnected, getPath, setOnRailPlaceCheckConn, getBisonProfit, isCompatibleWithNeighbors};
 }

@@ -109,7 +109,7 @@ window.buildingSpritesManager = buildingSpritesManager;
 
 const fgContainer = new PIXI.Container();
 fgContainer.zIndex = 10;
-const { getHighlightedTile } = setupTileHighlight(app, camera, () => gridScale, cellSize, () => drawGraphics(), areas, getPlacementMode, bisonManager);
+const { getHighlightedTile } = setupTileHighlight(app, camera, () => gridScale, cellSize, () => drawGraphics(), areas, getPlacementMode, bisonManager, railRenderer, () => hudRenderer.getSelectedType(), characterOverlay, getUnlockedCities);
 
 const drawGraphicsInstance = createDrawGraphics(app, camera, getGridScale, cellSize, getLevel, getHighlightedTile, getPlacementMode, getAreas, renderers, fgContainer);
 let drawGraphics = drawGraphicsInstance.drawGraphics;
