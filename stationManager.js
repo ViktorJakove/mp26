@@ -5,7 +5,7 @@ import { ColorGenerator } from "./utils/colorGenerator.js";
 import { generateAreas } from "./generateAreas.js";
 import { TUTORIAL_TEXTS } from "./text/tutorialTexts.js";
 
-export function createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel, setLevel, railRenderer, trainRenderer, unlockCity, characterOverlay) {
+export function createStationManager(stationRenderer, areaRenderer, drawGraphics, getAreas, getLevel, setLevel, railRenderer, trainRenderer, unlockCity, characterOverlay, loadingOverlay) {
     let stationLevel = 0;
     const colorGen = new ColorGenerator({ sat: 0.6, light: 0.43 });
     const routeColors = new Map();
@@ -13,13 +13,19 @@ export function createStationManager(stationRenderer, areaRenderer, drawGraphics
     const shownTutorials = new Set();
 
     function addLevel() {
-        console.log("adding level");
-        const areas = getAreas();
-        const level = getLevel() + 1;
-        areas.push(...generateAreas(level, areas[areas.length - 1]));
-        setLevel(level);
-        areaRenderer.markDirty();
-        stationRenderer.markDirty();
+        loadingOverlay.show();
+
+        setTimeout(() => {
+            console.log("adding level");
+            const areas = getAreas();
+            const level = getLevel() + 1;
+            areas.push(...generateAreas(level, areas[areas.length - 1]));
+            setLevel(level);
+            areaRenderer.markDirty();
+            stationRenderer.markDirty();
+
+            loadingOverlay.hide();
+        },100);
     }
 
     function showTutorial(routeIndex) {

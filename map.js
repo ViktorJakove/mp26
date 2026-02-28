@@ -14,6 +14,7 @@ import { createBisonManager } from "./utils/bisonManager.js";
 import { createBisonProfitStore } from "./createBisonProfitStore.js";
 import { createBuildingSpritesManager } from "./buildingSprites.js";
 import { getShiftPressed } from "./utils/shiftState.js";
+import { createLoadingOverlay } from "./utils/renderers/loadingOverLay.js";
 
 const app = createApp();
 app.stage.sortableChildren = true;
@@ -82,6 +83,8 @@ window.bisonManager = bisonManager;
 const bisonProfitStore = createBisonProfitStore();
 window.bisonProfitStore = bisonProfitStore;
 
+const loadingOverLay = createLoadingOverlay(app);
+
 function onLoanExpired(expiredAmount, seizedMoney, remainingDebt) {
     if (hudRenderer) hudRenderer.markDirty();
 }
@@ -128,7 +131,8 @@ const { addLevel, addStations, spawnTrainsForConnectedRoutes } = createStationMa
             buildingSpritesManager.createSprite(city);
         }
     },
-    characterOverlay
+    characterOverlay,
+    loadingOverLay
 );
 
 const { checkRouteConnections } = createRouteChecker(stationRenderer, railRenderer);
