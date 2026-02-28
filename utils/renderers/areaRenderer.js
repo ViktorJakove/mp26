@@ -1,6 +1,6 @@
 import { AREA_TYPES } from "../../enums/areaTypes.js";
 import { SCREEN_DIMENSIONS } from "../../screenDimensions.js";
-import { FOREST_SPRITES, ROCK_SPRITES, CITY_SPRITES, LAKE_SPRITES, GRAVE_SPRITES } from "../../enums/areaSprites.js";
+import { FOREST_SPRITES, ROCK_SPRITES, CITY_SPRITES, LAKE_SPRITES, GRAVE_SPRITES, RANDOM_SPRITES } from "../../enums/areaSprites.js";
 
 const { CITY, LAKE, INDIANS, BISONS, FOREST, ROCK, LOCK } = AREA_TYPES;
 
@@ -11,9 +11,15 @@ const AREA_SPRITE_MAP = {
     [LAKE.type]: LAKE_SPRITES,
 };
 
-const GRAVE_SPRITE_ARRAY = GRAVE_SPRITES;
+const GRAVEYARD_CONFIG = {
+    sprites: GRAVE_SPRITES,
+    minSpriteSize: 0.25, 
+    maxSpriteSize: 0.35,
+    getSpriteCount: () => 5
+};
 
 export function createAreaRenderer(app, camera, getGridScale, cellSize) {
+    // Kontejnery
     const areaContainer = new PIXI.Container();
     areaContainer.zIndex = 1;
     const areaTextContainer = new PIXI.Container();
@@ -26,6 +32,7 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
     app.stage.addChild(spriteContainer);
     app.stage.addChild(areaTextContainer);
 
+    // Pooly/cache
     const graphicsPool = [];
     const textPool = [];
     const textureCache = new Map();
@@ -39,21 +46,52 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
     const spritesPool = [];
     let spritesGenerated = false;
 
-    function getTextureForArea(areaType) {
-        if (areaType === FOREST && Math.random() < 0.01 && GRAVE_SPRITE_ARRAY.length > 0) {
-            const path = GRAVE_SPRITE_ARRAY[Math.floor(Math.random() * GRAVE_SPRITE_ARRAY.length)];
-            return getOrCreateTexture(path);
+    
+    function isGraveyard(area) {
+        return area.type === CITY && area.building === "graveyard";
+    }
+
+    
+    function getSpriteConfigForArea(area) {
+        if (isGraveyard(area)) {
+            return {
+                sprites: GRAVEYARD_CONFIG.sprites,
+                minSize: GRAVEYARD_CONFIG.minSpriteSize,
+                maxSize: GRAVEYARD_CONFIG.maxSpriteSize,
+                getCount: GRAVEYARD_CONFIG.getSpriteCount
+            };
         }
-
-        const spriteArray = AREA_SPRITE_MAP[areaType.type];
-
+        
+        const spriteArray = AREA_SPRITE_MAP[area.type.type];
         if (spriteArray && spriteArray.length > 0) {
-            const randomIndex = Math.floor(Math.random() * spriteArray.length);
-            const path = spriteArray[randomIndex];
-            return getOrCreateTexture(path);
+            return {
+                sprites: spriteArray,
+                minSize: area.type.minSpriteSize || 0.2,
+                maxSize: area.type.maxSpriteSize || 0.5,
+                getCount: area.type.getSpriteCount || (() => 0)
+            };
         }
+        
         return null;
     }
+    function getTextureForArea(area) {
+        const config = getSpriteConfigForArea(area);
+        if (!config) return null;
+        
+        if ((area.type === FOREST || area.type === ROCK) && Math.random() < 0.01) {
+            const path = RANDOM_SPRITES[Math.floor(Math.random() * RANDOM_SPRITES.length)];
+            return getOrCreateTexture(path);
+        }
+        
+        // Normální výběr z konfigurace oblasti
+        const randomIndex = Math.floor(Math.random() * config.sprites.length);
+        const path = config.sprites[randomIndex];
+        return getOrCreateTexture(path);
+    }
+
+    /**
+     * Pomocná funkce pro získání textury z cache
+     */
     function getOrCreateTexture(path) {
         if (!path) return null;
         
@@ -63,6 +101,7 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
         return textureCache.get(path);
     }
 
+    // Pool funkce
     function getPooledSprite() {
         return spritesPool.pop() || new PIXI.Sprite();
     }
@@ -126,22 +165,25 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
         spritesData.length = 0;
         
         areas.forEach(area => {
-            if (area.type !== FOREST && area.type !== ROCK) return;
+            // Pouze FOREST, ROCK a města s buildingem "graveyard" generují sprity
+            if (area.type !== FOREST && area.type !== ROCK && !isGraveyard(area)) return;
+            
+            const config = getSpriteConfigForArea(area);
+            if (!config) return;
             
             const tileSize = cellSize;
-            const getSpriteCount = area.type.getSpriteCount || (() => 0);
             
             for (let x = area.x; x < area.x + area.sizeX; x++) {
                 for (let y = area.y; y < area.y + area.sizeY; y++) {
-                    const spriteCount = getSpriteCount();
+                    const spriteCount = config.getCount();
                     
                     for (let i = 0; i < spriteCount; i++) {
                         const offsetX = (Math.random() - 0.5) * (tileSize * 0.8);
                         const offsetY = (Math.random() - 0.5) * (tileSize * 0.8);
                         
-                        const scale = area.type.minSpriteSize + Math.random() * (area.type.maxSpriteSize - area.type.minSpriteSize);
+                        const scale = config.minSize + Math.random() * (config.maxSize - config.minSize);
                         
-                        const texture = getTextureForArea(area.type);
+                        const texture = getTextureForArea(area);
                         if (!texture) continue;
                         
                         spritesData.push({
@@ -185,6 +227,7 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
         while (spriteContainer.children.length > 0) {
             returnSprite(spriteContainer.removeChildAt(0));
         }
+        
         for (const spriteData of spritesData) {
             const screenX = spriteData.worldX - dimensions.worldLeft;
             const screenY = spriteData.worldY - dimensions.worldTop;
@@ -266,6 +309,7 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             generateSprites(areas);
         }
         
+        // Vyčistíme kontejnery
         while (areaContainer.children.length > 0) {
             returnGraphics(areaContainer.removeChildAt(0));
         }
@@ -289,6 +333,7 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             }
         });
         
+        // Vykreslení barevných ploch
         visibleAreas.forEach((area) => {
             const areaGraphics = getPooledGraphics();
             areaGraphics.beginFill(area.type.color, 0.55);
@@ -301,8 +346,10 @@ export function createAreaRenderer(app, camera, getGridScale, cellSize) {
             areaContainer.addChild(areaGraphics);
         });
         
+        // Vykreslení spriteů
         updateSprites(dimensions);
         
+        // Texty pouze když je shift pressed
         if (!shiftPressed) {
             lastCameraPos = { x: camera.x, y: camera.y };
             lastGridScale = gridScale;

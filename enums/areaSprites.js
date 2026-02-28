@@ -25,3 +25,6 @@ export const LAKE_SPRITES = [
     "../../graphics/map/lake/lake1.png",
     "../../graphics/map/lake/lake2.png",*/
 ];
+export const RANDOM_SPRITES = [
+    "../../graphics/map/graves/rov0.png",
+];
