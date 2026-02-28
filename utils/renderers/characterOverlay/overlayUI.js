@@ -79,12 +79,12 @@ export function createOverlayUI(app, container, handleClick) {
 
         desc = new PIXI.Text(description, { 
             fontFamily: "Arial", 
-            fontSize: 18, 
+            fontSize: 22, 
             fill: 0xecf0f1, 
             fontStyle: "italic", 
             wordWrap: true, 
             wordWrapWidth: w - 40, 
-            align: "center" 
+            align: "left" 
         });
         desc.x = 20;
         desc.y = 70;
