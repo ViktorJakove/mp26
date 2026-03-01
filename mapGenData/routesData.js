@@ -22,7 +22,23 @@ export const ROUTES_DATA =[
     [6,13],
     [9,13],
     [7,14], //koleje
-    [15,10]
+    [15,10],
+    [15,14],//odsud unused mesta (7 -> 22)
+    [16,15],
+    [16,15],
+    [15,14],
+    [17,16],
+    [18,17],
+    [19,18],
+    [20,21],
+    [21,22],//8
+    [21,22],
+    [22,18],
+    [19,17],
+    [16,16],
+    [18,17],
+    [19,20],
+    [21,20],
     
 ]
 export const ROUTE_COUNT_DATA =[
@@ -43,6 +59,10 @@ export const ROUTE_COUNT_DATA =[
     3, //saloon
     1,//koleje
     1,//kostel
+    4,
+    3,
+    1,
+    8,
 ]
 //pridat nic mesta a mezi nima uname
 export const TUTORIAL_ROUTE_INDEXES =[0/*init tutorial*/,2/*chars*/,4/*saves*/,6/*levelup*/,11/*galerie*/];

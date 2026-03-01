@@ -105,7 +105,6 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
     }
 
     function addRail(tileX, tileY, railType) {
-        removeAreaTile(tileX, tileY);
         
         const buildOverCost = getBuildOverCost(tileX, tileY);
         const totalCost = railType.cost + buildOverCost;
@@ -128,6 +127,8 @@ export function createRailRenderer(app, camera, getGridScale, cellSize, getAreas
         if (onRailPlaced) onRailPlaced();
 
         subMoney(totalCost);
+        
+        removeAreaTile(tileX, tileY);
     
         return true;
     }
